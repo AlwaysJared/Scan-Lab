@@ -1,0 +1,2 @@
+dotnet ef migrations add ScannerModelUpdate --project Libs --startup-project API
+dotnet ef database update --project Libs --startup-project API
