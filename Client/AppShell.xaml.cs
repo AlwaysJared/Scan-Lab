@@ -1,0 +1,11 @@
+﻿using Libs.Data.Models;
+
+namespace Client;
+
+public partial class AppShell : Shell
+{
+	public AppShell()
+	{
+		InitializeComponent();
+	}
+}

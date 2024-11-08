@@ -21,7 +21,7 @@ public class OrderRepository : IOrderRepository, IDisposable
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        context.Dispose();
     }
 
     public Order GetOrder(Guid id)
@@ -29,9 +29,14 @@ public class OrderRepository : IOrderRepository, IDisposable
         throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<Order>> GetOrders()
+    public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status)
     {
-        return await context.Orders.ToListAsync();
+        var orders = await context.Orders.ToListAsync();
+        if(!String.IsNullOrWhiteSpace(search) || status.HasValue)
+        {
+            
+        }
+        return orders;
     }
 
     public void Save()

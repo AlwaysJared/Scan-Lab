@@ -27,6 +27,7 @@ namespace API.Controllers
             {
                 var newOrder = new Order{
                     OrderId = request.OrderId,
+                    Rolls = request.Rolls,
                 };
                 var resp = await _orderRepository.AddOrder(newOrder);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
@@ -47,9 +48,9 @@ namespace API.Controllers
         }
 
         [HttpGet("orders")]
-        public async Task<IActionResult> GetOrders()
+        public async Task<IActionResult> GetOrders(string? search = null, OrderStatus? status = null)
         {
-            var orders = await _orderRepository.GetOrders();
+            var orders = await _orderRepository.GetOrders(search,status);
             return Ok(orders);
         }
     }

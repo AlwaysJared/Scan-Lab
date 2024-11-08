@@ -1,0 +1,22 @@
+// Services/ScannerService.cs
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Libs.Data.Models;
+
+public class ScannerService
+{
+    private readonly HttpClient _httpClient;
+
+    public ScannerService()
+    {
+        _httpClient = new HttpClient();
+    }
+
+    public async Task<List<Scanner>> GetScannersAsync()
+    {
+        var response = await _httpClient.GetStringAsync("http://localhost:5010/api/scanners");
+        return JsonSerializer.Deserialize<List<Scanner>>(response);
+    }
+}
