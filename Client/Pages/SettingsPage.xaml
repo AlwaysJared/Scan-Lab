@@ -4,7 +4,8 @@
              x:Class="Client.Pages.SettingsPage"
              Title="Settings">
 
-    <Label Text="Settings Page" 
-           VerticalOptions="CenterAndExpand" 
-           HorizontalOptions="CenterAndExpand" />
+    <StackLayout>
+        <Label Text="Select Scanner" />
+        <Picker x:Name="ScannerPicker" SelectedIndexChanged="OnScannerSelectedIndexChanged" />
+    </StackLayout>
 </ContentPage>

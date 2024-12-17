@@ -7,5 +7,6 @@ interface IOrderRepository : IDisposable
     Order GetOrder(Guid id);
     Task<SystemResponse> AddOrder(Order order);
     Task<SystemResponse> UpdateOrder(Order order);
+    Task<SystemResponse> ProcessOrder(string id);
     void Save();
 }

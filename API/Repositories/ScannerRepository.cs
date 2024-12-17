@@ -1,3 +1,4 @@
+using API.Models;
 using Libs.Classes;
 using Libs.Data.Context;
 using Libs.Data.Models;
@@ -11,9 +12,27 @@ public class ScannerRepository : IScannerRepository, IDisposable
         this.context = context;
     }
 
-    public Task<SystemResponse> AddScanner(Scanner scanner)
+    public async Task<SystemResponse> AddScanner(AddScannerRequest req)
     {
-        throw new NotImplementedException();
+        try{
+            var scnr = new Scanner{
+                Id = Guid.NewGuid(),
+                ScannerName = req.ScannerName,
+                Make = req.Make,
+                Model = req.Model,
+                WatchedDir = req.WatchedDir,
+                DestinationDir = req.DestinationDir,
+                ArchiveDir = req.ArchiveDir,
+                ArtistName = req.ArtistName
+            };
+            context.Scanners.Add(scnr);
+            await context.SaveChangesAsync();
+        }
+        catch(Exception ex){
+            return new SystemResponse{IsSuccess = false, Message = ex.Message};
+        }
+
+        return new SystemResponse{IsSuccess = true};
     }
 
     public async Task<SystemResponse> DeleteScanner(Guid id)
@@ -45,7 +64,7 @@ public class ScannerRepository : IScannerRepository, IDisposable
 
     public void Dispose()
     {
-        throw new NotImplementedException();
+        context.Dispose();
     }
 
     public Scanner GetScanner(Guid id)
@@ -53,9 +72,9 @@ public class ScannerRepository : IScannerRepository, IDisposable
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Scanner>> GetScanners()
+    public async Task<List<Scanner>> GetScanners()
     {
-        throw new NotImplementedException();
+        return await context.Scanners.ToListAsync();
     }
 
     public void Save()

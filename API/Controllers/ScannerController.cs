@@ -18,11 +18,11 @@ namespace API.Controllers
         }
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddScanner(Scanner scnr)
+        public async Task<IActionResult> AddScanner(AddScannerRequest req)
         {
             try
             {
-                var resp = await _scannerRepository.AddScanner(scnr);
+                var resp = await _scannerRepository.AddScanner(req);
                 return Ok(resp);
             }
             catch (ArgumentException ex)
