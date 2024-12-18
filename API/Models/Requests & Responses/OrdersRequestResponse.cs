@@ -6,6 +6,7 @@ namespace API.Models
     public class SubmitOrderRequest
     {
         public required string OrderId { get; set; }
+        public required Guid ScannerId { get; set; }
         public List<Roll>? Rolls { get; set; }
     }
 

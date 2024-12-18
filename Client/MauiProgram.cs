@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Client.Pages;
+using Microsoft.Extensions.Logging;
 
 namespace Client;
 
@@ -8,8 +9,6 @@ public static class MauiProgram
 	{
 		var builder = MauiApp.CreateBuilder();
 
-		builder.Services.AddSingleton<ScannerService>();
-
 		builder
 			.UseMauiApp<App>()
 			.ConfigureFonts(fonts =>
@@ -17,6 +16,13 @@ public static class MauiProgram
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
 				fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 			});
+		
+		builder.Services.AddSingleton<ScannerService>();
+
+		// Register pages for DI
+        builder.Services.AddTransient<DashboardPage>();
+        builder.Services.AddTransient<OrderFormPage>();
+        builder.Services.AddTransient<SettingsPage>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

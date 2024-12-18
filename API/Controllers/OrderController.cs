@@ -25,11 +25,7 @@ namespace API.Controllers
         {
             try
             {
-                var newOrder = new Order{
-                    OrderId = request.OrderId,
-                    Rolls = request.Rolls,
-                };
-                var resp = await _orderRepository.AddOrder(newOrder);
+                var resp = await _orderRepository.AddOrder(request);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
                 // return Ok(new { Id = id });
                 return Ok(resp);

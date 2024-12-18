@@ -12,17 +12,19 @@ namespace Client.Pages
     public partial class OrderFormPage : ContentPage
     {
         private readonly HttpClient _httpClient;
+        private readonly ScannerService _scannerService;
 
         // ObservableCollection will update UI automatically when items are added/removed
         public ObservableCollection<Roll> OrderRolls { get; set; }
 
         public bool IsTableVisible { get; set; }
 
-        public OrderFormPage()
+        public OrderFormPage(ScannerService scannerService)
         {
             InitializeComponent();
             OrderRolls = new ObservableCollection<Roll>();
             _httpClient = new HttpClient();  // Initialize HttpClient
+            _scannerService = scannerService;
             BindingContext = this;
         }
 
@@ -60,7 +62,8 @@ namespace Client.Pages
                 OrderID = orderId,
                 // FirstRollNumber = firstRollNumber,
                 // RollCount = rollCount
-                Rolls = OrderRolls
+                Rolls = OrderRolls,
+                ScannerId = _scannerService.SelectedScanner.Id
             };
 
             // Serialize data to JSON
@@ -96,7 +99,7 @@ namespace Client.Pages
             }
 
             // Clear form after submission (optional)
-            OnClearClicked(sender, e);
+            // OnClearClicked(sender, e);
         }
 
         // Method to update the roll numbers table based on the fields

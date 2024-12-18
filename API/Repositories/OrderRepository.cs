@@ -1,3 +1,4 @@
+using API.Models;
 using Libs.Classes;
 using Libs.Data.Context;
 using Libs.Data.Models;
@@ -10,9 +11,18 @@ public class OrderRepository : IOrderRepository, IDisposable
     {
         this.context = context;
     }
-    public async Task<SystemResponse> AddOrder(Order order)
+    public async Task<SystemResponse> AddOrder(SubmitOrderRequest req)
     {
-        var res = context.Orders.Add(order);
+        var scnr = context.Scanners.FirstOrDefault(sc => sc.Id == req.ScannerId);
+        if (scnr == null)
+            return new SystemResponse{IsSuccess = false, Message = "Scanner not found"};
+
+        var newOrder = new Order{
+                    OrderId = req.OrderId,
+                    Rolls = req.Rolls,
+                    Scanner = scnr,
+                };
+        var res = context.Orders.Add(newOrder);
         await context.SaveChangesAsync();
         return new SystemResponse(){
             IsSuccess = true,

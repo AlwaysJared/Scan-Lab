@@ -35,9 +35,8 @@ namespace Client.Pages
             ScannerPicker.ItemsSource = scanners;
             ScannerPicker.ItemDisplayBinding = new Binding("ScannerName");
 
-            // // Set the default selected item based on the current selected scanner
-            if (_scannerService.SelectedScanner != null)
-            {
+            // Set the default selected item based on the current selected scanner
+            if(_scannerService.SelectedScanner != null){
                 var selectedScanner = scanners.FirstOrDefault(s => s.Id == _scannerService.SelectedScanner.Id);
                 if (selectedScanner != null)
                 {
@@ -53,6 +52,7 @@ namespace Client.Pages
             {
                 // Update the global selected scanner
                 _scannerService.SelectedScanner = selectedScanner;
+                _scannerService.SaveScannerProfile(selectedScanner);
             }
         }
     }
