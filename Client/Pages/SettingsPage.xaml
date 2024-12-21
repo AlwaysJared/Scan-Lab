@@ -1,11 +1,83 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		     xmlns:d="http://schemas.microsoft.com/dotnet/2021/maui/design"
              x:Class="Client.Pages.SettingsPage"
              Title="Settings">
 
-    <StackLayout>
-        <Label Text="Select Scanner" />
-        <Picker x:Name="ScannerPicker" SelectedIndexChanged="OnScannerSelectedIndexChanged" />
-    </StackLayout>
+    <!-- Single Root ScrollView with the Layout inside -->
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            <StackLayout>
+                <Label Text="Select Scanner" />
+                <Picker x:Name="ScannerPicker" SelectedIndexChanged="OnScannerSelectedIndexChanged" />
+            </StackLayout>
+
+            <!-- Scanner Configuration Section -->
+            <Frame CornerRadius="12" BorderColor="Gray" Padding="20" HasShadow="True">
+                <StackLayout>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                        <Label Text="Scanner Configuration" FontSize="20" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Button Text="✏️" Clicked="OnEditScannerConfiguration" HorizontalOptions="EndAndExpand" />
+                    </StackLayout>
+                    
+                    <StackLayout IsVisible="{Binding IsScannerEditable}">
+                        <Label Text="Scanner ID" />
+                        <Entry Text="{Binding SelectedScanner.Id}" IsReadOnly="True" />
+
+                        <Label Text="Name" />
+                        <Entry Text="{Binding SelectedScanner.ScannerName}" IsEnabled="{Binding IsScannerEditable}" />
+
+                        <Label Text="Make" />
+                        <Entry Text="{Binding SelectedScanner.Make}" IsEnabled="{Binding IsScannerEditable}" />
+
+                        <Label Text="Model" />
+                        <Entry Text="{Binding SelectedScanner.Model}" IsEnabled="{Binding IsScannerEditable}" />
+
+                        <Label Text="Watched Directory" />
+                        <Button Text="{Binding SelectedScanner.WatchedDir}" Command="{Binding BrowseWatchedDir}" IsEnabled="{Binding IsScannerEditable}" />
+
+                        <Label Text="Destination Directory" />
+                        <Button Text="{Binding SelectedScanner.DestinationDir}" Command="{Binding BrowseDestinationDir}" IsEnabled="{Binding IsScannerEditable}" />
+
+                        <Label Text="Archive Directory" />
+                        <Button Text="{Binding SelectedScanner.ArchiveDir}" Command="{Binding BrowseArchiveDir}" IsEnabled="{Binding IsScannerEditable}" />
+
+                        <Label Text="Artist Name" />
+                        <Entry Text="{Binding SelectedScanner.ArtistName}" IsEnabled="{Binding IsScannerEditable}" />
+                    </StackLayout>
+
+                    <!-- Save and Cancel Buttons -->
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" IsVisible="{Binding IsScannerEditable}">
+                        <Button Text="Save" Command="{Binding SaveScannerCommand}" />
+                        <Button Text="Cancel" Command="{Binding CancelScannerCommand}" />
+                    </StackLayout>
+                </StackLayout>
+            </Frame>
+
+            <!-- API Section -->
+            <Frame CornerRadius="12" BorderColor="Gray" Padding="20" HasShadow="True">
+                <StackLayout>
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                        <Label Text="API" FontSize="20" FontAttributes="Bold" VerticalOptions="Center" />
+                        <Button Text="✏️" Clicked="OnEditAPI" HorizontalOptions="EndAndExpand" />
+                    </StackLayout>
+
+                    <StackLayout IsVisible="{Binding IsAPIEditable}">
+                        <Label Text="API URL" />
+                        <Entry Text="{Binding ApiUrl}" IsEnabled="{Binding IsAPIEditable}" />
+
+                        <Button Text="Test API" Command="{Binding TestApiCommand}" IsEnabled="{Binding IsAPIEditable}" />
+                    </StackLayout>
+
+                    <!-- Save and Cancel Buttons -->
+                    <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand" IsVisible="{Binding IsAPIEditable}">
+                        <Button Text="Save" Command="{Binding SaveApiCommand}" />
+                        <Button Text="Cancel" Command="{Binding CancelApiCommand}" />
+                    </StackLayout>
+                </StackLayout>
+            </Frame>
+
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

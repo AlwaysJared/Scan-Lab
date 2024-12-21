@@ -1,4 +1,7 @@
-﻿using Client.Pages;
+﻿using Client.Interfaces;
+using Client.Pages;
+using Client.Platforms.Windows;
+using Client.ViewModels;
 using Microsoft.Extensions.Logging;
 
 namespace Client;
@@ -23,6 +26,7 @@ public static class MauiProgram
         builder.Services.AddTransient<DashboardPage>();
         builder.Services.AddTransient<OrderFormPage>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<SettingsViewModel>();
 
 #if DEBUG
 		builder.Logging.AddDebug();

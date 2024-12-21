@@ -36,10 +36,24 @@ namespace API.Controllers
             }
         }
 
+        [HttpGet("complete/{id}")]
+        public async Task<IActionResult> ProcessOrder(string id)
+        {
+            try
+            {
+                var resp = await _orderRepository.ProcessOrder(id);
+                return Ok(resp);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new SubmitOrderResponse{Message = ex.Message});
+            }
+        }
+
         [HttpDelete("cancel/{id}")]
         public async Task<IActionResult> CancelOrder(Guid id)
         {
-            await Task.Run(() => _watcherService.DisposeWatcher(id));
+            // await Task.Run(() => _watcherService.DisposeWatcher(id));
             return Ok($"Watcher disposed for ID {id}");
         }
 

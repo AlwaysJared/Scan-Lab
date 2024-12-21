@@ -14,6 +14,7 @@ public class OrderRepository : IOrderRepository, IDisposable
     public async Task<SystemResponse> AddOrder(SubmitOrderRequest req)
     {
         var scnr = context.Scanners.FirstOrDefault(sc => sc.Id == req.ScannerId);
+        
         if (scnr == null)
             return new SystemResponse{IsSuccess = false, Message = "Scanner not found"};
 
@@ -64,11 +65,22 @@ public class OrderRepository : IOrderRepository, IDisposable
 
         if(Directory.Exists(order.Scanner.WatchedDir))
           return new SystemResponse(){IsSuccess = false, Message = "Scanner's export directory not found"};
+
+        if(Directory.Exists(order.Scanner.DestinationDir))
+          return new SystemResponse(){IsSuccess = false, Message = "Scanner's destination directory not found"};
         
         // Define the common image file extensions
         string[] imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp" };
         
-        var rollDirs = Directory.GetDirectories(order.Scanner.WatchedDir);
+        var rollDirsSorted = Directory.GetDirectories(order.Scanner.WatchedDir).Select(dir => new
+            {
+                Path = dir,
+                CreationDate = Directory.GetCreationTime(dir)
+            })
+            .OrderBy(dir => dir.CreationDate) // Sort by creation date
+            .ToList();
+        var rollDirs = rollDirsSorted.Select(dir => dir.Path).ToList();
+
         var rollIndex = 0;
         foreach (var roll in rollDirs)
         {
@@ -85,8 +97,9 @@ public class OrderRepository : IOrderRepository, IDisposable
                 {
                     string fileName = Path.GetFileName(file);
                     string fileExtension = Path.GetExtension(file);
-                    string newFileName = $"{order.CustomerId}-{order.OrderId}-{order.Rolls![rollIndex].RollNumber}" + fileExtension;
-                    string newFilePath = Path.Combine(roll, newFileName);
+                    string newFileName = $"{order.OrderId}-{order.Rolls![rollIndex].RollNumber}" + fileExtension;
+                    // string newFilePath = Path.Combine(roll, newFileName);
+                    string newFilePath = Path.Combine(order.Scanner.DestinationDir, newFileName);
 
                     // Check if the new file name already exists
                     if (File.Exists(newFilePath))
@@ -100,6 +113,9 @@ public class OrderRepository : IOrderRepository, IDisposable
             }
             rollIndex++;
         }
+
+        order.Status = OrderStatus.Completed;
+        await context.SaveChangesAsync();
         return new SystemResponse(){IsSuccess = true};
     }
 

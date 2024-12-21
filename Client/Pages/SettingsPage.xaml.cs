@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Windows.Input;
+using Client.ViewModels;
 using Libs.Data.Models;
 using Microsoft.Maui.Controls;
 
@@ -8,11 +10,16 @@ namespace Client.Pages
     {
         private readonly ScannerService _scannerService;
         private readonly HttpClient _httpClient;
+        private SettingsViewModel _viewModel;
+
         public SettingsPage(ScannerService scannerService)
         {
             InitializeComponent();
             _httpClient = new HttpClient();
             _scannerService = scannerService;
+            _viewModel = new SettingsViewModel();
+            _viewModel.SelectedScanner = _scannerService.SelectedScanner;
+            BindingContext = _viewModel;
             LoadScanners();
         }
 
@@ -41,6 +48,7 @@ namespace Client.Pages
                 if (selectedScanner != null)
                 {
                     ScannerPicker.SelectedItem = selectedScanner;
+                    _viewModel.SelectedScanner = selectedScanner;
                 }
             }
         }
@@ -52,8 +60,21 @@ namespace Client.Pages
             {
                 // Update the global selected scanner
                 _scannerService.SelectedScanner = selectedScanner;
+                _viewModel.SelectedScanner = selectedScanner;
                 _scannerService.SaveScannerProfile(selectedScanner);
             }
+        }
+
+        // Edit Scanner Configuration section
+        private void OnEditScannerConfiguration(object sender, EventArgs e)
+        {
+            _viewModel.IsScannerEditable = true;
+        }
+
+        // Edit API section
+        private void OnEditAPI(object sender, EventArgs e)
+        {
+            _viewModel.IsAPIEditable = true;
         }
     }
 }
