@@ -15,5 +15,6 @@ namespace Libs.Data.Models
         public int? ImageCount { get; set; }
         public FilmType? FilmType{ get; set; }
         public string[]? RollNotes { get; set; }
+        public Order? Order { get; set; }
     }
 }
