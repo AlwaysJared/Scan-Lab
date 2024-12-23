@@ -1,6 +1,7 @@
 using Libs.Data.Context;
 using Libs.Services;
 using Microsoft.EntityFrameworkCore;
+using Libs.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

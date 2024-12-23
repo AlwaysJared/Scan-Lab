@@ -23,6 +23,13 @@ namespace Client.Pages
             LoadScanners();
         }
 
+        // Load orders on page load
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            LoadScanners(); // Fetch the orders when the page appears
+        }
+
         // Load Scanners when the page is loaded
         private async void LoadScanners()
         {

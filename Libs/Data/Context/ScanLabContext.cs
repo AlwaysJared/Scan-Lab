@@ -12,5 +12,6 @@ namespace Libs.Data.Context
         public DbSet<Order> Orders { get; set; }
         public DbSet<Scanner> Scanners { get; set; }
         public DbSet<Roll> Rolls { get; set; }
+        public DbSet<Customer> Customers { get; set; }
     }
 }

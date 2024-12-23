@@ -4,6 +4,7 @@ using API.Models;
 using Libs.Data.Context;
 using Libs.Data.Models;
 using Libs.Services;
+using Libs.Repositories;
 
 namespace API.Controllers
 {
@@ -25,7 +26,14 @@ namespace API.Controllers
         {
             try
             {
-                var resp = await _orderRepository.AddOrder(request);
+                var newOrder = new Order{
+                    OrderId = request.OrderId,
+                    Customer = request.Customer,
+                    Rolls = request.Rolls,
+                    Scanner = request.Scanner,
+                };
+
+                var resp = await _orderRepository.AddOrder(newOrder);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
                 // return Ok(new { Id = id });
                 return Ok(resp);
@@ -36,17 +44,17 @@ namespace API.Controllers
             }
         }
 
-        [HttpGet("complete/{id}")]
-        public async Task<IActionResult> ProcessOrder(string id)
+        [HttpPost("complete")]
+        public async Task<IActionResult> ProcessOrder(CompleteOrderRequest req)
         {
             try
             {
-                var resp = await _orderRepository.ProcessOrder(id);
+                var resp = await _orderRepository.ProcessOrder(req.OrderId);
                 return Ok(resp);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new SubmitOrderResponse{Message = ex.Message});
+                return BadRequest(new CompleteOrderResponse{Message = ex.Message});
             }
         }
 

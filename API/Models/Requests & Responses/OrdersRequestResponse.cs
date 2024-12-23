@@ -3,17 +3,26 @@ using Libs.Data.Models;
 
 namespace API.Models
 {
-    public class SubmitOrderRequest
+    public class SubmitOrderRequest : BaseRequest
     {
         public required string OrderId { get; set; }
-        public required Guid ScannerId { get; set; }
+        public required Scanner Scanner { get; set; }
+        public Customer? Customer { get; set; }
         public List<Roll>? Rolls { get; set; }
     }
 
-    public class SubmitOrderResponse
+    public class SubmitOrderResponse : BaseResponse
     {
         public string? OrderId { get; set; }
-        public string? Message { get; set; }
     }
 
+    public class CompleteOrderRequest : BaseRequest
+    {
+        public required string OrderId { get; set; }
+    }
+
+    public class CompleteOrderResponse : BaseResponse
+    {
+
+    }
 }

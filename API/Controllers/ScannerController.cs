@@ -4,6 +4,7 @@ using API.Models;
 using Libs.Data.Context;
 using Libs.Data.Models;
 using Libs.Services;
+using Libs.Repositories;
 
 namespace API.Controllers
 {
@@ -22,12 +23,28 @@ namespace API.Controllers
         {
             try
             {
-                var resp = await _scannerRepository.AddScanner(req);
+                var newScnr = new Scanner
+                {
+                    Id = Guid.NewGuid(),
+                    ScannerName = req.ScannerName,
+                    Make = req.Make,
+                    Model = req.Model,
+                    WatchedDir = req.WatchedDir,
+                    DestinationDir = req.DestinationDir,
+                    ArchiveDir = req.ArchiveDir,
+                    ArtistName = req.ArtistName
+                };
+
+                var resp = await _scannerRepository.AddScanner(newScnr);
+                
                 return Ok(resp);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new SubmitOrderResponse{Message = ex.Message});
+                return BadRequest(new SubmitOrderResponse
+                {
+                    Message = ex.Message
+                });
             }
         }
 
@@ -35,8 +52,10 @@ namespace API.Controllers
         public async Task<IActionResult> DeleteScanner(Guid id)
         {
             var resp = await _scannerRepository.DeleteScanner(id);
-            if (!resp.IsSuccess){
-                return BadRequest(new DeleteScannerResponse{
+            if (!resp.IsSuccess)
+            {
+                return BadRequest(new DeleteScannerResponse
+                {
                     Message = resp.Message
                 });
             }

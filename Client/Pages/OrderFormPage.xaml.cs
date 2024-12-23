@@ -63,7 +63,7 @@ namespace Client.Pages
                 // FirstRollNumber = firstRollNumber,
                 // RollCount = rollCount
                 Rolls = OrderRolls,
-                ScannerId = _scannerService.SelectedScanner.Id
+                Scanner = _scannerService.SelectedScanner
             };
 
             // Serialize data to JSON

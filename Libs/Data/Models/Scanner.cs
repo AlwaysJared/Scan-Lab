@@ -5,7 +5,7 @@ namespace Libs.Data.Models
     public class Scanner
     {
         [Key]
-        public required Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.NewGuid();
         public required string ScannerName { get; set; }
         public string? Make { get; set; }
         public string? Model { get; set; }

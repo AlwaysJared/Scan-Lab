@@ -56,7 +56,7 @@ obj/
 ScaffoldingReadMe.txt
 
 # Entity Framework Core migrations
-Migrations/
+# Migrations/
 
 # User-specific files (macOS/Linux)
 .idea/
@@ -95,3 +95,4 @@ Testing/
 
 # sqlite DB files
 *.db
+*.db-*
