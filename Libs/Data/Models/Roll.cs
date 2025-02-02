@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Libs.Enumerables;
+using Libs.Enums;
 
 namespace Libs.Data.Models
 {
@@ -16,5 +16,6 @@ namespace Libs.Data.Models
         public FilmType? FilmType{ get; set; }
         public List<string>? RollNotes { get; set; }
         public Order? Order { get; set; }
+        public RollStatus Status { get; set; } = RollStatus.Created;
     }
 }

@@ -1,0 +1,22 @@
+[WORKFLOW CONECPT FOR ORDERS (AS OF 1-3-2025)]
+* Order is created through Client component (can also be done by admin in admin component). Orders consist of:
+    - Scanner Object (used for reference to scanner's export directory)
+        ~ [note]: Scanners should be locked to scanning ONE ROLL AT A TIME. Otherwise, if all roll image files are exported to the same directory (not organized by order folders because the system does that), how will the system know which roll it is watching for and be able to collect the proper files for each order?  
+    - Customer object (used for customer's initials)
+    - Order number (used as ID in DB [NEEDS DUPLICATE CHECK UPON CREATION])
+    - Rolls object array (primarily used for roll numbers, but this could expand in the future)
+* After submitting order, the client will add the recently submitted order to the "order queue" table on the "order form" page, through which the scan tech can perform order processing actions including (but not limited to):
+    - Changing a roll's status
+        ~ scanning in progress
+        ~ progress paused
+        ~ scanning complete
+        ~ canelled
+    - Changing an order's status
+        ~ progress paused
+        ~ cancelled
+* Client user marks a roll from said order as "scanning in progress" and scans roll through it's associated scanner
+    - this action subsequently marks the parent order as "in progress"
+* Client user exports scanned roll and marks roll as "scanning complete"
+* After roll is marked complete, the system checks if there are any rolls for that order not marked as "scanning complete" in the DB.
+    - If more rolls need to be scanned, the order will remain as "in progress"
+    - If all rolls belonging to order are marked as "scanning complete", the client will prompt user to confirm 

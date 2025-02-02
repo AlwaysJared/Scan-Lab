@@ -1,6 +1,8 @@
 using Libs.Classes;
 using Libs.Data.Context;
 using Libs.Data.Models;
+using Libs.Enums;
+using Libs.Helpers;
 using Libs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -112,7 +114,8 @@ namespace Libs.Repositories
                         string rollFolderPath = Path.Combine(order.Scanner.DestinationDir, order.OrderId, order.Rolls![rollIndex].RollNumber.ToString());
                         string newFilePath = Path.Combine(rollFolderPath, newFileName);
 
-                        if(!Directory.Exists(rollFolderPath)){
+                        if (!Directory.Exists(rollFolderPath))
+                        {
                             Directory.CreateDirectory(rollFolderPath);
                         }
 
@@ -146,5 +149,7 @@ namespace Libs.Repositories
         {
             throw new NotImplementedException();
         }
+
+        
     }
 }

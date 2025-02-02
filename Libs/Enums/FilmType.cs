@@ -1,4 +1,4 @@
-namespace Libs.Enumerables
+namespace Libs.Enums
 {
     public enum FilmType
     {
