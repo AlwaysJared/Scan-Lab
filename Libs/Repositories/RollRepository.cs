@@ -21,6 +21,17 @@ namespace Libs.Repositories
             this.context = context;
         }
 
+        public async Task<Roll?> GetRoll(Guid rollId){
+            try{
+                return await context.Rolls
+                    .Include(r => r.Order)
+                    .Include(r => r.Order.Scanner)
+                    .FirstOrDefaultAsync(r => r.RollId == rollId);
+            }
+            catch{
+                return null;
+            }
+        }
         public async Task<SystemResponse> ProcessRoll(Guid rollId)
         {
             try
@@ -47,9 +58,11 @@ namespace Libs.Repositories
                     return new SystemResponse() { IsSuccess = false, Message = "Scanner's destination directory not found" };
 
                 
-                //Check that roll requesting processing is part of an order in progress
-                
+                // Attempt to update roll's status to 'in progress'
+                var statusResp = await UpdateRollStatus(roll, RollStatus.Processing);
 
+                if (!statusResp.IsSuccess)
+                    return new SystemResponse() { IsSuccess = false, Message = statusResp.Message };
                 
                 // Define the common image file extensions
                 string[] imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"];
@@ -109,8 +122,16 @@ namespace Libs.Repositories
                     }
 
                 }
+
                 Directory.Delete(latestRollDir);
-                
+
+                statusResp = await UpdateRollStatus(roll, RollStatus.Processed);
+
+                if(!statusResp.IsSuccess)
+                    return new SystemResponse {
+                        IsSuccess = false,
+                        Message = $"Error marking roll ID: {roll.RollId} as 'processed'. \n[ERROR]: {statusResp.Message}"
+                    };
 
                 return new SystemResponse() { IsSuccess = true };
             }
@@ -118,8 +139,7 @@ namespace Libs.Repositories
             {
                 return new SystemResponse() { IsSuccess = false, Message = ex.Message };
             }
-        }
-        
+        } 
         public void Dispose()
         {
             throw new NotImplementedException();
@@ -128,24 +148,108 @@ namespace Libs.Repositories
         {
             throw new NotImplementedException();
         }
-
-        public async Task<List<Roll>?> RollsInProgress(Roll roll)
+        public async Task<List<Roll>> RollsInProgress(Scanner? scnr = null)
         {
             try
             {
-                var rollInProgress = context.Rolls
+                if(scnr != null){
+                    return await context.Rolls
+                    .Include(r => r.Order)
+                    .Include(r => r.Order.Scanner)
+                    .Where(r => r.Status == RollStatus.ScanningInProgress && r.Order.Scanner.Id == scnr.Id)
+                    .ToListAsync() ?? new List<Roll>();
+                }
+                
+                return await context.Rolls
+                    .Include(r => r.Order)
+                    .Include(r => r.Order.Scanner)
                     .Where(r => r.Status == RollStatus.ScanningInProgress)
-                    .ToList();
-
-                if (rollInProgress.Count == 0)
-                    return null;
-
-                return rollInProgress;
+                    .ToListAsync() ?? new List<Roll>();
             }
             catch (Exception ex)
             {
+                return new List<Roll>();
+            }
+        }
+        public async Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status)
+        {
+            try
+            {
+                var dbRoll = await context.Rolls
+                .Include(r => r.Order)
+                .Include(r => r.Order.Scanner)
+                .FirstOrDefaultAsync(r => r.RollId == roll.RollId);
+
+                if(dbRoll == null)
+                    return new SystemResponse{
+                        IsSuccess = false,
+                        Message = $"Roll ID:{roll.RollId} not found"
+                    };
+                    
+                if(dbRoll.Status == status){
+                    return new SystemResponse{
+                        IsSuccess = false,
+                        Message = "Roll's current status already set to requested status"
+                    };
+                }
+
+                if(status == RollStatus.ScanningInProgress){
+                    if(dbRoll.Order == null)
+                        return new SystemResponse{
+                            IsSuccess = false,
+                            Message = $"No order associated with roll ID: {dbRoll.RollId}. Assign roll to order to initiate scanning progress"
+                        };
+
+                    if(dbRoll.Order.Scanner == null)
+                        return new SystemResponse{
+                            IsSuccess = false,
+                            Message = $"No scanner associated with order ID: '{dbRoll.Order.OrderId}'. Assign order to scanner to initiate scanning progress"
+                        };
+
+                    var scnrInProgressRolls = await RollsInProgress(dbRoll.Order.Scanner);
                 
-                return null;
+                    if(scnrInProgressRolls.Any())
+                        if(!scnrInProgressRolls.Where(r => r.RollId == dbRoll.RollId).Any())
+                            return new SystemResponse{
+                                IsSuccess = false,
+                                Message = "Other roll(s) already in progress. Complete or suspend roll(s) in progress to initiate progress of this roll."
+                            };
+
+                    dbRoll.Order.Status = OrderStatus.Processing;
+                }
+
+                dbRoll.Status = status;
+
+                await context.SaveChangesAsync();
+
+                return new SystemResponse{
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse{
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+        }
+        public async Task<List<Roll>> RemainingRollsByOrder(String orderId)
+        {
+            try
+            {
+                var order = context.Orders
+                    .Include(o => o.Rolls)
+                    .Where(o => o.OrderId.ToLower() == orderId.ToLower())
+                    .FirstOrDefaultAsync();
+
+                if(order == null)
+                    retu
+                return order.Rolls.Where(r => r.Status != RollStatus.Processed).ToList();
+            }
+            catch
+            {
+                return new List<Roll>();
             }
         }
     }

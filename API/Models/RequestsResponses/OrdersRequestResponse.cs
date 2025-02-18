@@ -1,7 +1,7 @@
 ﻿using System;
 using Libs.Data.Models;
 
-namespace API.Models
+namespace API.Models.RequestsResponses
 {
     public class SubmitOrderRequest : BaseRequest
     {

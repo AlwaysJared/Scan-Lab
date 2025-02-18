@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using API.Models.RequestsResponses;
 using Libs.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +18,53 @@ namespace API.Controllers
         public RollController(RollRepository rollRepository)
         {
             _rollRepository = rollRepository;
+        }
+
+        [HttpPost("complete")]
+        public async Task<IActionResult> ProcessRoll(CompleteRollRequest req)
+        {
+            try
+            {
+                var resp = await _rollRepository.ProcessRoll(req.RollId);
+
+                if (!resp.IsSuccess)
+                    return BadRequest(resp.Message);
+
+                var remainingRolls = _rollRepository.RemainingRollsByOrder(roll.Order);
+
+                if (remainingRolls.Any()){
+                    ret
+                }    
+
+                return Ok(resp);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new CompleteRollResponse{Message = ex.Message});
+            }
+        }
+
+        [HttpPost("updateStatus")]
+        public async Task<IActionResult> UpdateRollStatus(UpdateRollRequest req){
+            try{
+                var roll = await _rollRepository.GetRoll(req.RollId);
+
+                if (roll == null)
+                    return BadRequest(new UpdateRollResponse {
+                        Success = false,
+                        Message = "Error retrieving roll"
+                    });
+                
+                var resp = await _rollRepository.UpdateRollStatus(roll, req.Status);
+
+                if(resp.IsSuccess)
+                    return BadRequest(resp.Message);
+                
+                return Ok("Roll status successfully updated");
+            }
+            catch (ArgumentException ex){
+                return BadRequest(ex.Message);
+            }
         }
     }
 }

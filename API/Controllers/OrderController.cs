@@ -6,6 +6,7 @@ using Libs.Data.Models;
 using Libs.Services;
 using Libs.Repositories;
 using Libs.Enums;
+using API.Models.RequestsResponses;
 
 namespace API.Controllers
 {
@@ -37,6 +38,9 @@ namespace API.Controllers
                 var resp = await _orderRepository.AddOrder(newOrder);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
                 // return Ok(new { Id = id });
+                if(!resp.IsSuccess)
+                    return BadRequest(resp.Message);
+
                 return Ok(resp);
             }
             catch (ArgumentException ex)
@@ -63,7 +67,8 @@ namespace API.Controllers
         public async Task<IActionResult> CancelOrder(Guid id)
         {
             // await Task.Run(() => _watcherService.DisposeWatcher(id));
-            return Ok($"Watcher disposed for ID {id}");
+            // return Ok($"Watcher disposed for ID {id}");
+            throw new NotImplementedException();
         }
 
         [HttpGet("orders")]
