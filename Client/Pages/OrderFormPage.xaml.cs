@@ -89,7 +89,11 @@ namespace Client.Pages
                 else
                 {
                     // API call failed
-                    await DisplayAlert("Error", "Failed to submit order. Please try again.", "OK");
+                    //get message string
+                    var msg = await response.Content.ReadAsStringAsync();
+                    await DisplayAlert("Error", 
+                    $"Failed to submit order. Please try again. \n[ERROR]:\n{msg}", 
+                    "OK");
                 }
             }
             catch (Exception ex)
@@ -137,11 +141,5 @@ namespace Client.Pages
         {
             UpdateTable();
         }
-
-        // Roll class for holding roll number data
-        // public class Roll
-        // {
-        //     public int RollNumber { get; set; }
-        // }
     }
 }

@@ -1,8 +1,9 @@
 ﻿using Client.Interfaces;
 using Client.Pages;
-using Client.Platforms.Windows;
+using Client.Platforms;
 using Client.ViewModels;
 using Microsoft.Extensions.Logging;
+using CommunityToolkit.Maui;
 
 namespace Client;
 
@@ -14,6 +15,7 @@ public static class MauiProgram
 
 		builder
 			.UseMauiApp<App>()
+			.UseMauiCommunityToolkit() // Add this line
 			.ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

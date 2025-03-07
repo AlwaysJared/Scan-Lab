@@ -25,18 +25,27 @@ namespace API.Controllers
         {
             try
             {
+                var roll = await _rollRepository.GetRoll(req.RollId);
+
+                if (roll == null)
+                    return BadRequest($"Roll ID: {req.RollId} not found");
+
                 var resp = await _rollRepository.ProcessRoll(req.RollId);
 
                 if (!resp.IsSuccess)
                     return BadRequest(resp.Message);
 
-                var remainingRolls = _rollRepository.RemainingRollsByOrder(roll.Order);
+                var processedRollsResp = _rollRepository.AllRollsProcessed(roll.Order);
 
-                if (remainingRolls.Any()){
-                    ret
-                }    
+                if(!processedRollsResp.IsSuccess)
+                    return BadRequest(processedRollsResp.Message);
+                
+                var orderComplete = (bool)processedRollsResp.ReturnObject;
 
-                return Ok(resp);
+                return Ok(new CompleteRollResponse{
+                    Success = true,
+                    ParentOrderComplete = orderComplete
+                });
             }
             catch (ArgumentException ex)
             {
@@ -44,7 +53,7 @@ namespace API.Controllers
             }
         }
 
-        [HttpPost("updateStatus")]
+        [HttpPut("updateStatus")]
         public async Task<IActionResult> UpdateRollStatus(UpdateRollRequest req){
             try{
                 var roll = await _rollRepository.GetRoll(req.RollId);

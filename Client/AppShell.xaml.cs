@@ -4,6 +4,12 @@ namespace Client;
 
 public partial class AppShell : Shell
 {
+	// public AppShell()
+	// {
+	// 	InitializeComponent();
+	// }
+
+	// New
 	public AppShell()
 	{
 		InitializeComponent();

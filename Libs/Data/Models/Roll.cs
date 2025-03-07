@@ -4,9 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Libs.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace Libs.Data.Models
 {
+    [Index(nameof(RollNumber), IsUnique = true)]
     public class Roll
     {
         [Key]

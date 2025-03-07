@@ -17,23 +17,33 @@ namespace Libs.Repositories
         }
         public async Task<SystemResponse> AddOrder(Order req)
         {
-            var scnr = context.Scanners.FirstOrDefault(sc => sc.Id == req.Scanner.Id);
-
-            if (scnr == null)
-                return new SystemResponse { IsSuccess = false, Message = "Scanner not found" };
-
-            var newOrder = new Order
+            try
             {
-                OrderId = req.OrderId,
-                Rolls = req.Rolls,
-                Scanner = scnr,
-            };
-            var res = context.Orders.Add(newOrder);
-            await context.SaveChangesAsync();
-            return new SystemResponse()
+                var scnr = context.Scanners.FirstOrDefault(sc => sc.Id == req.Scanner.Id);
+
+                if (scnr == null)
+                    return new SystemResponse { IsSuccess = false, Message = "Scanner not found" };
+
+                var newOrder = new Order
+                {
+                    OrderId = req.OrderId,
+                    Rolls = req.Rolls,
+                    Scanner = scnr,
+                };
+                var res = context.Orders.Add(newOrder);
+                await context.SaveChangesAsync();
+                return new SystemResponse()
+                {
+                    IsSuccess = true,
+                };
+            }
+            catch(Exception ex)
             {
-                IsSuccess = true,
-            };
+                return new SystemResponse{
+                    IsSuccess = false,
+                    Message = ex.Message,
+                };
+            }
         }
 
         public void Dispose()
@@ -48,7 +58,9 @@ namespace Libs.Repositories
 
         public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status)
         {
-            var orders = await context.Orders.ToListAsync();
+            var orders = await context.Orders
+            .Include(o => o.Rolls)
+            .ToListAsync();
             if (!String.IsNullOrWhiteSpace(search) || status.HasValue)
             {
 

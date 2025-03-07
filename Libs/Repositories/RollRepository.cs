@@ -234,22 +234,23 @@ namespace Libs.Repositories
                 };
             }
         }
-        public async Task<List<Roll>> RemainingRollsByOrder(String orderId)
+        public SystemResponse AllRollsProcessed(Order order)
         {
             try
             {
-                var order = context.Orders
-                    .Include(o => o.Rolls)
-                    .Where(o => o.OrderId.ToLower() == orderId.ToLower())
-                    .FirstOrDefaultAsync();
+                var unprocessedRolls = order.Rolls.Where(r => r.Status != RollStatus.Processed).ToList();
 
-                if(order == null)
-                    retu
-                return order.Rolls.Where(r => r.Status != RollStatus.Processed).ToList();
+                return new SystemResponse{
+                    IsSuccess = true,
+                    ReturnObject = !unprocessedRolls.Any()
+                };
             }
-            catch
+            catch(Exception ex)
             {
-                return new List<Roll>();
+                return new SystemResponse{
+                    IsSuccess = false,
+                    Message = ex.Message,
+                };
             }
         }
     }

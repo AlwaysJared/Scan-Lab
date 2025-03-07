@@ -7,6 +7,8 @@ using Libs.Services;
 using Libs.Repositories;
 using Libs.Enums;
 using API.Models.RequestsResponses;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace API.Controllers
 {
@@ -28,7 +30,8 @@ namespace API.Controllers
         {
             try
             {
-                var newOrder = new Order{
+                var newOrder = new Order
+                {
                     OrderId = request.OrderId,
                     Customer = request.Customer,
                     Rolls = request.Rolls,
@@ -38,14 +41,14 @@ namespace API.Controllers
                 var resp = await _orderRepository.AddOrder(newOrder);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
                 // return Ok(new { Id = id });
-                if(!resp.IsSuccess)
+                if (!resp.IsSuccess)
                     return BadRequest(resp.Message);
 
                 return Ok(resp);
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new SubmitOrderResponse{Message = ex.Message});
+                return BadRequest(new SubmitOrderResponse { Message = ex.Message });
             }
         }
 
@@ -59,7 +62,7 @@ namespace API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(new CompleteOrderResponse{Message = ex.Message});
+                return BadRequest(new CompleteOrderResponse { Message = ex.Message });
             }
         }
 
@@ -74,8 +77,24 @@ namespace API.Controllers
         [HttpGet("orders")]
         public async Task<IActionResult> GetOrders(string? search = null, OrderStatus? status = null)
         {
-            var orders = await _orderRepository.GetOrders(search,status);
-            return Ok(orders);
+            try
+            {
+                var orders = await _orderRepository.GetOrders(search, status);
+                var options = new JsonSerializerOptions
+                {
+                    ReferenceHandler = ReferenceHandler.Preserve,
+                    WriteIndented = true
+                };
+
+                string json = JsonSerializer.Serialize(orders, options);
+
+                return Ok(json);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+
         }
     }
 }
