@@ -54,7 +54,8 @@ namespace API.Controllers
         }
 
         [HttpPut("updateStatus")]
-        public async Task<IActionResult> UpdateRollStatus(UpdateRollRequest req){
+        public async Task<IActionResult> UpdateRollStatus(UpdateRollRequest req)
+        {
             try{
                 var roll = await _rollRepository.GetRoll(req.RollId);
 

@@ -17,6 +17,7 @@ builder.Services.AddDbContext<ScanLabContext>(options =>
 builder.Services.AddSingleton<FileSystemWatcherService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ScannerRepository>();
+builder.Services.AddScoped<RollRepository>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
