@@ -57,6 +57,8 @@ namespace Libs.Repositories
                 if (!Directory.Exists(roll.Order.Scanner.DestinationDir))
                     return new SystemResponse() { IsSuccess = false, Message = "Scanner's destination directory not found" };
 
+                if(Directory.GetDirectories(roll.Order.Scanner.WatchedDir).ToList().Count == 0)
+                    return new SystemResponse() { IsSuccess = false, Message = "No rolls found in scanner's watched directory"};
                 
                 // Attempt to update roll's status to 'in progress'
                 var statusResp = await UpdateRollStatus(roll, RollStatus.Processing);
@@ -142,7 +144,7 @@ namespace Libs.Repositories
         } 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            context.Dispose();
         }
         public void Save()
         {
@@ -216,6 +218,10 @@ namespace Libs.Repositories
                             };
 
                     dbRoll.Order.Status = OrderStatus.Processing;
+                }
+                
+                if(status == RollStatus.ScanningPaused){
+                    dbRoll.Order.Status = OrderStatus.Created;
                 }
 
                 dbRoll.Status = status;

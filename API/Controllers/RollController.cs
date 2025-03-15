@@ -67,7 +67,7 @@ namespace API.Controllers
                 
                 var resp = await _rollRepository.UpdateRollStatus(roll, req.Status);
 
-                if(resp.IsSuccess)
+                if(!resp.IsSuccess)
                     return BadRequest(resp.Message);
                 
                 return Ok("Roll status successfully updated");
