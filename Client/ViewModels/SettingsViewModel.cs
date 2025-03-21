@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Input;
 using Client.Interfaces;
+using CommunityToolkit.Maui.Storage;
 using Libs.Data.Models;
 using Microsoft.Maui.Controls;
 
@@ -59,27 +60,35 @@ namespace Client.ViewModels
         {
             try
             {
-                // Get the current directory from the property if set, otherwise use a default location (e.g., Home directory)
-                string initialDirectory = GetInitialDirectory(property);
+                // // Get the current directory from the property if set, otherwise use a default location (e.g., Home directory)
+                // string initialDirectory = GetInitialDirectory(property);
 
-                // Use DependencyService to pick the folder using platform-specific code
-                var folderPicker = DependencyService.Get<IFolderPicker>();
-                var selectedFolder = await folderPicker.PickFolderAsync(initialDirectory);
+                // // Use DependencyService to pick the folder using platform-specific code
+                // var folderPicker = DependencyService.Get<IFolderPicker>();
+                // var selectedFolder = await folderPicker.PickFolderAsync(initialDirectory);
 
-                if (!string.IsNullOrEmpty(selectedFolder))
+                var selectedFolder = await FolderPicker.PickAsync(default);
+
+                if (selectedFolder.IsSuccessful)
                 {
-                    // Set the selected directory based on the property name
-                    if (property == "WatchedDir")
+                    if (!string.IsNullOrEmpty(selectedFolder.Folder.Path))
                     {
-                        SelectedScanner.WatchedDir = selectedFolder;
-                    }
-                    else if (property == "DestinationDir")
-                    {
-                        SelectedScanner.DestinationDir = selectedFolder;
-                    }
-                    else if (property == "ArchiveDir")
-                    {
-                        SelectedScanner.ArchiveDir = selectedFolder;
+                        var tempScnr = SelectedScanner;
+                        // Set the selected directory based on the property name
+                        if (property == "WatchedDir")
+                        {
+                            tempScnr.WatchedDir = selectedFolder.Folder.Path;
+                        }
+                        else if (property == "DestinationDir")
+                        {
+                            tempScnr.DestinationDir = selectedFolder.Folder.Path;
+                        }
+                        else if (property == "ArchiveDir")
+                        {
+                            tempScnr.ArchiveDir = selectedFolder.Folder.Path;
+                        }
+
+                        SelectedScanner = tempScnr;
                     }
                 }
             }
@@ -116,7 +125,7 @@ namespace Client.ViewModels
 
             return directory;
         }
-        
+
         private void SaveScannerConfiguration()
         {
             // Add logic to save the scanner configuration
