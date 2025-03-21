@@ -5,16 +5,24 @@
              x:Class="Client.Pages.DashboardPage"
              x:Name="DashboardPageRef"
              Title="Dashboard">
+    <Grid Padding="10"
+          RowDefinitions="Auto, *">
+        <Grid Grid.Row="0"
+              Padding="10"
+              ColumnDefinitions="*, Auto"
+              ColumnSpacing="10">
+            <SearchBar Grid.Column="0"
+                       Placeholder="Search by Order ID..."
+                       Text="{Binding SearchQuery, Mode=TwoWay}"
+                       HeightRequest="40"/>
 
-    <ScrollView>
-        <StackLayout Padding="20"
-                     Spacing="10">
-
-            <SearchBar x:Name="OrderSearchBar"
-                       Placeholder="Search Orders"
-                       TextChanged="OnSearchTextChanged"
-                       HorizontalOptions="FillAndExpand"/>
-
+            <!-- Order Status Dropdown -->
+            <Picker Grid.Column="1"
+                    ItemsSource="{Binding OrderStatusOptions}"
+                    SelectedItem="{Binding SelectedOrderStatus, Mode=TwoWay, Path=Value}"
+                    ItemDisplayBinding="{Binding Key}"/>
+        </Grid>
+        <ScrollView Grid.Row="1">
             <CollectionView x:Name="OrdersCollectionView"
                             ItemsSource="{Binding Orders}">
                 <CollectionView.ItemTemplate>
@@ -30,7 +38,7 @@
                                                      Binding="{Binding Status}"
                                                      Value="Processing">
                                             <Setter Property="BackgroundColor"
-                                                    Value="Yellow"/>
+                                                    Value="#FF5148D4"/>
                                         </DataTrigger>
                                     </Grid.Triggers>
 
@@ -159,8 +167,8 @@
                                                                  IsVisible="False">
                                                         <ImageButton.Triggers>
                                                             <DataTrigger TargetType="ImageButton"
-                                                                    Binding="{Binding Status}"
-                                                                    Value="ScanningInProgress">
+                                                                         Binding="{Binding Status}"
+                                                                         Value="ScanningInProgress">
                                                                 <Setter Property="IsVisible"
                                                                         Value="True"/>
                                                             </DataTrigger>
@@ -177,8 +185,8 @@
                                                                  ToolTipProperties.Text="Delete Roll">
                                                         <ImageButton.Triggers>
                                                             <DataTrigger TargetType="ImageButton"
-                                                                    Binding="{Binding Status}"
-                                                                    Value="Processed">
+                                                                         Binding="{Binding Status}"
+                                                                         Value="Processed">
                                                                 <Setter Property="IsVisible"
                                                                         Value="False"/>
                                                             </DataTrigger>
@@ -194,85 +202,6 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-        </StackLayout>
-    </ScrollView>
+        </ScrollView>
+    </Grid>
 </ContentPage>
-
-<!-- <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Client.Pages.DashboardPage"
-             Title="Dashboard">
-
-    <ScrollView>
-        <StackLayout Padding="20"
-                Spacing="10">
-
-            <SearchBar x:Name="OrderSearchBar"
-                       Placeholder="Search Orders"
-                       TextChanged="OnSearchTextChanged"
-                       HorizontalOptions="FillAndExpand"/>
-
-            <CollectionView x:Name="OrdersCollectionView"
-                            ItemsSource="{Binding Orders}"
-                            SelectionMode="Single">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate>
-                        <Border Padding="10"
-                                Margin="5">
-                            <StackLayout>
-                                <Label Text="{Binding OrderId}"
-                                        FontSize="Medium"/>
-                                <Label Text="{Binding OrderName}"
-                                        FontSize="Large"/>
-                                <Label Text="{Binding Status}"/>
-                                <Label Text="{Binding DateCreated, StringFormat='{0:MM/dd/yyyy}'}"/>
-                            </StackLayout>
-                        </Border>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
-
-        </StackLayout>
-    </ScrollView>
-</ContentPage>
- -->
-
-<!-- <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             x:Class="Client.Pages.DashboardPage">
-
-    <CollectionView x:Name="OrdersCollectionView" ItemsSource="{Binding Orders}">
-        <CollectionView.ItemTemplate>
-            <DataTemplate>
-                <toolkit:toolkit:toolkit:Expander>
-                    <toolkit:toolkit:toolkit:Expander.Header>
-                        <Grid Padding="10" BackgroundColor="LightGray">
-                            <Label Text="{Binding OrderId}" FontSize="18" VerticalOptions="Center"/>
-                            <Label Text="{Binding Status}" FontSize="14" VerticalOptions="Center" HorizontalOptions="EndAndExpand"/>
-                        </Grid>
-                    </toolkit:toolkit:toolkit:Expander.Header>
-
-                    <toolkit:toolkit:toolkit:Expander.Content>
-                        <CollectionView ItemsSource="{Binding Rolls}">
-                            <CollectionView.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Padding="10">
-                                        <Label Text="{Binding RollId}" FontSize="16" VerticalOptions="Center"/>
-                                        
-                                        <Picker ItemsSource="{Binding StatusOptions}" 
-                                                SelectedItem="{Binding Status, Mode=TwoWay}"
-                                                Title="Select Status"
-                                                HorizontalOptions="End"
-                                                SelectedIndexChanged="OnRollStatusChanged"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </CollectionView.ItemTemplate>
-                        </CollectionView>
-                    </toolkit:toolkit:toolkit:Expander.Content>
-                </toolkit:toolkit:toolkit:Expander>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
-</ContentPage> -->

@@ -15,7 +15,31 @@ namespace Client.Pages
     public partial class DashboardPage : ContentPage
     {
         private string _searchQuery = string.Empty;
-        private string _statusFilter = "All";
+        private CancellationTokenSource _searchDelayToken; // ✅ Used to cancel previous API calls
+
+        private KeyValuePair<string, int?> _selectedOrderStatus; // ✅ Default to "All" (null)
+        public List<KeyValuePair<string, int?>> OrderStatusOptions { get; } // ✅ Use int? for API
+
+
+        public string SearchQuery
+        {
+            get => _searchQuery;
+            set
+            {
+                _searchQuery = value;
+                DelayedSearchAsync(); // ✅ Calls the new delayed search method
+            }
+        }
+
+        public KeyValuePair<string, int?> SelectedOrderStatus
+        {
+            get => _selectedOrderStatus;
+            set
+            {
+                _selectedOrderStatus = value;
+                FetchOrdersAsync(); // ✅ Call API with updated status filter
+            }
+        }
 
         // Observable collection to bind to the CollectionView
         public List<Order> Orders { get; set; }
@@ -30,6 +54,20 @@ namespace Client.Pages
         {
             InitializeComponent();
             Orders = new List<Order>();
+
+            // ✅ Populate dropdown with int? values
+            OrderStatusOptions = new List<KeyValuePair<string, int?>>
+            {
+                new KeyValuePair<string, int?>("All", null) // ✅ "All" option with null value
+            };
+
+            foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                OrderStatusOptions.Add(new KeyValuePair<string, int?>(status.ToString(), (int)status));
+            }
+
+            SelectedOrderStatus = OrderStatusOptions[0];
+
             StartResumeScanningCommand = new Command<Roll>(async (roll) => await StartResumeScanning(roll));
             PauseScanningCommand = new Command<Roll>(async (roll) => await PauseScanning(roll));
             DeleteRollCommand = new Command<Roll>(async (roll) => await DeleteRoll(roll));
@@ -46,8 +84,9 @@ namespace Client.Pages
             {
                 try
                 {
-                    // Build the request URL with search and status filters
-                    var url = $"{apiUrl}/Order/orders?search={_searchQuery}&status={0}";
+                    // ✅ Convert null to an empty string for API query
+                    var statusFilter = SelectedOrderStatus.Value.HasValue ? ((int)SelectedOrderStatus.Value.Value).ToString() : "";
+                    var url = $"{apiUrl}/Order/orders?search={SearchQuery}&status={statusFilter}";
                     var response = await client.GetStringAsync(url);
 
                     // Deserialize the response into a list of orders
@@ -64,8 +103,9 @@ namespace Client.Pages
                         order.Rolls = order.Rolls.OrderBy(roll => roll.RollNumber).ToList();
                     }
 
+
                     // Refresh the UI by binding the updated list
-                    OrdersCollectionView.ItemsSource = Orders;
+                    OrdersCollectionView.ItemsSource = Orders.OrderByDescending(o => o.DateCreated);
                 }
                 catch (Exception ex)
                 {
@@ -73,18 +113,38 @@ namespace Client.Pages
                 }
             }
         }
-
-        private async void OnRollStatusChanged(object sender, EventArgs e)
+        private async void DelayedSearchAsync()
         {
-            var picker = sender as Picker;
-            if (picker?.BindingContext is Roll selectedRoll)
+            _searchDelayToken?.Cancel(); // ✅ Cancel any previous pending search
+            _searchDelayToken = new CancellationTokenSource();
+
+            try
             {
-                if (Enum.TryParse(typeof(RollStatus), picker.SelectedItem.ToString(), out var newStatus))
+                await Task.Delay(500, _searchDelayToken.Token); // ✅ Wait 500ms before triggering API call
+
+                // ✅ If not canceled, fetch data
+                if (!_searchDelayToken.Token.IsCancellationRequested)
                 {
-                    selectedRoll.Status = (RollStatus)newStatus;
-                    await UpdateRollStatus(selectedRoll.RollId, selectedRoll.Status);
+                    await FetchOrdersAsync();
                 }
             }
+            catch (TaskCanceledException)
+            {
+                // ✅ Ignore if the delay was canceled (user kept typing)
+            }
+        }
+        private async void OnRollStatusChanged(object sender, EventArgs e)
+        {
+            // var picker = sender as Picker;
+            // if (picker?.BindingContext is Roll selectedRoll)
+            // {
+            //     if (Enum.TryParse(typeof(RollStatus), picker.SelectedItem.ToString(), out var newStatus))
+            //     {
+            //         selectedRoll.Status = (RollStatus)newStatus;
+            //         await UpdateRollStatus(selectedRoll.RollId, selectedRoll.Status);
+            //     }
+            // }
+            await FetchOrdersAsync();
         }
         private async Task<bool> CompleteRoll(Guid rollId)
         {
@@ -267,11 +327,10 @@ namespace Client.Pages
         #endregion
 
         // Event handler when search text changes
-        private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
-        {
-            _searchQuery = e.NewTextValue;
-            await FetchOrdersAsync(); // Fetch orders with the new search query
-        }
+        // private async void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+        // {
+        //     _searchQuery = e.NewTextValue;
+        // }
 
         // Load orders on page load
         protected override async void OnAppearing()

@@ -244,7 +244,7 @@ namespace Libs.Repositories
         {
             try
             {
-                var unprocessedRolls = order.Rolls.Where(r => r.Status != RollStatus.Processed).ToList();
+                var unprocessedRolls = order.Rolls.Where(r => r.Status < RollStatus.Processed).ToList();
 
                 return new SystemResponse{
                     IsSuccess = true,

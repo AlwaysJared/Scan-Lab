@@ -1,0 +1,81 @@
+<UserControl
+    x:Class="Client.Views.OrderForm"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="clr-namespace:Client.ViewModels"
+    x:DataType="vm:OrderFormViewModel">
+
+    <Grid
+        Margin="20"
+        ColumnDefinitions="*"
+        RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+
+        <!--  Customer Initials  -->
+        <TextBlock
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="Customer Initials:" />
+        <TextBox
+            x:Name="CustomerInitialsInput"
+            Grid.Row="1"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Text="{Binding CustomerInitials}" />
+
+        <!--  Order Number  -->
+        <TextBlock
+            Grid.Row="2"
+            Grid.Column="0"
+            Text="Order Number:" />
+        <TextBox
+            x:Name="OrderNumberInput"
+            Grid.Row="3"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Text="{Binding OrderId}" />
+
+        <!--  First Roll Number  -->
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="0"
+            Text="First Roll Number:" />
+        <TextBox
+            x:Name="FirstRollNumberInput"
+            Grid.Row="5"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Text="{Binding FirstRollNumber}" />
+
+        <!--  Roll Count  -->
+        <TextBlock
+            Grid.Row="6"
+            Grid.Column="0"
+            Text="Roll Count:" />
+        <TextBox
+            x:Name="RollCountInput"
+            Grid.Row="7"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Text="{Binding RollCount}" />
+
+        <!--  Buttons  -->
+        <StackPanel
+            Grid.Row="8"
+            Grid.Column="0"
+            Margin="10"
+            HorizontalAlignment="Center"
+            Orientation="Horizontal">
+            <Button
+                Width="100"
+                Margin="5"
+                Command="{Binding SubmitOrderAsync}"
+                Content="Submit" />
+            <Button
+                Width="100"
+                Margin="5"
+                Command="{Binding CancelCommand}"
+                Content="Cancel" />
+        </StackPanel>
+
+    </Grid>
+</UserControl>

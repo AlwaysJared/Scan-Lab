@@ -37,9 +37,10 @@ namespace Libs.Repositories
                     IsSuccess = true,
                 };
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                return new SystemResponse{
+                return new SystemResponse
+                {
                     IsSuccess = false,
                     Message = ex.Message,
                 };
@@ -60,11 +61,13 @@ namespace Libs.Repositories
         {
             var orders = await context.Orders
             .Include(o => o.Rolls)
+            .Where(o => !String.IsNullOrWhiteSpace(search) ? (
+                    o.OrderId.ToLower().Contains(search.ToLower())
+                    || o.Rolls.Select(r => r.RollNumber.ToString()).ToArray().Contains(search)
+                ) : true
+            )
+            .Where(o => status.HasValue ? (o.Status == status) : true)
             .ToListAsync();
-            if (!String.IsNullOrWhiteSpace(search) || status.HasValue)
-            {
-
-            }
             return orders;
         }
 
@@ -152,6 +155,50 @@ namespace Libs.Repositories
             return new SystemResponse() { IsSuccess = true };
         }
 
+        public async Task<SystemResponse> UpdateOrderStatus(Order order, OrderStatus status)
+        {
+            try
+            {
+                var dbOrder = await context.Orders
+                .Include(o => o.Scanner)
+                .FirstOrDefaultAsync(o => o.OrderId == order.OrderId);
+
+                if (dbOrder == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = $"Order ID:{order.OrderId} not found"
+                    };
+
+                if (dbOrder.Status == status)
+                {
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Order's current status already set to requested status"
+                    };
+                }
+
+                dbOrder.Status = status;
+
+                await context.SaveChangesAsync();
+
+                return new SystemResponse
+                {
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+
+        }
+
         public void Save()
         {
             throw new NotImplementedException();
@@ -162,6 +209,6 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        
+
     }
 }

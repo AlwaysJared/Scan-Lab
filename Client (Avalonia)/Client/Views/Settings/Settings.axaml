@@ -1,0 +1,116 @@
+<UserControl
+    x:Class="Client.Views.Settings"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewModels="clr-namespace:Client.ViewModels"
+    x:DataType="viewModels:SettingsViewModel">
+
+    <Grid
+        Margin="20"
+        ColumnDefinitions="*"
+        RowDefinitions="Auto,Auto,*">
+
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            Spacing="10">
+
+            <!--  Scanner Selection Dropdown with Loading Indicator  -->
+            <TextBlock FontWeight="Bold" Text="Select Scanner:" />
+
+            <!--  Show "Loading..." when fetching scanners  -->
+            <TextBlock IsVisible="{Binding IsLoading}" Text="Loading scanners..." />
+
+            <!--  Scanner Dropdown (Disabled when loading)  -->
+            <ComboBox
+                x:Name="ScannerComboBox"
+                HorizontalAlignment="Stretch"
+                IsEnabled="{Binding IsNotLoading}"
+                ItemsSource="{Binding Scanners}"
+                SelectedItem="{Binding SelectedScanner}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding ScannerName}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+
+            <!--  Scanner Configuration Expander  -->
+            <Expander
+                HorizontalAlignment="Stretch"
+                Header="Scanner Configuration"
+                IsExpanded="False">
+                <Border
+                    Padding="10"
+                    HorizontalAlignment="Stretch"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5">
+                    <StackPanel Spacing="5">
+                        <TextBlock FontWeight="Bold" Text="Scanner Name:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.ScannerName}" />
+
+                        <TextBlock FontWeight="Bold" Text="Make:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.Make}" />
+
+                        <TextBlock FontWeight="Bold" Text="Model:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.Model}" />
+
+                        <TextBlock FontWeight="Bold" Text="Watched Directory:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.WatchedDir}" />
+
+                        <TextBlock FontWeight="Bold" Text="Destination Directory:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.DestinationDir}" />
+
+                        <TextBlock FontWeight="Bold" Text="Archive Directory:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.ArchiveDir}" />
+
+                        <TextBlock FontWeight="Bold" Text="Artist Name:" />
+                        <TextBox
+                            HorizontalAlignment="Stretch"
+                            IsReadOnly="True"
+                            Text="{Binding SelectedScanner.ArtistName}" />
+                    </StackPanel>
+                </Border>
+            </Expander>
+
+            <!--  API Configuration Expander  -->
+            <Expander
+                HorizontalAlignment="Stretch"
+                Header="API Configuration"
+                IsExpanded="False">
+                <Border
+                    Padding="10"
+                    HorizontalAlignment="Stretch"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5">
+                    <StackPanel>
+                        <TextBlock Text="API settings go here..." />
+                    </StackPanel>
+                </Border>
+            </Expander>
+
+        </StackPanel>
+
+    </Grid>
+</UserControl>
