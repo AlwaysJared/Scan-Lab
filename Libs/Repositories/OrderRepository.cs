@@ -180,6 +180,7 @@ namespace Libs.Repositories
                 }
 
                 dbOrder.Status = status;
+                dbOrder.DateUpdated = DateTime.Now;
 
                 await context.SaveChangesAsync();
 

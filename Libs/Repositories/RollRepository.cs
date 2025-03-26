@@ -225,6 +225,7 @@ namespace Libs.Repositories
                 }
 
                 dbRoll.Status = status;
+                dbRoll.DateUpdated = DateTime.Now;
 
                 await context.SaveChangesAsync();
 

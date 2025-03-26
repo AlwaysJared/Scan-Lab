@@ -1,5 +1,6 @@
 using Avalonia.Input;
 using Client.Services;
+using Client.Tools;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Libs.Data.Models;
@@ -10,6 +11,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using static Client.Tools.UiTools;
 
 namespace Client.ViewModels;
 
@@ -17,6 +19,7 @@ public partial class OrderFormViewModel : ViewModelBase
 {
     private readonly HttpClient _httpClient = new();
     private readonly ScannerService _scannerService;
+    private readonly ApiService _apiService;
 
     [ObservableProperty]
     private string orderId = string.Empty;
@@ -40,13 +43,14 @@ public partial class OrderFormViewModel : ViewModelBase
     private string rollCount = string.Empty;
     public Scanner? SelectedScanner => _scannerService.SelectedScanner;
 
-    public OrderFormViewModel() : this(App.ScannerService) { }
+    public OrderFormViewModel() : this(App.ApiService,App.ScannerService) { }
 
-    public OrderFormViewModel(ScannerService scannerService)
+    public OrderFormViewModel(ApiService apiService,ScannerService scannerService)
     {
         NumberOnlyCommand = new RelayCommand<KeyEventArgs>(OnNumberOnlyKeyPress);
         // Load the currently selected scanner from SettingsViewModel
         _scannerService = scannerService;
+        _apiService = apiService;
     }
 
     public RelayCommand<KeyEventArgs> NumberOnlyCommand { get; }
@@ -89,7 +93,7 @@ public partial class OrderFormViewModel : ViewModelBase
             Rolls
         };
 
-        string apiUrl = "http://localhost:5010/api/Order/submit"; // ✅ Replace with actual API URL
+        string apiUrl = $"{_apiService.ApiAddress}/api/Order/submit"; // ✅ Replace with actual API URL
 
         try
         {
@@ -100,16 +104,16 @@ public partial class OrderFormViewModel : ViewModelBase
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine("Order submitted successfully!");
+                await ShowMessageAsync("Success","Order submitted successfully!", MessageType.Success);
             }
             else
             {
-                Console.WriteLine($"Failed to submit order. Status Code: {response.Content}");
+                await ShowMessageAsync("Failure",$"[Failed to submit order]: {response.Content}",MessageType.Error);
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error submitting order: {ex.Message}");
+            await ShowMessageAsync("Failure",$"Error submitting order: {ex.Message}", MessageType.Error);
         }
     }
 

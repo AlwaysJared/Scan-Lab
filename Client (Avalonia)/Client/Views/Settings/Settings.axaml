@@ -104,8 +104,17 @@
                     BorderBrush="Gray"
                     BorderThickness="1"
                     CornerRadius="5">
-                    <StackPanel>
-                        <TextBlock Text="API settings go here..." />
+                    <StackPanel Orientation="Vertical" Spacing="10">
+
+                        <!--  API Address Input  -->
+                        <TextBlock FontWeight="Bold" Text="Address:" />
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBox Width="300" Text="{Binding ApiAddress, Mode=TwoWay}" />
+                            <Button
+                                Width="60"
+                                Command="{Binding TestApiCommand}"
+                                Content="Test" />
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Expander>

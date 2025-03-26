@@ -7,6 +7,9 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.Input;
+using System;
+using Client.Tools;
 
 namespace Client.ViewModels;
 
@@ -14,6 +17,7 @@ public partial class SettingsViewModel : ViewModelBase
 {
     private readonly HttpClient _httpClient = new();
     private readonly ScannerService _scannerService;
+    private readonly ApiService _apiService;
 
     [ObservableProperty]
     private ObservableCollection<Scanner> scanners = new();
@@ -38,14 +42,22 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
-    public SettingsViewModel() : this(App.ScannerService) { }
-
-    public SettingsViewModel(ScannerService scannerService)
+    public string ApiAddress
     {
+        get => _apiService.ApiAddress;
+        set => _apiService.ApiAddress = value; // ✅ Automatically saves when changed
+    }
+
+    public SettingsViewModel() : this(App.ApiService,App.ScannerService) { }
+
+    public SettingsViewModel(ApiService apiService, ScannerService scannerService)
+    {
+        _apiService = apiService;
         _scannerService = scannerService;
         LoadScannersAsync();
     }
 
+    #region Scanner
     private async void LoadScannersAsync()
     {
         try
@@ -53,7 +65,7 @@ public partial class SettingsViewModel : ViewModelBase
             IsLoading = true;
             OnPropertyChanged(nameof(IsNotLoading));
 
-            string apiUrl = "http://localhost:5010/api/Scanner/Scanners"; // ✅ Replace with actual API URL
+            string apiUrl = $"{_apiService.ApiAddress}/api/Scanner/Scanners"; // ✅ Replace with actual API URL
             var response = await _httpClient.GetStringAsync(apiUrl);
             var scannerList = JsonSerializer.Deserialize<List<Scanner>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
@@ -86,9 +98,38 @@ public partial class SettingsViewModel : ViewModelBase
             OnPropertyChanged(nameof(IsNotLoading));
         }
     }
-
     private void SaveSelectedScanner()
     {
         _scannerService.SaveSelectedScanner(); // ✅ Delegate saving to ScannerService
     }
+    #endregion
+
+    #region API
+    [RelayCommand]
+    public async Task TestApiAsync()
+    {
+        if (string.IsNullOrWhiteSpace(ApiAddress))
+        {
+            Console.WriteLine("API Address is required.");
+            return;
+        }
+
+        try
+        {
+            var response = await _httpClient.GetAsync($"{ApiAddress}/api/ping");
+            if (response.IsSuccessStatusCode)
+            {
+                await UiTools.ShowMessageAsync("Success", "API is reachable.", UiTools.MessageType.Success);
+            }
+            else
+            {
+                await UiTools.ShowMessageAsync("Error", $"[API test failed]: {response.Content}", UiTools.MessageType.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error",$"[Error]: {ex.Message}", UiTools.MessageType.Error);
+        }
+    }
+    #endregion
 }

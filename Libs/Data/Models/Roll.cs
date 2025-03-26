@@ -19,5 +19,7 @@ namespace Libs.Data.Models
         public List<string>? RollNotes { get; set; }
         public Order? Order { get; set; }
         public RollStatus Status { get; set; } = RollStatus.Created;
+        public DateTime? DateCreated { get; set; } = DateTime.Now;
+        public DateTime? DateUpdated { get; set; }
     }
 }

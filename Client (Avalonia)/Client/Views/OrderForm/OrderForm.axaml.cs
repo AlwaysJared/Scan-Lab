@@ -32,7 +32,7 @@ namespace Client.Views
         // Allow only alphanumeric (A-Z, a-z, 0-9)
         private void OnAlphanumericOnlyKeyPress(object? sender, KeyEventArgs e)
         {
-            if (!Regex.IsMatch(e.Key.ToString(), @"^[A-Za-z0-9]$") &&
+            if (!Regex.IsMatch(e.Key.ToString(), "^[a-zA-Z0-9]+$") &&
                 e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space)
             {
                 e.Handled = true;  // Block invalid input
