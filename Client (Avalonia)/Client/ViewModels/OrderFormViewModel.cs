@@ -105,6 +105,7 @@ public partial class OrderFormViewModel : ViewModelBase
             if (response.IsSuccessStatusCode)
             {
                 await ShowMessageAsync("Success","Order submitted successfully!", MessageType.Success);
+                ClearForm();
             }
             else
             {
@@ -118,7 +119,7 @@ public partial class OrderFormViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void Cancel()
+    private void ClearForm()
     {
         CustomerInitials = string.Empty;
         OrderNumber = string.Empty;

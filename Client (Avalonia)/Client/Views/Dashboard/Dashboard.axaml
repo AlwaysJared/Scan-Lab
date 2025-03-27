@@ -1,5 +1,127 @@
-<UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="Client.Views.Dashboard">
-    <TextBlock Text="Dashboard Page" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+<UserControl
+    x:Class="Client.Views.Dashboard"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:libs-models="using:Libs.Data.Models"
+    xmlns:vm="clr-namespace:Client.ViewModels"
+    x:Name="DashboardView"
+    x:DataType="vm:DashboardViewModel">
+
+    <Grid>
+        <TextBlock
+            Margin="10"
+            HorizontalAlignment="Center"
+            FontSize="16"
+            Text="Orders Table" />
+
+        <DataGrid
+            MinHeight="200"
+            MaxHeight="500"
+            Margin="10"
+            AutoGenerateColumns="False"
+            IsReadOnly="True"
+            ItemsSource="{Binding Orders}"
+            RowDetailsVisibilityMode="VisibleWhenSelected">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding OrderId}" Header="Order ID" />
+                <DataGridTextColumn Binding="{Binding DateCreated}" Header="Created" />
+                <DataGridTextColumn Binding="{Binding DateUpdated}" Header="Updated" />
+                <DataGridTextColumn Binding="{Binding Customer.FirstName}" Header="Customer" />
+                <DataGridTextColumn Binding="{Binding Scanner.ScannerName}" Header="Scanner" />
+                <DataGridTextColumn Binding="{Binding Status}" Header="Status" />
+            </DataGrid.Columns>
+
+            <!--  ✅ Explicitly set x:DataType to Order  -->
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate x:DataType="libs-models:Order">
+                    <Border
+                        Margin="5"
+                        Padding="5"
+                        BorderBrush="Gray"
+                        BorderThickness="1">
+                        <StackPanel>
+                            <DataGrid
+                                MinHeight="100"
+                                AutoGenerateColumns="False"
+                                ItemsSource="{Binding Rolls}">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn
+                                        Binding="{Binding RollNumber}"
+                                        Header="Roll #"
+                                        IsReadOnly="True" />
+                                    <DataGridTextColumn
+                                        Binding="{Binding DateCreated}"
+                                        Header="Created"
+                                        IsReadOnly="True" />
+                                    <DataGridTextColumn
+                                        Binding="{Binding DateUpdated}"
+                                        Header="Updated"
+                                        IsReadOnly="True" />
+                                    <DataGridTextColumn
+                                        Binding="{Binding Status}"
+                                        Header="Status"
+                                        IsReadOnly="True" />
+
+                                    <!--  ✅ Button Group Column  -->
+                                    <DataGridTemplateColumn Width="Auto" Header="Actions">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                                    <!--  Start/Resume Scanning  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).StartResumeScanningRollCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Start/Resume Scanning">
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="avares://Client/Assets/start_icon.png" />
+                                                    </Button>
+
+                                                    <!--  Pause Scanning  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).PauseScanningRollCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Pause Scanning">
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="avares://Client/Assets/pause_icon.png" />
+                                                    </Button>
+
+                                                    <!--  Complete Roll  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).CompleteRollCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Complete Roll">
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="avares://Client/Assets/complete_icon.png" />
+                                                    </Button>
+
+                                                    <!--  Delete Roll  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).DeleteRollCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Delete Roll">
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="avares://Client/Assets/delete_icon.png" />
+                                                    </Button>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+
+        </DataGrid>
+    </Grid>
 </UserControl>

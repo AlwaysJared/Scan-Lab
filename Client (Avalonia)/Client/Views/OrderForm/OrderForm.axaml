@@ -73,7 +73,7 @@
             <Button
                 Width="100"
                 Margin="5"
-                Command="{Binding CancelCommand}"
+                Command="{Binding ClearFormCommand}"
                 Content="Cancel" />
         </StackPanel>
 

@@ -66,8 +66,14 @@ namespace API.Controllers
         [HttpGet("scanners")]
         public async Task<IActionResult> GetScanners()
         {
-            var scanners = await _scannerRepository.GetScanners();
-            return Ok(scanners);
+            try{
+                var scanners = await _scannerRepository.GetScanners();
+                return Ok(scanners);
+            }
+            catch(Exception ex){
+                return BadRequest(ex.Message);
+            }
+            
         }
     }
 }

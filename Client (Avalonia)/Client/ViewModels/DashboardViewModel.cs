@@ -8,6 +8,10 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
+using System;
+using Client.Tools;
+using Avalonia.Threading;
+using System.Linq;
 
 namespace Client.ViewModels;
 
@@ -24,21 +28,20 @@ public partial class DashboardViewModel : ViewModelBase
     public DashboardViewModel(ApiService apiService)
     {
         _apiService = apiService;
-        Orders = new ObservableCollection<Order>();
         LoadOrdersAsync();
     }
 
     [RelayCommand]
     private async Task LoadOrdersAsync()
     {
-        if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
-        {
-            System.Console.WriteLine("API Address is not configured.");
-            return;
-        }
-
         try
         {
+            if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
+            {
+                await UiTools.ShowMessageAsync("Error", $"[Error]: API Address is not configured.", UiTools.MessageType.Error);
+                return;
+            }
+
             string apiUrl = $"{_apiService.ApiAddress}/api/Order/Orders"; // ✅ Fetch orders from API
             var response = await _httpClient.GetStringAsync(apiUrl);
             // Deserialize the response into a list of orders
@@ -54,14 +57,55 @@ public partial class DashboardViewModel : ViewModelBase
                 Orders.Clear();
                 foreach (var order in orderList)
                 {
-                    System.Console.WriteLine($"Loaded Order: ID={order.OrderId}, Customer={order.Customer?.FirstName}");
-                    Orders.Add(order); // ✅ Properly updates UI
+                    // ✅ Ensure Rolls is never null
+                    order.Rolls ??= new List<Roll>();
+
+                    System.Console.WriteLine($"Adding Order: {order.OrderId} (Rolls: {order.Rolls.Count})");
+                    Orders.Add(order); // ✅ UI Updates now!
                 }
             }
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            System.Console.WriteLine($"Error fetching orders: {ex.Message}");
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", UiTools.MessageType.Error);
         }
     }
+
+    [RelayCommand]
+    public void StartResumeScanningRoll(Roll? roll)
+    {
+        if(roll is not null){
+            Console.WriteLine($"Scanning Roll: {roll.RollNumber}");
+        }
+        
+    }
+
+    [RelayCommand]
+    public void PauseScanningRoll(Roll? roll)
+    {
+        if (roll is not null)
+        {
+            Console.WriteLine($"Pausing Roll: {roll.RollNumber}");
+        }
+    }
+
+    [RelayCommand]
+    public void CompleteRoll(Roll? roll)
+    {
+        if (roll is not null)
+        {
+            Console.WriteLine($"Completing Roll: {roll.RollNumber}");
+        }
+    }
+
+    [RelayCommand]
+    public void DeleteRoll(Roll? roll)
+    {
+        if (roll is not null)
+        {
+            Console.WriteLine($"Deleting Roll: {roll.RollNumber}");
+        }
+    }
+
+
 }

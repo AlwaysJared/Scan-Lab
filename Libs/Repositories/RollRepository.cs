@@ -117,15 +117,20 @@ namespace Libs.Repositories
                             continue;
                         }
 
-                        // Rename the file
-                        File.Move(file, newFilePath);
+                        // Move/Rename the file 
+                        // (awaiting to avoid Directory.Delete conflict)
+                        // File.Move(file, newFilePath);
+                        await IOHelpers.MoveFileAsync(file, newFilePath);
 
                         imgCount++;
                     }
 
                 }
-
-                Directory.Delete(latestRollDir);
+                
+                // Delete the rolol folder
+                // awaited to ensure proper execution
+                // Directory.Delete(latestRollDir);
+                await IOHelpers.DeleteDirAsync(latestRollDir);
 
                 statusResp = await UpdateRollStatus(roll, RollStatus.Processed);
 

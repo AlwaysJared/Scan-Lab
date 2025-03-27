@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using CommunityToolkit.Mvvm.Input;
 using System;
 using Client.Tools;
+using static Client.Tools.UiTools;
 
 namespace Client.ViewModels;
 
@@ -85,12 +86,11 @@ public partial class SettingsViewModel : ViewModelBase
                     OnPropertyChanged(nameof(SelectedScanner));
                     // SaveSelectedScanner();
                 }
-
             }
         }
-        catch (HttpRequestException ex)
+        catch (Exception ex)
         {
-            System.Console.WriteLine($"Error fetching scanners: {ex.Message}");
+            await UiTools.ShowMessageAsync("Error",$"Error fetching scanners: {ex.Message}",MessageType.Error);
         }
         finally
         {
@@ -102,6 +102,7 @@ public partial class SettingsViewModel : ViewModelBase
     {
         _scannerService.SaveSelectedScanner(); // ✅ Delegate saving to ScannerService
     }
+    
     #endregion
 
     #region API

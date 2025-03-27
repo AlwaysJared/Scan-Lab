@@ -7,9 +7,9 @@
     xmlns:vm="using:Client.ViewModels"
     Title="Client"
     Height="600"
-    Width="600"
-    MinWidth="500"
-    MinHeight="500"
+    Width="900"
+    MinWidth="900"
+    MinHeight="600"
     x:DataType="vm:MainWindowViewModel"
     Icon="/Assets/avalonia-logo.ico"
     mc:Ignorable="d">
