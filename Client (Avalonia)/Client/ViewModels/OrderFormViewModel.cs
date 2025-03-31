@@ -90,6 +90,7 @@ public partial class OrderFormViewModel : ViewModelBase
             OrderId,
             Scanner = SelectedScanner, // ✅ Pass the selected scanner
             Customer,
+            CustomerInitials,
             Rolls
         };
 
@@ -97,7 +98,9 @@ public partial class OrderFormViewModel : ViewModelBase
 
         try
         {
-            string jsonRequest = JsonSerializer.Serialize(submitOrderRequest, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            string jsonRequest = JsonSerializer.Serialize(submitOrderRequest, 
+                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            );
             var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
             HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
@@ -115,6 +118,9 @@ public partial class OrderFormViewModel : ViewModelBase
         catch (Exception ex)
         {
             await ShowMessageAsync("Failure",$"Error submitting order: {ex.Message}", MessageType.Error);
+        }
+        finally{
+            rolls.Clear();
         }
     }
 

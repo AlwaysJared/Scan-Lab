@@ -8,13 +8,50 @@
     x:DataType="vm:DashboardViewModel">
 
     <Grid>
-        <TextBlock
+        <!-- <TextBlock
             Margin="10"
             HorizontalAlignment="Center"
             FontSize="16"
-            Text="Orders Table" />
+            Text="Orders Table" />-->
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> 
+            <!--  Search bar row  -->
+            <RowDefinition Height="*" />    
+            <!--  Orders table  -->
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="LightGray">
+            <StackPanel
+                Margin="5"
+                Orientation="Horizontal"
+                Spacing="10">
+                <TextBox
+                    Width="200"
+                    Text="{Binding SearchQuery, Mode=TwoWay}"
+                    Watermark="Search orders..." />
+
+                <ComboBox
+                    Width="150"
+                    DockPanel.Dock="Left"
+                    ItemsSource="{Binding OrderStatusOptions}"
+                    SelectedItem="{Binding SelectedOrderStatus, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Key}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <Button
+                    Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).LoadOrdersAsync}"
+                    Content="Search"
+                    DockPanel.Dock="Left" />
+            </StackPanel>
+        </Border>
 
         <DataGrid
+            Grid.Row="1"
             MinHeight="200"
             MaxHeight="500"
             Margin="10"

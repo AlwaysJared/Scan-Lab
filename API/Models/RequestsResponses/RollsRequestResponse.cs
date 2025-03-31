@@ -11,6 +11,11 @@ namespace API.Models.RequestsResponses
         public Guid RollId { get; set; }
     }
 
+    public class DeleteRollRequest : BaseRequest
+    {
+        public Guid RollId { get; set; }
+    }
+
     public class CompleteRollResponse : BaseResponse
     {
         public bool ParentOrderComplete { get; set; } = false;

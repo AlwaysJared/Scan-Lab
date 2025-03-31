@@ -34,6 +34,7 @@ namespace API.Controllers
                 {
                     OrderId = request.OrderId,
                     Customer = request.Customer,
+                    CustomerInitials = request.CustomerInitials,
                     Rolls = request.Rolls,
                     Scanner = request.Scanner,
                 };

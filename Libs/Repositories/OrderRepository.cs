@@ -27,6 +27,7 @@ namespace Libs.Repositories
                 var newOrder = new Order
                 {
                     OrderId = req.OrderId,
+                    CustomerInitials = req.CustomerInitials,
                     Rolls = req.Rolls,
                     Scanner = scnr,
                 };

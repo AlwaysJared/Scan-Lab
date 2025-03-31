@@ -76,5 +76,29 @@ namespace API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("delete")]
+        public async Task<IActionResult> DeleteRoll(DeleteRollRequest req)
+        {
+            try{
+                // var roll = await _rollRepository.GetRoll(req.RollId);
+
+                // if (roll == null)
+                //     return BadRequest(new UpdateRollResponse {
+                //         Success = false,
+                //         Message = "Error retrieving roll"
+                //     });
+                
+                var resp = await _rollRepository.DeleteRoll(req.RollId);
+
+                if(!resp.IsSuccess)
+                    return BadRequest(resp.Message);
+                
+                return Ok("Roll successfully deleted");
+            }
+            catch (ArgumentException ex){
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
