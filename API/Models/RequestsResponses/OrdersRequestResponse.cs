@@ -1,5 +1,6 @@
 ﻿using System;
 using Libs.Data.Models;
+using Libs.Enums;
 
 namespace API.Models.RequestsResponses
 {
@@ -25,5 +26,12 @@ namespace API.Models.RequestsResponses
     public class CompleteOrderResponse : BaseResponse
     {
 
+    }
+
+    public class GetOrdersRequest : BaseRequest
+    {
+        public string? search {get; set;}
+        public OrderStatus? orderStatus {get; set;}
+        public Guid? scannerId {get; set;} 
     }
 }

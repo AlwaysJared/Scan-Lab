@@ -28,25 +28,26 @@
                 Spacing="10">
                 <TextBox
                     Width="200"
-                    Text="{Binding SearchQuery, Mode=TwoWay}"
+                    Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Watermark="Search orders..." />
 
                 <ComboBox
                     Width="150"
                     DockPanel.Dock="Left"
                     ItemsSource="{Binding OrderStatusOptions}"
-                    SelectedItem="{Binding SelectedOrderStatus, Mode=TwoWay}">
+                    SelectedItem="{Binding SelectedOrderStatus, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <ComboBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Key}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                <CheckBox Content="Only orders for scanner" IsChecked="{Binding ScannerSearchChecked}" />
 
-                <Button
+                <!-- <Button
                     Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).LoadOrdersAsync}"
                     Content="Search"
-                    DockPanel.Dock="Left" />
+                    DockPanel.Dock="Left" /> -->
             </StackPanel>
         </Border>
 

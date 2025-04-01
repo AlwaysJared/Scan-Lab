@@ -26,7 +26,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         CurrentView = viewName switch
         {
-            "Dashboard" => new Dashboard { DataContext = new DashboardViewModel(_apiService) },
+            "Dashboard" => new Dashboard { DataContext = new DashboardViewModel(_apiService, _scannerService) },
             "OrderForm" => new OrderForm { DataContext = new OrderFormViewModel(_apiService, _scannerService) },
             "Settings" => new Settings { DataContext = new SettingsViewModel(_apiService, _scannerService) },
             _ => CurrentView

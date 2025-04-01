@@ -58,16 +58,19 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status)
+        public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status, Guid? scannerId)
         {
             var orders = await context.Orders
             .Include(o => o.Rolls)
+            .Include(o => o.Scanner)
+            .Include(o => o.Customer)
             .Where(o => !String.IsNullOrWhiteSpace(search) ? (
                     o.OrderId.ToLower().Contains(search.ToLower())
                     || o.Rolls.Select(r => r.RollNumber.ToString()).ToArray().Contains(search)
                 ) : true
             )
             .Where(o => status.HasValue ? (o.Status == status) : true)
+            .Where(o => scannerId.HasValue ? (o.Scanner.Id == scannerId) : true)
             .ToListAsync();
             return orders;
         }

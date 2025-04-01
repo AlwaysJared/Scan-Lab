@@ -75,12 +75,12 @@ namespace API.Controllers
             throw new NotImplementedException();
         }
 
-        [HttpGet("orders")]
-        public async Task<IActionResult> GetOrders(string? search = null, OrderStatus? status = null)
+        [HttpPost("orders")]
+        public async Task<IActionResult> GetOrders(GetOrdersRequest req)
         {
             try
             {
-                var orders = await _orderRepository.GetOrders(search, status);
+                var orders = await _orderRepository.GetOrders(req.search, req.orderStatus, req.scannerId);
                 var options = new JsonSerializerOptions
                 {
                     ReferenceHandler = ReferenceHandler.Preserve,

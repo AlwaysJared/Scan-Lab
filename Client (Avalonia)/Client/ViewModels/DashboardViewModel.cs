@@ -13,6 +13,8 @@ using Client.Tools;
 using Avalonia.Threading;
 using System.Linq;
 using Libs.Enums;
+using System.Text;
+using System.ComponentModel;
 
 namespace Client.ViewModels;
 
@@ -20,38 +22,90 @@ public partial class DashboardViewModel : ViewModelBase
 {
     private readonly HttpClient _httpClient = new();
     private readonly ApiService _apiService;
+    private readonly ScannerService _scannerService;
+
+    private bool _scannerSearchChecked = true;
+
+    public bool ScannerSearchChecked
+    {
+        get => _scannerSearchChecked;
+        set
+        {
+            if (_scannerSearchChecked != value)
+            {
+                _scannerSearchChecked = value;
+                OnPropertyChanged(nameof(ScannerSearchChecked));
+                RestartSearchDelay();
+            }
+        }
+    }
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected void OnPropertyChanged(string propertyName)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 
     [ObservableProperty]
     private ObservableCollection<Order> orders = new();
 
-    [ObservableProperty]
+    // [ObservableProperty]
     private string _searchQuery = string.Empty;
+    public string SearchQuery
+    {
+        get => _searchQuery;
+        set
+        {
+            SetProperty(ref _searchQuery, value);
+            RestartSearchDelay();
+        }
+    }
 
-    [ObservableProperty]
+    // [ObservableProperty]
     private KeyValuePair<string, int?> _selectedOrderStatus; // ✅ Default to "All" (null)
+    public KeyValuePair<string, int?> SelectedOrderStatus
+    {
+        get => _selectedOrderStatus;
+        set
+        {
+            SetProperty(ref _selectedOrderStatus, value);
+            RestartSearchDelay();
+        }
+    }
     public List<KeyValuePair<string, int?>> OrderStatusOptions { get; } // ✅ Use int? for API
+
+    private readonly System.Timers.Timer _searchDelayTimer = new(500) { AutoReset = false };
 
     // public DashboardViewModel() : this(App.ApiService) { }
     public DashboardViewModel() { }
 
-    public DashboardViewModel(ApiService apiService)
+    public DashboardViewModel(ApiService apiService, ScannerService scannerService)
     {
         _apiService = apiService;
+        _scannerService = scannerService;
 
         // ✅ Populate dropdown with int? values
         OrderStatusOptions = new List<KeyValuePair<string, int?>>
         {
             new KeyValuePair<string, int?>("All", null) // ✅ "All" option with null value
         };
-
         foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
         {
             OrderStatusOptions.Add(new KeyValuePair<string, int?>(status.ToString(), (int)status));
         }
-
         SelectedOrderStatus = OrderStatusOptions[0];
 
-        LoadOrdersAsync();
+        // _searchDelayTimer.Elapsed += (s, e) => LoadOrdersCommand.Execute(null);
+        _searchDelayTimer.Elapsed += (s, e) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                LoadOrdersCommand.Execute(null);
+            });
+        };
+
+        // LoadOrdersAsync();
     }
 
     [RelayCommand]
@@ -65,32 +119,56 @@ public partial class DashboardViewModel : ViewModelBase
                 return;
             }
 
+
             // ✅ Convert null to an empty string for API query
-            var statusFilter = SelectedOrderStatus.Value.HasValue ? ((int)SelectedOrderStatus.Value.Value).ToString() : "";
-            var apiUrl = $"{_apiService.ApiAddress}/api/Order/orders?search={SearchQuery}&status={statusFilter}";
+            var statusFilter = SelectedOrderStatus.Value.HasValue ? ((OrderStatus?)SelectedOrderStatus.Value.Value) : null;
+            var apiUrl = $"{_apiService.ApiAddress}/api/Order/orders";
 
-            // string apiUrl = $"{_apiService.ApiAddress}/api/Order/Orders"; // ✅ Fetch orders from API
-            var response = await _httpClient.GetStringAsync(apiUrl);
-            // Deserialize the response into a list of orders
-            var options = new JsonSerializerOptions
+            var getOrdersRequest = new
             {
-                PropertyNameCaseInsensitive = true,
-                ReferenceHandler = ReferenceHandler.Preserve
+                search = SearchQuery,
+                orderStatus = statusFilter,
+                scannerId = _scannerSearchChecked ? (Guid?)_scannerService.SelectedScanner.Id : null
             };
-            var orderList = JsonSerializer.Deserialize<List<Order>>(response, options);
 
-            if (orderList != null)
+
+            // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            string jsonRequest = JsonSerializer.Serialize(getOrdersRequest);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            // Check if the request was successful
+            if (response.IsSuccessStatusCode)
             {
-                Orders.Clear();
-                foreach (var order in orderList)
-                {
-                    // ✅ Ensure Rolls is never null
-                    order.Rolls ??= new List<Roll>();
+                var json = await response.Content.ReadAsStringAsync();
 
-                    System.Console.WriteLine($"Adding Order: {order.OrderId} (Rolls: {order.Rolls.Count})");
-                    Orders.Add(order); // ✅ UI Updates now!
+                // var response = await _httpClient.GetStringAsync(apiUrl);
+                // Deserialize the response into a list of orders
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                };
+                var orderList = JsonSerializer.Deserialize<List<Order>>(json, options);
+
+                if (orderList != null)
+                {
+                    Orders.Clear();
+                    foreach (var order in orderList)
+                    {
+                        // ✅ Ensure Rolls is never null
+                        order.Rolls ??= new List<Roll>();
+
+                        System.Console.WriteLine($"Adding Order: {order.OrderId} (Rolls: {order.Rolls.Count})");
+                        Orders.Add(order); // ✅ UI Updates now!
+                    }
                 }
             }
+            else
+            {
+                await UiTools.ShowMessageAsync("Error", response.Content.ToString(), UiTools.MessageType.Error);
+            }
+
         }
         catch (Exception ex)
         {
@@ -270,5 +348,11 @@ public partial class DashboardViewModel : ViewModelBase
         {
             await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", UiTools.MessageType.Error);
         }
+    }
+
+    private void RestartSearchDelay()
+    {
+        _searchDelayTimer.Stop();
+        _searchDelayTimer.Start();
     }
 }
