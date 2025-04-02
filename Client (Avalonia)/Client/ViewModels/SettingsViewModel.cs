@@ -11,6 +11,11 @@ using CommunityToolkit.Mvvm.Input;
 using System;
 using Client.Tools;
 using static Client.Tools.UiTools;
+using Avalonia.Controls;
+using Avalonia.Platform.Storage;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Converters;
+using System.Text;
 
 namespace Client.ViewModels;
 
@@ -28,6 +33,19 @@ public partial class SettingsViewModel : ViewModelBase
 
     public bool IsNotLoading => !IsLoading; // ✅ Re-added IsNotLoading
 
+    public Scanner? refScanner
+    {
+        get => _scannerService.SelectedScanner;
+        set
+        {
+            if (_scannerService.SelectedScanner != value)
+            {
+                _scannerService.SelectedScanner = value;
+                OnPropertyChanged(nameof(refScanner));
+                SaveSelectedScanner(); // ✅ Save whenever scanner changes
+            }
+        }
+    }
 
     public Scanner? SelectedScanner
     {
@@ -49,17 +67,22 @@ public partial class SettingsViewModel : ViewModelBase
         set => _apiService.ApiAddress = value; // ✅ Automatically saves when changed
     }
 
-    public SettingsViewModel() : this(App.ApiService,App.ScannerService) { }
+    public SettingsViewModel() : this(App.ApiService, App.ScannerService) { }
 
     public SettingsViewModel(ApiService apiService, ScannerService scannerService)
     {
         _apiService = apiService;
         _scannerService = scannerService;
+        SelectedScanner = _scannerService.SelectedScanner;
+
+        SelectFolderCommand = new RelayCommand<string>(async (propertyName) => await SelectFolderAsync(propertyName));
+
         LoadScannersAsync();
     }
 
     #region Scanner
-    private async void LoadScannersAsync()
+    public IRelayCommand<string> SelectFolderCommand { get; }
+    private async Task LoadScannersAsync()
     {
         try
         {
@@ -90,7 +113,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await UiTools.ShowMessageAsync("Error",$"Error fetching scanners: {ex.Message}",MessageType.Error);
+            await UiTools.ShowMessageAsync("Error", $"Error fetching scanners: {ex.Message}", MessageType.Error);
         }
         finally
         {
@@ -102,7 +125,75 @@ public partial class SettingsViewModel : ViewModelBase
     {
         _scannerService.SaveSelectedScanner(); // ✅ Delegate saving to ScannerService
     }
-    
+    private async Task SelectFolderAsync(string propertyName)
+    {
+        if (App.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            return;
+
+        var window = desktop.MainWindow;
+        var storageProvider = window?.StorageProvider;
+        if (storageProvider is null) return;
+
+        var result = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        {
+            Title = "Select Folder",
+            AllowMultiple = false
+        });
+
+
+        if (SelectedScanner != null && result?.Count > 0)
+        {
+            string selectedPath = result[0].Path.LocalPath;
+
+            switch (propertyName)
+            {
+                case "WatchedDir":
+                    SelectedScanner.WatchedDir = selectedPath;
+                    OnPropertyChanged(nameof(SelectedScanner));
+                    break;
+                case "DestinationDir":
+                    SelectedScanner.DestinationDir = selectedPath;
+                    OnPropertyChanged(nameof(SelectedScanner));
+                    break;
+                case "ArchiveDir":
+                    SelectedScanner.ArchiveDir = selectedPath;
+                    OnPropertyChanged(nameof(SelectedScanner));
+                    break;
+            }
+        }
+    }
+    [RelayCommand]
+    private async void UpdateScanner()
+    {
+        var apiUrl = $"{_apiService.ApiAddress}/api/Scanner/update";
+
+        var updateScannerRequest = new
+        {
+            Scanner = SelectedScanner
+        };
+
+
+        // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+        string jsonRequest = JsonSerializer.Serialize(updateScannerRequest);
+        var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+        // Check if the request was successful
+        if (response.IsSuccessStatusCode)
+        {
+            await UiTools.ShowMessageAsync("Success", "Scanner successfully updated", MessageType.Success);
+            await LoadScannersAsync();
+        }
+        else{
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {response.Content}", MessageType.Error);
+        }
+    }
+    [RelayCommand]
+    private async void CancelUpdateScanner()
+    {
+        SelectedScanner = refScanner;
+        OnPropertyChanged(nameof(SelectedScanner));
+    }
     #endregion
 
     #region API
@@ -111,7 +202,7 @@ public partial class SettingsViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(ApiAddress))
         {
-            Console.WriteLine("API Address is required.");
+            await UiTools.ShowMessageAsync("Error", "API Address is required.", MessageType.Error);
             return;
         }
 
@@ -129,7 +220,7 @@ public partial class SettingsViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            await UiTools.ShowMessageAsync("Error",$"[Error]: {ex.Message}", UiTools.MessageType.Error);
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", UiTools.MessageType.Error);
         }
     }
     #endregion

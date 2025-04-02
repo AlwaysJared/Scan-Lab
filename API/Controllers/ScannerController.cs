@@ -75,5 +75,22 @@ namespace API.Controllers
             }
             
         }
+
+        [HttpPost("update")]
+        public async Task<IActionResult> UpdateScanner(UpdateScannerRequest req)
+        {
+            try{
+                var resp = await _scannerRepository.UpdateScanner(req.Scanner);
+
+                if(!resp.IsSuccess){
+                    return BadRequest(resp.Message);
+                }
+
+                return Ok();
+            }
+            catch(Exception ex){
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

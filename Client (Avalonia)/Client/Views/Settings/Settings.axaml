@@ -34,7 +34,7 @@
                             <TextBlock Text="{Binding ScannerName}" />
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
-                
+
                 </ComboBox>
                 <!--  Scanner Configuration Expander  -->
                 <Expander
@@ -51,44 +51,73 @@
                             <TextBlock FontWeight="Bold" Text="Scanner Name:" />
                             <TextBox
                                 HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
                                 Text="{Binding SelectedScanner.ScannerName}" />
 
                             <TextBlock FontWeight="Bold" Text="Make:" />
                             <TextBox
                                 HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
                                 Text="{Binding SelectedScanner.Make}" />
 
                             <TextBlock FontWeight="Bold" Text="Model:" />
                             <TextBox
                                 HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
                                 Text="{Binding SelectedScanner.Model}" />
-
-                            <TextBlock FontWeight="Bold" Text="Watched Directory:" />
-                            <TextBox
-                                HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
-                                Text="{Binding SelectedScanner.WatchedDir}" />
-
-                            <TextBlock FontWeight="Bold" Text="Destination Directory:" />
-                            <TextBox
-                                HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
-                                Text="{Binding SelectedScanner.DestinationDir}" />
-
-                            <TextBlock FontWeight="Bold" Text="Archive Directory:" />
-                            <TextBox
-                                HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
-                                Text="{Binding SelectedScanner.ArchiveDir}" />
-
+                            
                             <TextBlock FontWeight="Bold" Text="Artist Name:" />
                             <TextBox
                                 HorizontalAlignment="Stretch"
-                                IsReadOnly="True"
                                 Text="{Binding SelectedScanner.ArtistName}" />
+
+                            <TextBlock FontWeight="Bold" Text="Watched Directory:" />
+                            <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto">
+                                <TextBox
+                                    Grid.Column="0"
+                                    IsReadOnly="True"
+                                    Text="{Binding SelectedScanner.WatchedDir}" />
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding SelectFolderCommand}"
+                                    CommandParameter="WatchedDir"
+                                    Content="Browse"
+                                    Margin="8,0,0,0" />
+                            </Grid>
+
+                            <TextBlock FontWeight="Bold" Text="Destination Directory:" />
+                            <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto">
+                                <TextBox
+                                    Grid.Column="0"
+                                    IsReadOnly="True"
+                                    Text="{Binding SelectedScanner.DestinationDir}" />
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding SelectFolderCommand}"
+                                    CommandParameter="DestinationDir"
+                                    Content="Browse"
+                                    Margin="8,0,0,0" />
+                            </Grid>
+
+                            <TextBlock FontWeight="Bold" Text="Archive Directory:" />
+                            <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto">
+                                <TextBox
+                                    Grid.Column="0"
+                                    IsReadOnly="True"
+                                    Text="{Binding SelectedScanner.ArchiveDir}" />
+                                <Button
+                                    Grid.Column="1"
+                                    Command="{Binding SelectFolderCommand}"
+                                    CommandParameter="ArchiveDir"
+                                    Content="Browse"
+                                    Margin="8,0,0,0" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal">
+                                <Button
+                                    Command="{Binding UpdateScannerCommand}"
+                                    Content="Save" />
+                                    <Button
+                                    Command="{Binding CancelUpdateScannerCommand}"
+                                    Content="Cancel" 
+                                    Margin="8,0,0,0"/>
+                            </StackPanel>
                         </StackPanel>
                     </Border>
                 </Expander>

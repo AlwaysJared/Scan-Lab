@@ -1,4 +1,5 @@
 ﻿using System;
+using Libs.Data.Models;
 
 namespace API.Models.RequestsResponses
 {
@@ -27,5 +28,10 @@ namespace API.Models.RequestsResponses
     public class DeleteScannerResponse : BaseResponse
     {
         public string? ScannerId { get; set; }
+    }
+
+    public class UpdateScannerRequest : BaseRequest
+    {
+        public required Scanner Scanner{ get; set; }
     }
 }

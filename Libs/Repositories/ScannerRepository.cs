@@ -84,9 +84,33 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<SystemResponse> UpdateScanner(Scanner scanner)
+        public async Task<SystemResponse> UpdateScanner(Scanner scanner)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var dbScnr = context.Scanners.Where(s => s.Id == scanner.Id).FirstOrDefault();
+
+                if(dbScnr == null){
+                    return new SystemResponse{IsSuccess = false, Message = "Scanner not found"}; 
+                }
+
+                dbScnr.ScannerName = scanner.ScannerName;
+                dbScnr.Make = scanner.Make;
+                dbScnr.Model = scanner.Model;
+                dbScnr.WatchedDir = scanner.WatchedDir;
+                dbScnr.DestinationDir = scanner.DestinationDir;
+                dbScnr.ArchiveDir = scanner.ArchiveDir;
+                dbScnr.ArtistName = scanner.ArtistName;
+
+                await context.SaveChangesAsync();
+
+                return new SystemResponse { IsSuccess = true};
+            }
+            catch (Exception ex)
+            {
+                
+                return new SystemResponse{IsSuccess = false, Message = ex.Message};
+            }
         }
     }
 }
