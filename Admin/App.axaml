@@ -3,7 +3,7 @@
              x:Class="Admin.App"
              xmlns:local="using:Admin"
              xmlns:conv="using:Admin.Converters"
-             RequestedThemeVariant="Dark">
+             RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
