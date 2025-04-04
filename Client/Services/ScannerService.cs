@@ -1,51 +1,65 @@
-// Services/ScannerService.cs
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Libs.Data.Models;
+using System;
+using System.IO;
+using System.Text.Json;
+
+namespace Client.Services;
 
 public class ScannerService
 {
-    private readonly HttpClient _httpClient;
-    public Scanner SelectedScanner { get; set; } = new Scanner{
-        Id = Guid.NewGuid(),
-        ScannerName = "",
-        WatchedDir = "",
-        DestinationDir = "",
-        ArchiveDir = "",
-    };
+    private const string ScannerSaveFile = "selected_scanner.json"; // ✅ File for persistence
+    private Scanner? _selectedScanner;
 
-    private const string ScannerIDKey = "ScannerID";
-    private const string ScannerNameKey = "ScannerName";
-    
+    public event Action<Scanner?>? ScannerChanged; // ✅ Notify subscribers when the scanner changes
+
+    public Scanner? SelectedScanner
+    {
+        get => _selectedScanner;
+        set
+        {
+            if (_selectedScanner != value)
+            {
+                _selectedScanner = value;
+                SaveSelectedScanner();
+                ScannerChanged?.Invoke(_selectedScanner); // ✅ Notify all pages
+            }
+        }
+    }
+
     public ScannerService()
     {
-        _httpClient = new HttpClient();
-        LoadScanner();
+        LoadSavedScanner(); // ✅ Load scanner on startup
     }
 
-    public async Task<List<Scanner>> GetScannersAsync()
+    public void LoadSavedScanner()
     {
-        var response = await _httpClient.GetStringAsync("http://localhost:5010/api/scanner/scanners");
-        return JsonSerializer.Deserialize<List<Scanner>>(response, new JsonSerializerOptions{PropertyNameCaseInsensitive = true});
-    }
-
-    public void SaveScannerProfile(Scanner scnr){
-        Preferences.Set(ScannerIDKey, scnr.Id.ToString());
-        Preferences.Set(ScannerNameKey, scnr.ScannerName);
-    }
-
-    private void LoadScanner()
-    {
-        // Load the scanner details from Preferences
-        var savedScannerID = Preferences.Get(ScannerIDKey, string.Empty);
-        var savedScannerName = Preferences.Get(ScannerNameKey, string.Empty);
-
-        if (!string.IsNullOrEmpty(savedScannerID) && !string.IsNullOrEmpty(savedScannerName))
+        if (File.Exists(ScannerSaveFile))
         {
-            SelectedScanner.Id = Guid.Parse(savedScannerID);
-            SelectedScanner.ScannerName = savedScannerName;
+            try
+            {
+                string json = File.ReadAllText(ScannerSaveFile);
+                _selectedScanner = JsonSerializer.Deserialize<Scanner>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            }
+            catch (Exception ex)
+            {
+                System.Console.WriteLine($"Error loading saved scanner: {ex.Message}");
+            }
+        }
+    }
+
+    public void SaveSelectedScanner()
+    {
+        try
+        {
+            if (_selectedScanner != null)
+            {
+                string json = JsonSerializer.Serialize(_selectedScanner, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(ScannerSaveFile, json);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"Error saving selected scanner: {ex.Message}");
         }
     }
 }
