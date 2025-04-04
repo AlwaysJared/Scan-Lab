@@ -1,0 +1,13 @@
+<UserControl
+    x:Class="Admin.Views.Scanners"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <TabControl Margin="5">
+        <TabItem Header="Scanner List">
+            <TextBlock Margin="5">This is tab 1 content</TextBlock>
+        </TabItem>
+        <TabItem Header="Add Scanner">
+            <TextBlock Margin="5">This is tab 2 content</TextBlock>
+        </TabItem>
+    </TabControl>
+</UserControl>

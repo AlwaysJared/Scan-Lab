@@ -1,11 +1,11 @@
 <Window
-    x:Class="Client.Views.MainWindow"
+    x:Class="Admin.Views.MainWindow"
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:vm="using:Client.ViewModels"
-    Title="Client"
+    xmlns:vm="using:Admin.ViewModels"
+    Title="Admin"
     Width="900"
     Height="600"
     MinWidth="900"
@@ -34,6 +34,7 @@
                 <!--  Top buttons take equal space, but settings button is floated at bottom  -->
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <!--  Spacer to push settings button to bottom  -->
                 <RowDefinition Height="Auto" />
@@ -43,28 +44,37 @@
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Dashboard"
                 DockPanel.Dock="Top"
-                ToolTip.Tip="Orders">
+                ToolTip.Tip="Dashboard">
                 <Image
                     Width="25"
                     Height="25"
-                    Source="{SvgImage avares://Client/Assets/to-do.svg}" />
+                    Source="{SvgImage avares://Admin/Assets/dashboard-monitor.svg}" />
             </Button>
             <Button Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
-                CommandParameter="OrderForm"
+                CommandParameter="Orders"
                 DockPanel.Dock="Top"
-                ToolTip.Tip="Order Form">
+                ToolTip.Tip="Manage Orders">
                 <Image
                     Width="25"
                     Height="25"
-                    Source="{SvgImage avares://Client/Assets/form.svg}" />
+                    Source="{SvgImage avares://Admin/Assets/to-do.svg}" />
+            </Button>
+            <Button Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="Scanners"
+                DockPanel.Dock="Top"
+                ToolTip.Tip="Manage Scanners">
+                <Image
+                    Width="25"
+                    Height="25"
+                    Source="{SvgImage avares://Admin/Assets/scanner-image.svg}" />
             </Button>
             <!--  Spacer (push the settings button to the bottom)  -->
-            <GridSplitter
+            <!-- <GridSplitter
                 Grid.Row="2"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Background="LightGray"/>
+                VerticalAlignment="Stretch" />
             <Button Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Settings"
@@ -74,12 +84,13 @@
                 <Image
                     Width="25"
                     Height="25"
-                    Source="{SvgImage avares://Client/Assets/settings.svg}" />
-            </Button>
+                    Source="avares://Admin/Assets/cog.png" />
+            </Button> -->
         </Grid>
         <!-- </DockPanel> -->
 
         <!--  Content Area  -->
         <ContentControl Content="{Binding CurrentView}" />
     </DockPanel>
+
 </Window>

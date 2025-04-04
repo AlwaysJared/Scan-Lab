@@ -3,12 +3,17 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Client"
-    RequestedThemeVariant="Default">
+    xmlns:converters="using:Client.Converters"
+    RequestedThemeVariant="Dark">
     <!--  "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options.  -->
 
     <Application.DataTemplates>
         <local:ViewLocator />
     </Application.DataTemplates>
+
+    <Application.Resources>
+        <converters:RollActionVisibilityMultiConver x:Key="RollActionVis"/>
+    </Application.Resources>
 
     <Application.Styles>
         <FluentTheme />

@@ -177,7 +177,7 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async void StartResumeScanningRoll(Roll? roll)
+    public async Task StartResumeScanningRoll(Roll? roll)
     {
         try
         {
@@ -206,8 +206,9 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
-                        $"[Error]: {response.Content}",
+                        $"[Error]: {errMsg}",
                         UiTools.MessageType.Error
                     );
                 }
@@ -222,7 +223,7 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async void PauseScanningRoll(Roll? roll)
+    public async Task PauseScanningRoll(Roll? roll)
     {
         try
         {
@@ -251,8 +252,9 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
-                        $"[Error]: {response.Content}",
+                        $"[Error]: {errMsg}",
                         UiTools.MessageType.Error
                     );
                 }
@@ -265,7 +267,7 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async void CompleteRoll(Roll? roll)
+    public async Task CompleteRoll(Roll? roll)
     {
         try
         {
@@ -294,8 +296,9 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
-                        $"[Error]: {response.Content}",
+                        $"[Error]: {errMsg}",
                         UiTools.MessageType.Error
                     );
                 }
@@ -308,7 +311,7 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public async void DeleteRoll(Roll? roll)
+    public async Task DeleteRoll(Roll? roll)
     {
         try
         {
@@ -337,8 +340,9 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
-                        $"[Error]: {response.Content}",
+                        $"[Error]: {errMsg}",
                         UiTools.MessageType.Error
                     );
                 }
@@ -354,5 +358,50 @@ public partial class DashboardViewModel : ViewModelBase
     {
         _searchDelayTimer.Stop();
         _searchDelayTimer.Start();
+    }
+
+    private bool IsRollButtonVisible(RollStatus rollStatus, string action){
+        try{
+            switch (action.ToLower()){
+                case "start":
+                    switch(rollStatus){
+                        case RollStatus.Created:
+                        case RollStatus.ScanningPaused:
+                            return true;
+                        default:
+                            return false;
+                    }
+                case "pause":
+                    switch (rollStatus){
+                        case RollStatus.ScanningInProgress:
+                            return true;
+                        default:
+                            return false;
+                    }
+                case "complete":
+                    switch (rollStatus){
+                        case RollStatus.ScanningInProgress:
+                        case RollStatus.ScanningPaused:
+                            return true;
+                        default:
+                            return false;
+                    }
+                case "delete":
+                    switch (rollStatus){
+                        case RollStatus.Processing:
+                        case RollStatus.Processed:
+                        case RollStatus.ScanningCompleted:
+                            return false;
+                        default:
+                            return true;
+                    }
+                default:
+                    return false;
+            }
+        }
+        catch
+        {
+            return true;
+        }
     }
 }

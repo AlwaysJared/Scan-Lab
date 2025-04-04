@@ -70,9 +70,17 @@ public partial class OrderFormViewModel : ViewModelBase
     [RelayCommand]
     public async Task SubmitOrderAsync()
     {
-        if (string.IsNullOrWhiteSpace(OrderId) || SelectedScanner == null)
+        if(SelectedScanner == null)
         {
-            Console.WriteLine("Order ID and Scanner are required.");
+            await ShowMessageAsync("Error", "No scanner selected for order. Please choose a scanner in Settings", MessageType.Error);
+        }
+        
+        if (string.IsNullOrWhiteSpace(OrderId)
+            || string.IsNullOrWhiteSpace(CustomerInitials)
+            || string.IsNullOrWhiteSpace(FirstRollNumber)
+            || string.IsNullOrWhiteSpace(RollCount))
+        {
+            await ShowMessageAsync("Error","Please fill out all fields", MessageType.Error);
             return;
         }
 

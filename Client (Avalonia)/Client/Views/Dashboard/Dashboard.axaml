@@ -3,6 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:libs-models="using:Libs.Data.Models"
+    xmlns:local="clr-namespace:Client"
     xmlns:vm="clr-namespace:Client.ViewModels"
     x:Name="DashboardView"
     x:DataType="vm:DashboardViewModel">
@@ -15,9 +16,9 @@
             Text="Orders Table" />-->
 
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /> 
+            <RowDefinition Height="Auto" />
             <!--  Search bar row  -->
-            <RowDefinition Height="*" />    
+            <RowDefinition Height="Auto" />
             <!--  Orders table  -->
         </Grid.RowDefinitions>
 
@@ -42,15 +43,11 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
-                <CheckBox Content="Only orders for scanner" IsChecked="{Binding ScannerSearchChecked}" />
-
-                <!-- <Button
-                    Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).LoadOrdersAsync}"
-                    Content="Search"
-                    DockPanel.Dock="Left" /> -->
+                <CheckBox Content="Only orders for this scanner" IsChecked="{Binding ScannerSearchChecked}" />
             </StackPanel>
         </Border>
 
+        
         <DataGrid
             Grid.Row="1"
             MinHeight="200"
@@ -111,10 +108,16 @@
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).StartResumeScanningRollCommand}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip.Tip="Start/Resume Scanning">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="start" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
                                                         <Image
                                                             Width="16"
                                                             Height="16"
-                                                            Source="avares://Client/Assets/start_icon.png" />
+                                                            Source="{SvgImage avares://Client/Assets/play.svg}" />
                                                     </Button>
 
                                                     <!--  Pause Scanning  -->
@@ -122,10 +125,16 @@
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).PauseScanningRollCommand}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip.Tip="Pause Scanning">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="pause" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
                                                         <Image
                                                             Width="16"
                                                             Height="16"
-                                                            Source="avares://Client/Assets/pause_icon.png" />
+                                                            Source="{SvgImage avares://Client/Assets/pause-outline.svg}" />
                                                     </Button>
 
                                                     <!--  Complete Roll  -->
@@ -133,10 +142,16 @@
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).CompleteRollCommand}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip.Tip="Complete Roll">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="complete" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
                                                         <Image
                                                             Width="16"
                                                             Height="16"
-                                                            Source="avares://Client/Assets/complete_icon.png" />
+                                                            Source="{SvgImage avares://Client/Assets/progress-complete.svg}" />
                                                     </Button>
 
                                                     <!--  Delete Roll  -->
@@ -144,10 +159,16 @@
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).DeleteRollCommand}"
                                                         CommandParameter="{Binding}"
                                                         ToolTip.Tip="Delete Roll">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="delete" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
                                                         <Image
                                                             Width="16"
                                                             Height="16"
-                                                            Source="avares://Client/Assets/delete_icon.png" />
+                                                            Source="{SvgImage avares://Client/Assets/trash.svg}" />
                                                     </Button>
                                                 </StackPanel>
                                             </DataTemplate>
@@ -159,7 +180,6 @@
                     </Border>
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
-
         </DataGrid>
     </Grid>
 </UserControl>

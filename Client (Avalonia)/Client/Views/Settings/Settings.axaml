@@ -71,9 +71,10 @@
                             <TextBlock FontWeight="Bold" Text="Watched Directory:" />
                             <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto">
                                 <TextBox
+                                    Name="WatchedDirPathTextBox"
                                     Grid.Column="0"
                                     IsReadOnly="True"
-                                    Text="{Binding SelectedScanner.WatchedDir}" />
+                                    Text="{Binding WatchedFolderPath}" />
                                 <Button
                                     Grid.Column="1"
                                     Command="{Binding SelectFolderCommand}"
@@ -87,7 +88,7 @@
                                 <TextBox
                                     Grid.Column="0"
                                     IsReadOnly="True"
-                                    Text="{Binding SelectedScanner.DestinationDir}" />
+                                    Text="{Binding DestFolderPath}" />
                                 <Button
                                     Grid.Column="1"
                                     Command="{Binding SelectFolderCommand}"
@@ -101,7 +102,7 @@
                                 <TextBox
                                     Grid.Column="0"
                                     IsReadOnly="True"
-                                    Text="{Binding SelectedScanner.ArchiveDir}" />
+                                    Text="{Binding ArchiveFolderPath}" />
                                 <Button
                                     Grid.Column="1"
                                     Command="{Binding SelectFolderCommand}"
