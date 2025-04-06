@@ -154,6 +154,23 @@
                                                             Source="{SvgImage avares://Client/Assets/progress-complete.svg}" />
                                                     </Button>
 
+                                                    <!--  Reset Roll  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).ResetRollCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Reset Roll Progress">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="reset" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="{SvgImage avares://Client/Assets/reset.svg}" />
+                                                    </Button>
+
                                                     <!--  Delete Roll  -->
                                                     <Button
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).DeleteRollCommand}"

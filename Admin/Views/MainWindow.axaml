@@ -71,11 +71,11 @@
                     Source="{SvgImage avares://Admin/Assets/scanner-image.svg}" />
             </Button>
             <!--  Spacer (push the settings button to the bottom)  -->
-            <!-- <GridSplitter
-                Grid.Row="2"
+            <GridSplitter
+                Grid.Row="3"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch" />
-            <Button Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+            <Button Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Settings"
                 Content="Settings"
@@ -84,10 +84,9 @@
                 <Image
                     Width="25"
                     Height="25"
-                    Source="avares://Admin/Assets/cog.png" />
-            </Button> -->
+                    Source="{SvgImage avares://Admin/Assets/settings.svg}" />
+            </Button>
         </Grid>
-        <!-- </DockPanel> -->
 
         <!--  Content Area  -->
         <ContentControl Content="{Binding CurrentView}" />

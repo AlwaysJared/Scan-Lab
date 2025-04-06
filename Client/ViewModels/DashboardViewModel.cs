@@ -311,6 +311,50 @@ public partial class DashboardViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    public async Task ResetRoll(Roll? roll)
+    {
+        try
+        {
+            if (roll is not null)
+            {
+                if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
+                {
+                    await UiTools.ShowMessageAsync("Error", $"[Error]: API Address is not configured.", UiTools.MessageType.Error);
+                    return;
+                }
+
+                string apiUrl = $"{_apiService.ApiAddress}/api/Roll/UpdateStatus";
+                var content = new StringContent(JsonSerializer.Serialize(
+                    new { RollId = roll.RollId, Status = RollStatus.Created }),
+                    System.Text.Encoding.UTF8, "application/json"
+                );
+                var response = await _httpClient.PutAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    await UiTools.ShowMessageAsync("Success",
+                        $"Roll #{roll.RollNumber} status sucessfully reset",
+                        UiTools.MessageType.Success
+                    );
+                    await LoadOrdersAsync();
+                }
+                else
+                {
+                    var errMsg = await response.Content.ReadAsStringAsync();
+                    await UiTools.ShowMessageAsync("Error",
+                        $"[Error]: {errMsg}",
+                        UiTools.MessageType.Error
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", UiTools.MessageType.Error);
+        }
+    }
+
+    [RelayCommand]
     public async Task DeleteRoll(Roll? roll)
     {
         try

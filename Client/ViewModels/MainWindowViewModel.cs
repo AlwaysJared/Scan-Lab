@@ -24,6 +24,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private void Navigate(string viewName)
     {
+        if(CurrentView != null)
+            if(CurrentView.GetType().Name.ToLower().Contains(viewName.ToLower()))
+                return;
+        
         CurrentView = viewName switch
         {
             "Dashboard" => new Dashboard { DataContext = new DashboardViewModel(_apiService, _scannerService) },

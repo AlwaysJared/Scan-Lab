@@ -1,0 +1,46 @@
+<UserControl
+    x:Class="Admin.Views.Settings"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:viewModels="clr-namespace:Admin.ViewModels"
+    x:DataType="viewModels:SettingsViewModel">
+    <ScrollViewer>
+        <Grid
+            Margin="20"
+            ColumnDefinitions="*"
+            RowDefinitions="Auto,Auto,*">
+
+            <StackPanel
+                Grid.Row="0"
+                Grid.Column="0"
+                HorizontalAlignment="Stretch"
+                Spacing="10">
+                <!--  API Configuration Expander  -->
+                <Expander
+                    HorizontalAlignment="Stretch"
+                    Header="API Configuration"
+                    IsExpanded="False">
+                    <Border
+                        Padding="10"
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        CornerRadius="5">
+                        <StackPanel Orientation="Vertical" Spacing="10">
+
+                            <!--  API Address Input  -->
+                            <TextBlock FontWeight="Bold" Text="Address:" />
+                            <StackPanel Orientation="Horizontal" Spacing="5">
+                                <TextBox Width="300" Text="{Binding ApiAddress, Mode=TwoWay}" />
+                                <Button
+                                    Width="60"
+                                    Command="{Binding TestApiCommand}"
+                                    Content="Test" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </Expander>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

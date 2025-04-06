@@ -59,6 +59,14 @@ namespace Client.Converters
                             default:
                                 return true;
                         }
+                    case "reset":
+                        switch (rollStatus)
+                        {
+                            case RollStatus.Processed:
+                                return true;
+                            default:
+                                return false;
+                        }
                     default:
                         return false;
                 }

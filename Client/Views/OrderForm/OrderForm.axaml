@@ -3,7 +3,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="clr-namespace:Client.ViewModels"
-    x:DataType="vm:OrderFormViewModel">
+    Assets/error.png Assets/info.png Assets/success.png>
 
     <Grid
         Margin="20"
