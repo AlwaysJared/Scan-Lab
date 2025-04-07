@@ -65,7 +65,7 @@ namespace Admin.ViewModels
 
             SelectFolderCommand = new RelayCommand<string>(async (propertyName) => await SelectFolderAsync(propertyName));
 
-            // LoadScannersAsync();
+            LoadScannersAsync();
         }
 
         public IRelayCommand<string> SelectFolderCommand { get; }

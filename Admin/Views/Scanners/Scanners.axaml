@@ -6,7 +6,25 @@
     x:DataType="vm:ScannersViewModel">
     <TabControl Margin="5">
         <TabItem Header="Scanner List">
-            <TextBlock Margin="5">This is tab 1 content</TextBlock>
+            <DataGrid
+                Grid.Row="1"
+                MinHeight="200"
+                MaxHeight="500"
+                Margin="10"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                ItemsSource="{Binding Scanners}">
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Binding="{Binding ScannerName}" Header="Name" />
+                    <DataGridTextColumn Binding="{Binding Make}" Header="Make" />
+                    <DataGridTextColumn Binding="{Binding Model}" Header="Model" />
+                    <DataGridTextColumn Binding="{Binding ArtistName}" Header="Artist Name" />
+                    <!-- <DataGridTextColumn Binding="{Binding WatchedDir}" Header="Watched Folder" />
+                    <DataGridTextColumn Binding="{Binding DestinationDir}" Header="Destination Folder" />
+                    <DataGridTextColumn Binding="{Binding ArchiveDir}" Header="Archive Folder" /> -->
+                </DataGrid.Columns>
+            </DataGrid>
         </TabItem>
         <TabItem Header="Add Scanner">
             <Border
