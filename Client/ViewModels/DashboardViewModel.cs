@@ -153,13 +153,15 @@ public partial class DashboardViewModel : ViewModelBase
 
                 if (orderList != null)
                 {
+                    orderList = orderList.OrderByDescending(o => o.DateCreated).ToList();
                     Orders.Clear();
                     foreach (var order in orderList)
                     {
                         // ✅ Ensure Rolls is never null
                         order.Rolls ??= new List<Roll>();
+                        order.Rolls = order.Rolls.OrderBy(r => r.RollNumber).ToList();
 
-                        System.Console.WriteLine($"Adding Order: {order.OrderId} (Rolls: {order.Rolls.Count})");
+                        // System.Console.WriteLine($"Adding Order: {order.OrderId} (Rolls: {order.Rolls.Count})");
                         Orders.Add(order); // ✅ UI Updates now!
                     }
                 }

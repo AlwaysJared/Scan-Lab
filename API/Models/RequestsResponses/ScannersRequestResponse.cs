@@ -32,6 +32,6 @@ namespace API.Models.RequestsResponses
 
     public class UpdateScannerRequest : BaseRequest
     {
-        public required Scanner Scanner{ get; set; }
+        public required Scanner Scnr{ get; set; }
     }
 }

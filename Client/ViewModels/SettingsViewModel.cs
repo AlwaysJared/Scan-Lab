@@ -240,7 +240,7 @@ public partial class SettingsViewModel : ViewModelBase
 
         var updateScannerRequest = new
         {
-            Scanner = SelectedScanner
+            Scnr = SelectedScanner
         };
 
         // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }

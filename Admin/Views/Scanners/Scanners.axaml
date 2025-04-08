@@ -4,7 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="clr-namespace:Admin.ViewModels"
     x:DataType="vm:ScannersViewModel">
-    <TabControl Margin="5">
+    <TabControl Margin="5" SelectedIndex="{Binding SelectedTabIndex}">
         <TabItem Header="Scanner List">
             <DataGrid
                 Grid.Row="1"
@@ -22,11 +22,32 @@
                     <DataGridTextColumn Binding="{Binding ArtistName}" Header="Artist Name" />
                     <!-- <DataGridTextColumn Binding="{Binding WatchedDir}" Header="Watched Folder" />
                     <DataGridTextColumn Binding="{Binding DestinationDir}" Header="Destination Folder" />
-                    <DataGridTextColumn Binding="{Binding ArchiveDir}" Header="Archive Folder" /> -->
+                    <DataGridTextColumn Binding="{Binding ArchiveDir}" Header="Archive Folder" />-->
+
+
+                    <!--  ✅ Button Group Column  -->
+                    <DataGridTemplateColumn Width="Auto" Header="Actions">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="5">
+                                    <!--  Edit Scanner  -->
+                                    <Button
+                                        Command="{Binding $parent[UserControl].((vm:ScannersViewModel)DataContext).EditScannerCommand}"
+                                        CommandParameter="{Binding}"
+                                        ToolTip.Tip="Edit Scanner">
+                                        <Image
+                                            Width="16"
+                                            Height="16"
+                                            Source="{SvgImage avares://Admin/Assets/pencil.svg}" />
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </TabItem>
-        <TabItem Header="Add Scanner">
+        <TabItem Header="{Binding FormTabText}">
             <Border
                 Padding="10"
                 HorizontalAlignment="Stretch"

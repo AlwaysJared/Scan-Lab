@@ -36,6 +36,53 @@ namespace Admin.ViewModels
             set => _apiService.ApiAddress = value; // ✅ Automatically saves when changed
         }
 
+        private Guid? _editScannerId;
+        public Guid? EditScannerId
+        {
+            get => _editScannerId;
+            set => SetProperty(ref _editScannerId, value);
+        }
+
+        private int _selectedTabIndex = 0;
+        public int SelectedTabIndex
+        {
+            get => _selectedTabIndex;
+            set
+            {
+                if (value == 0)
+                {
+                    IsEditMode = false;
+                    ClearScannerForm();
+                }
+                
+                SetProperty(ref _selectedTabIndex, value);
+            }
+        }
+
+        private void OnTabIndexChange(int val)
+        {
+            if (val == 0)
+            {
+                IsEditMode = false;
+                ClearScannerForm();
+            }
+            SetProperty(ref _selectedTabIndex, val);
+        }
+
+        private bool _isEditMode = false;
+        public bool IsEditMode
+        {
+            get => _isEditMode;
+            set => SetProperty(ref _isEditMode, value);
+        }
+
+        private string _formTabText = "Add Scanner";
+        public string FormTabText
+        {
+            get => !IsEditMode ? "Add Scanner" : "Edit Scanner";
+            set => SetProperty(ref _formTabText, value);
+        }
+
         [ObservableProperty]
         private string scannerName;
 
@@ -149,49 +196,96 @@ namespace Admin.ViewModels
         [RelayCommand]
         private async Task SubmitScanner()
         {
-            if (string.IsNullOrWhiteSpace(ScannerName)
-            || string.IsNullOrWhiteSpace(ScannerMake)
-            || string.IsNullOrWhiteSpace(ScannerModel)
-            || string.IsNullOrWhiteSpace(ArtistName)
-            || string.IsNullOrWhiteSpace(WatchedFolderPath)
-            || string.IsNullOrWhiteSpace(DestFolderPath)
-            || string.IsNullOrWhiteSpace(ArchiveFolderPath))
-            {
-                await ShowMessageAsync("Error", "Please fill out all fields", MessageType.Error);
-                return;
-            }
-
-            var addScannerRequest = new
-            {
-                ScannerName,
-                Make = ScannerMake,
-                Model = ScannerModel,
-                WatchedDir = WatchedFolderPath,
-                DestinationDir = DestFolderPath,
-                ArchiveDir = ArchiveFolderPath,
-                ArtistName
-            };
-
-            string apiUrl = $"{_apiService.ApiAddress}/api/Scanner/add"; // ✅ Replace with actual API URL
-
             try
             {
-                string jsonRequest = JsonSerializer.Serialize(addScannerRequest,
-                    new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
-                );
-                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
-
-                if (response.IsSuccessStatusCode)
+                if (string.IsNullOrWhiteSpace(ScannerName)
+                || string.IsNullOrWhiteSpace(ScannerMake)
+                || string.IsNullOrWhiteSpace(ScannerModel)
+                || string.IsNullOrWhiteSpace(ArtistName)
+                || string.IsNullOrWhiteSpace(WatchedFolderPath)
+                || string.IsNullOrWhiteSpace(DestFolderPath)
+                || string.IsNullOrWhiteSpace(ArchiveFolderPath))
                 {
-                    await ShowMessageAsync("Success", "Scanner added successfully!", MessageType.Success);
-                    await ClearScannerForm();
+                    await ShowMessageAsync("Error", "Please fill out all fields", MessageType.Error);
+                    return;
+                }
+
+                string apiUrl = !IsEditMode ? $"{_apiService.ApiAddress}/api/Scanner/add" : $"{_apiService.ApiAddress}/api/Scanner/update";
+
+                if (IsEditMode)
+                {
+                    if (!EditScannerId.HasValue)
+                    {
+                        await ShowMessageAsync("Error", "Scanner ID for edit missing", MessageType.Error);
+                        return;
+                    }
+                    var EditScannerRequest = new
+                    {
+                        Scnr = new
+                        {
+                            Id = EditScannerId.Value,
+                            ScannerName = ScannerName,
+                            Make = ScannerMake,
+                            Model = ScannerModel,
+                            WatchedDir = WatchedFolderPath,
+                            DestinationDir = DestFolderPath,
+                            ArchiveDir = ArchiveFolderPath,
+                            ArtistName = ArtistName,
+                        }
+                    };
+
+                    string jsonRequest = JsonSerializer.Serialize(EditScannerRequest,
+                                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                                    );
+                    var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await ShowMessageAsync("Success", "Scanner successfully updated!", MessageType.Success);
+                        await ClearScannerForm();
+                        SelectedTabIndex = 0;
+                        await LoadScannersAsync();
+                    }
+                    else
+                    {
+                        await ShowMessageAsync("Failure", $"[Failed to update scanner]: {response.Content}", MessageType.Error);
+                    }
                 }
                 else
                 {
-                    await ShowMessageAsync("Failure", $"[Failed to add scanner]: {response.Content}", MessageType.Error);
+                    var AddScannerRequest = new
+                    {
+                        Id = IsEditMode ? EditScannerId : null,
+                        ScannerName,
+                        Make = ScannerMake,
+                        Model = ScannerModel,
+                        WatchedDir = WatchedFolderPath,
+                        DestinationDir = DestFolderPath,
+                        ArchiveDir = ArchiveFolderPath,
+                        ArtistName
+                    };
+                    string jsonRequest = JsonSerializer.Serialize(AddScannerRequest,
+                                        new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                                    );
+                    var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await ShowMessageAsync("Success", "Scanner added successfully!", MessageType.Success);
+                        await ClearScannerForm();
+                        SelectedTabIndex = 0;
+                        await LoadScannersAsync();
+                    }
+                    else
+                    {
+                        await ShowMessageAsync("Failure", $"[Failed to add scanner]: {response.Content}", MessageType.Error);
+                    }
                 }
+
             }
             catch (Exception ex)
             {
@@ -202,6 +296,7 @@ namespace Admin.ViewModels
         [RelayCommand]
         private async Task ClearScannerForm()
         {
+            EditScannerId = null;
             ScannerName = string.Empty;
             ScannerMake = string.Empty;
             ScannerModel = string.Empty;
@@ -209,6 +304,24 @@ namespace Admin.ViewModels
             WatchedFolderPath = string.Empty;
             DestFolderPath = string.Empty;
             ArchiveFolderPath = string.Empty;
+            IsEditMode = false;
+            FormTabText = "Add Scanner";
+        }
+
+        [RelayCommand]
+        private async Task EditScanner(Scanner scnr)
+        {
+            EditScannerId = scnr.Id;
+            ScannerName = scnr.ScannerName;
+            ScannerMake = scnr.Make;
+            ScannerModel = scnr.Model;
+            ArtistName = scnr.ArtistName;
+            WatchedFolderPath = scnr.WatchedDir;
+            DestFolderPath = scnr.DestinationDir;
+            ArchiveFolderPath = scnr.ArchiveDir;
+            IsEditMode = true;
+            FormTabText = "Edit Scanner";
+            SelectedTabIndex = 1;
         }
     }
 }

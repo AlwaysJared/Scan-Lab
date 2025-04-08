@@ -80,7 +80,7 @@ namespace API.Controllers
         public async Task<IActionResult> UpdateScanner(UpdateScannerRequest req)
         {
             try{
-                var resp = await _scannerRepository.UpdateScanner(req.Scanner);
+                var resp = await _scannerRepository.UpdateScanner(req.Scnr);
 
                 if(!resp.IsSuccess){
                     return BadRequest(resp.Message);

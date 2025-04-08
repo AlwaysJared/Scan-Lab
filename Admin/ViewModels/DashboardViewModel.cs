@@ -1,4 +1,7 @@
 ﻿namespace Admin.ViewModels
 {
-    public class DashboardViewModel : ViewModelBase { }
+    public class DashboardViewModel : ViewModelBase 
+    {
+        
+    }
 }
