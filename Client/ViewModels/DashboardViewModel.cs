@@ -168,7 +168,8 @@ public partial class DashboardViewModel : ViewModelBase
             }
             else
             {
-                await UiTools.ShowMessageAsync("Error", response.Content.ToString(), UiTools.MessageType.Error);
+                var errMsg = await response.Content.ReadAsStringAsync(); 
+                await UiTools.ShowMessageAsync("Error", errMsg, UiTools.MessageType.Error);
             }
 
         }

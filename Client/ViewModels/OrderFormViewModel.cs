@@ -120,7 +120,8 @@ public partial class OrderFormViewModel : ViewModelBase
             }
             else
             {
-                await ShowMessageAsync("Failure",$"[Failed to submit order]: {response.Content}",MessageType.Error);
+                var errMsg = await response.Content.ReadAsStringAsync(); 
+                await ShowMessageAsync("Failure",$"[Failed to submit order]: {errMsg}",MessageType.Error);
             }
         }
         catch (Exception ex)

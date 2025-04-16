@@ -53,9 +53,16 @@ namespace Libs.Repositories
             context.Dispose();
         }
 
-        public Order GetOrder(Guid id)
+        public async Task<Order?> GetOrder(string orderId)
         {
-            throw new NotImplementedException();
+            try{
+                var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId.ToLower() == orderId.ToLower());
+
+                return order;
+            }
+            catch{
+                return null;
+            }
         }
 
         public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status, Guid? scannerId)
@@ -214,6 +221,26 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
+        public async Task<SystemResponse> DeleteOrder(string orderId){
+            try{
+                var dbOrder = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
+                if(dbOrder == null)
+                    return new SystemResponse{IsSuccess=false, Message="Order not found"};
+
+                context.Orders.Remove(dbOrder);
+
+                await context.SaveChangesAsync();
+
+                return new SystemResponse{
+                    IsSuccess = true
+                };
+            }
+            catch(Exception ex){
+                return new SystemResponse{
+                    IsSuccess = false, Message = ex.Message
+                };
+            }
+        }
     }
 }

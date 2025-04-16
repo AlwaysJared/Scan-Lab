@@ -256,7 +256,8 @@ public partial class SettingsViewModel : ViewModelBase
         }
         else
         {
-            await UiTools.ShowMessageAsync("Error", $"[Error]: {response.Content}", MessageType.Error);
+            var errMsg = await response.Content.ReadAsStringAsync(); 
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {errMsg}", MessageType.Error);
         }
     }
     [RelayCommand]
@@ -297,7 +298,8 @@ public partial class SettingsViewModel : ViewModelBase
             }
             else
             {
-                await UiTools.ShowMessageAsync("Error", $"[API test failed]: {response.Content}", UiTools.MessageType.Error);
+                var errMsg = await response.Content.ReadAsStringAsync(); 
+                await UiTools.ShowMessageAsync("Error", $"[API test failed]: {errMsg}", UiTools.MessageType.Error);
             }
         }
         catch (Exception ex)
