@@ -84,13 +84,25 @@ namespace Libs.Repositories
 
                 string rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir, roll.Order.OrderId, roll.RollNumber.ToString());
 
+                bool destFolderExists = false;
+
                 if (!Directory.Exists(rollFolderPath))
                 {
                     Directory.CreateDirectory(rollFolderPath);
                 }
+                else
+                {
+                    destFolderExists = true;
+                    rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
+                        roll.Order.OrderId,
+                        "Rescans",
+                        roll.RollNumber.ToString() + "-" + DateTime.Now.ToString("yyyy_MM_dd_HHmmss")
+                    );
+                    Directory.CreateDirectory(rollFolderPath);
+                }
 
                 // Get all files in the directory
-                string[] files = Directory.GetFiles(latestRollDir);
+                    string[] files = Directory.GetFiles(latestRollDir);
 
                 var imgCount = 1;
                 // Iterate through the files and check for image extensions
@@ -199,7 +211,7 @@ namespace Libs.Repositories
                         Message = $"Roll ID:{roll.RollId} not found"
                     };
 
-                if (dbRoll.Status == status)
+                if (dbRoll.Status == status && status != RollStatus.Created && status != RollStatus.Processing)
                 {
                     return new SystemResponse
                     {

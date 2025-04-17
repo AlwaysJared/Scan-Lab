@@ -13,5 +13,16 @@ namespace Libs.Data.Context
         public DbSet<Scanner> Scanners { get; set; }
         public DbSet<Roll> Rolls { get; set; }
         public DbSet<Customer> Customers { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Order>()
+                .HasMany(o => o.Rolls)
+                .WithOne(r => r.Order)
+                .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
     }
 }

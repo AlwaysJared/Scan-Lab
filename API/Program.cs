@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Libs.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://0.0.0.0:3624");
+builder.WebHost.UseUrls("https://0.0.0.0:7624");
 
 // Add services to the container.
 builder.Services.AddDbContext<ScanLabContext>(options =>
@@ -27,7 +27,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 // app.MapGet("/ping", () => "pong from root");
 
 app.UseAuthorization();

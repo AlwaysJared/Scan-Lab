@@ -24,6 +24,12 @@ namespace Libs.Repositories
                 if (scnr == null)
                     return new SystemResponse { IsSuccess = false, Message = "Scanner not found" };
 
+                var dupeCheck = await context.Orders
+                    .FirstOrDefaultAsync(o => o.OrderId.ToLower() == req.OrderId.ToLower());
+
+                if (dupeCheck != null)
+                    return new SystemResponse { IsSuccess = false, Message = "Order ID alread exists" };
+
                 var newOrder = new Order
                 {
                     OrderId = req.OrderId,

@@ -68,11 +68,29 @@ namespace API.Controllers
         }
 
         [HttpDelete("cancel/{id}")]
-        public async Task<IActionResult> CancelOrder(Guid id)
+        public async Task<IActionResult> CancelOrder(string id)
         {
             // await Task.Run(() => _watcherService.DisposeWatcher(id));
             // return Ok($"Watcher disposed for ID {id}");
             throw new NotImplementedException();
+        }
+
+        [HttpPost("delete")]
+        public async Task<IActionResult> DeleteOrder(DeleteOrderRequest req)
+        {
+            try
+            {
+                var resp = await _orderRepository.DeleteOrder(req.OrderId);
+
+                if (!resp.IsSuccess)
+                    return BadRequest(resp.Message);
+
+                return Ok("Order successfully deleted");
+            }
+            catch (ArgumentException ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
         [HttpPost("orders")]

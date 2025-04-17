@@ -30,8 +30,13 @@ namespace API.Models.RequestsResponses
 
     public class GetOrdersRequest : BaseRequest
     {
-        public string? search {get; set;}
-        public OrderStatus? orderStatus {get; set;}
-        public Guid? scannerId {get; set;} 
+        public string? search { get; set; }
+        public OrderStatus? orderStatus { get; set; }
+        public Guid? scannerId { get; set; }
+    }
+
+    public class DeleteOrderRequest : BaseRequest
+    {
+        public required string OrderId { get; set; } = "";
     }
 }
