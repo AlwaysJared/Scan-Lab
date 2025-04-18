@@ -22,8 +22,10 @@ namespace Client.Views
         // Allow only letters (A-Z, a-z)
         private void OnTextOnlyKeyPress(object? sender, KeyEventArgs e)
         {
-            if (!Regex.IsMatch(e.Key.ToString(), @"^[A-Za-z]$") &&
-                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space && e.Key != Key.Tab)
+            var isShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            if ((e.Key >= Key.D0 && e.Key <= Key.D9 && isShiftPressed) ||
+                (!Regex.IsMatch(e.Key.ToString(), @"^[A-Za-z]$") &&
+                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space && e.Key != Key.Tab))
             {
                 e.Handled = true;  // Block invalid input
             }
@@ -32,8 +34,10 @@ namespace Client.Views
         // Allow only alphanumeric (A-Z, a-z, 0-9)
         private void OnAlphanumericOnlyKeyPress(object? sender, KeyEventArgs e)
         {
-            if (!Regex.IsMatch(e.Key.ToString(), "^[a-zA-Z0-9]+$") &&
-                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space && e.Key != Key.Tab)
+            var isShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+            if ((e.Key >= Key.D0 && e.Key <= Key.D9 && isShiftPressed) ||
+                (!Regex.IsMatch(e.Key.ToString(), "^[a-zA-Z0-9]+$") &&
+                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space && e.Key != Key.Tab))
             {
                 e.Handled = true;  // Block invalid input
             }
