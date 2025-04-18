@@ -1,0 +1,28 @@
+<Window
+    x:Class="Client.Views.AddRollModal"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:libs-models="using:Libs.Data.Models"
+    xmlns:vm="clr-namespace:Client.ViewModels;assembly=Client"
+    x:Name="AddRollModalView"
+    Title="Add Roll"
+    Width="300"
+    Height="150"
+    x:DataType="vm:AddRollModalViewModel"
+    CanResize="False"
+    WindowStartupLocation="CenterOwner">
+    <StackPanel
+        Margin="20"
+        Spacing="10">
+        <TextBlock Text="Roll Number" />
+        <TextBox Text="{Binding RollNumber}" />
+
+        <StackPanel
+            HorizontalAlignment="Right"
+            Orientation="Horizontal"
+            Spacing="10">
+            <Button Command="{Binding CancelCommand}" Content="Cancel" />
+            <Button Command="{Binding SubmitCommand}" Content="Submit" />
+        </StackPanel>
+    </StackPanel>
+</Window>

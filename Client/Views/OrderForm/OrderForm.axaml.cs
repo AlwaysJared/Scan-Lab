@@ -23,7 +23,7 @@ namespace Client.Views
         private void OnTextOnlyKeyPress(object? sender, KeyEventArgs e)
         {
             if (!Regex.IsMatch(e.Key.ToString(), @"^[A-Za-z]$") &&
-                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space)
+                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space && e.Key != Key.Tab)
             {
                 e.Handled = true;  // Block invalid input
             }
@@ -33,20 +33,33 @@ namespace Client.Views
         private void OnAlphanumericOnlyKeyPress(object? sender, KeyEventArgs e)
         {
             if (!Regex.IsMatch(e.Key.ToString(), "^[a-zA-Z0-9]+$") &&
-                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space)
+                e.Key != Key.Back && e.Key != Key.Delete && e.Key != Key.Space && e.Key != Key.Tab)
             {
                 e.Handled = true;  // Block invalid input
             }
         }
 
-        // Allow only numbers (0-9)
+        // Allow only number keys (0–9), block letters and special characters
         private void OnNumberOnlyKeyPress(object? sender, KeyEventArgs e)
         {
-            if (!(e.Key >= Key.D0 && e.Key <= Key.D9) &&  // Top row numbers
-                !(e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) &&  // Numpad numbers
-                !(e.Key == Key.Back || e.Key == Key.Delete))
+            // Check if Shift is held down
+            var isShiftPressed = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+
+            if (
+                // Block if shift is used with top number row
+                (e.Key >= Key.D0 && e.Key <= Key.D9 && isShiftPressed) ||
+
+                // Block if not a number key (top row or numpad) or allowed control key
+                (!((e.Key >= Key.D0 && e.Key <= Key.D9) ||
+                   (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) ||
+                   e.Key == Key.Back ||
+                   e.Key == Key.Delete ||
+                   e.Key == Key.Tab ||
+                   e.Key == Key.Left ||
+                   e.Key == Key.Right))
+            )
             {
-                e.Handled = true;  // Block invalid input
+                e.Handled = true;
             }
         }
     }

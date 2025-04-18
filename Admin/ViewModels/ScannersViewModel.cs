@@ -54,7 +54,7 @@ namespace Admin.ViewModels
                     IsEditMode = false;
                     ClearScannerForm();
                 }
-                
+
                 SetProperty(ref _selectedTabIndex, value);
             }
         }
@@ -146,51 +146,59 @@ namespace Admin.ViewModels
 
         private async Task SelectFolderAsync(string propertyName)
         {
-            if (App.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-                return;
-
-            var window = desktop.MainWindow;
-            var storageProvider = window?.StorageProvider;
-            if (storageProvider is null) return;
-
-            var titleFolder = "";
-            switch (propertyName)
+            try
             {
-                case "WatchedDir":
-                    titleFolder = "Watched";
-                    break;
-                case "DestinationDir":
-                    titleFolder = "Destination";
-                    break;
-                case "ArchiveDir":
-                    titleFolder = "Archive";
-                    break;
-            }
+                if (App.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                    return;
 
-            var result = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-            {
-                Title = $"Select {titleFolder} Folder",
-                AllowMultiple = false
-            });
+                var window = desktop.MainWindow;
+                var storageProvider = window?.StorageProvider;
+                if (storageProvider is null) return;
 
-
-            if (result?.Count > 0)
-            {
-                string selectedPath = result[0].Path.LocalPath;
-
+                var titleFolder = "";
                 switch (propertyName)
                 {
                     case "WatchedDir":
-                        WatchedFolderPath = selectedPath;
+                        titleFolder = "Watched";
                         break;
                     case "DestinationDir":
-                        DestFolderPath = selectedPath; ;
+                        titleFolder = "Destination";
                         break;
                     case "ArchiveDir":
-                        ArchiveFolderPath = selectedPath; ;
+                        titleFolder = "Archive";
                         break;
                 }
+
+                var result = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+                {
+                    Title = $"Select {titleFolder} Folder",
+                    AllowMultiple = false
+                });
+
+
+                if (result?.Count > 0)
+                {
+                    string selectedPath = result[0].Path.LocalPath;
+
+                    switch (propertyName)
+                    {
+                        case "WatchedDir":
+                            WatchedFolderPath = selectedPath;
+                            break;
+                        case "DestinationDir":
+                            DestFolderPath = selectedPath; ;
+                            break;
+                        case "ArchiveDir":
+                            ArchiveFolderPath = selectedPath; ;
+                            break;
+                    }
+                }
             }
+            catch (Exception ex)
+            {
+                await UiTools.ShowMessageAsync("Error", $"Error fetching scanners: {ex.Message}", MessageType.Error);
+            }
+
         }
 
         [RelayCommand]

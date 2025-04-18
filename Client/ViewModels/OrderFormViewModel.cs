@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static Client.Tools.UiTools;
 
@@ -20,6 +21,13 @@ public partial class OrderFormViewModel : ViewModelBase
     private readonly HttpClient _httpClient = new();
     private readonly ScannerService _scannerService;
     private readonly ApiService _apiService;
+
+    private bool _isLoading;
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
 
     [ObservableProperty]
     private string orderId = string.Empty;
@@ -43,9 +51,9 @@ public partial class OrderFormViewModel : ViewModelBase
     private string rollCount = string.Empty;
     public Scanner? SelectedScanner => _scannerService.SelectedScanner;
 
-    public OrderFormViewModel() : this(App.ApiService,App.ScannerService) { }
+    public OrderFormViewModel() : this(App.ApiService, App.ScannerService) { }
 
-    public OrderFormViewModel(ApiService apiService,ScannerService scannerService)
+    public OrderFormViewModel(ApiService apiService, ScannerService scannerService)
     {
         NumberOnlyCommand = new RelayCommand<KeyEventArgs>(OnNumberOnlyKeyPress);
         // Load the currently selected scanner from SettingsViewModel
@@ -70,43 +78,44 @@ public partial class OrderFormViewModel : ViewModelBase
     [RelayCommand]
     public async Task SubmitOrderAsync()
     {
-        if(SelectedScanner == null)
-        {
-            await ShowMessageAsync("Error", "No scanner selected for order. Please choose a scanner in Settings", MessageType.Error);
-        }
-        
-        if (string.IsNullOrWhiteSpace(OrderId)
-            || string.IsNullOrWhiteSpace(CustomerInitials)
-            || string.IsNullOrWhiteSpace(FirstRollNumber)
-            || string.IsNullOrWhiteSpace(RollCount))
-        {
-            await ShowMessageAsync("Error","Please fill out all fields", MessageType.Error);
-            return;
-        }
-
-        for (int i = 0; i < int.Parse(RollCount); i++)
-        {
-            rolls.Add(new Roll
-            {
-                RollNumber = long.Parse(FirstRollNumber) + i, // ✅ Incrementing roll numbers
-                Status = RollStatus.Created, // ✅ Default status (modify if needed)
-            });
-        }
-
-        var submitOrderRequest = new
-        {
-            OrderId,
-            Scanner = SelectedScanner, // ✅ Pass the selected scanner
-            Customer,
-            CustomerInitials,
-            Rolls
-        };
-
-        string apiUrl = $"{_apiService.ApiAddress}/api/Order/submit"; // ✅ Replace with actual API URL
-
         try
         {
-            string jsonRequest = JsonSerializer.Serialize(submitOrderRequest, 
+            if (SelectedScanner == null)
+            {
+                await ShowMessageAsync("Error", "No scanner selected for order. Please choose a scanner in Settings", MessageType.Error);
+            }
+
+            if (string.IsNullOrWhiteSpace(OrderId)
+                || string.IsNullOrWhiteSpace(CustomerInitials)
+                || string.IsNullOrWhiteSpace(FirstRollNumber)
+                || string.IsNullOrWhiteSpace(RollCount))
+            {
+                await ShowMessageAsync("Error", "Please fill out all fields", MessageType.Error);
+                return;
+            }
+
+            for (int i = 0; i < int.Parse(RollCount); i++)
+            {
+                rolls.Add(new Roll
+                {
+                    RollNumber = long.Parse(FirstRollNumber) + i, // ✅ Incrementing roll numbers
+                    Status = RollStatus.Created, // ✅ Default status (modify if needed)
+                });
+            }
+
+            var submitOrderRequest = new
+            {
+                OrderId,
+                Scanner = SelectedScanner, // ✅ Pass the selected scanner
+                Customer,
+                CustomerInitials,
+                Rolls
+            };
+
+            string apiUrl = $"{_apiService.ApiAddress}/api/Order/submit"; // ✅ Replace with actual API URL
+
+
+            string jsonRequest = JsonSerializer.Serialize(submitOrderRequest,
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
             var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
@@ -115,20 +124,21 @@ public partial class OrderFormViewModel : ViewModelBase
 
             if (response.IsSuccessStatusCode)
             {
-                await ShowMessageAsync("Success","Order submitted successfully!", MessageType.Success);
+                await ShowMessageAsync("Success", "Order submitted successfully!", MessageType.Success);
                 ClearForm();
             }
             else
             {
-                var errMsg = await response.Content.ReadAsStringAsync(); 
-                await ShowMessageAsync("Failure",$"[Failed to submit order]: {errMsg}",MessageType.Error);
+                var errMsg = await response.Content.ReadAsStringAsync();
+                await ShowMessageAsync("Failure", $"[Failed to submit order]: {errMsg}", MessageType.Error);
             }
         }
         catch (Exception ex)
         {
-            await ShowMessageAsync("Failure",$"Error submitting order: {ex.Message}", MessageType.Error);
+            await ShowMessageAsync("Failure", $"Error submitting order: {ex.Message}", MessageType.Error);
         }
-        finally{
+        finally
+        {
             rolls.Clear();
         }
     }

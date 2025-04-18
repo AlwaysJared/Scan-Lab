@@ -61,12 +61,14 @@ namespace Libs.Repositories
 
         public async Task<Order?> GetOrder(string orderId)
         {
-            try{
+            try
+            {
                 var order = await context.Orders.FirstOrDefaultAsync(o => o.OrderId.ToLower() == orderId.ToLower());
 
                 return order;
             }
-            catch{
+            catch
+            {
                 return null;
             }
         }
@@ -227,24 +229,30 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<SystemResponse> DeleteOrder(string orderId){
-            try{
+        public async Task<SystemResponse> DeleteOrder(string orderId)
+        {
+            try
+            {
                 var dbOrder = await context.Orders.FirstOrDefaultAsync(o => o.OrderId == orderId);
 
-                if(dbOrder == null)
-                    return new SystemResponse{IsSuccess=false, Message="Order not found"};
+                if (dbOrder == null)
+                    return new SystemResponse { IsSuccess = false, Message = "Order not found" };
 
                 context.Orders.Remove(dbOrder);
 
                 await context.SaveChangesAsync();
 
-                return new SystemResponse{
+                return new SystemResponse
+                {
                     IsSuccess = true
                 };
             }
-            catch(Exception ex){
-                return new SystemResponse{
-                    IsSuccess = false, Message = ex.Message
+            catch (Exception ex)
+            {
+                return new SystemResponse
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
                 };
             }
         }

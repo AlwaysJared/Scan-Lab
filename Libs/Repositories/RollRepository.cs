@@ -35,6 +35,40 @@ namespace Libs.Repositories
                 return null;
             }
         }
+
+        public async Task<SystemResponse> AddRoll(string orderId, int rollNumber)
+        {
+            try
+            {
+                var dbOrder = await context.Orders.Where(o => o.OrderId == orderId).FirstOrDefaultAsync();
+
+                if (dbOrder == null)
+                    return new SystemResponse { IsSuccess = true, Message = $"Order ID '{orderId}' not found" };
+
+                var dupRoll = await context.Rolls.Where(r => r.RollNumber == rollNumber).FirstOrDefaultAsync();
+
+                if (dupRoll != null)
+                    return new SystemResponse { IsSuccess = false, Message = $"roll #{rollNumber} already exists" };
+
+                var newRoll = new Roll
+                {
+                    RollId = Guid.NewGuid(),
+                    RollNumber = rollNumber,
+                    OrderId = dbOrder.OrderId,
+                    Order = dbOrder,
+                };
+
+                context.Rolls.Add(newRoll);
+                await context.SaveChangesAsync();
+
+                return new SystemResponse { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse { IsSuccess = false, Message = ex.Message};
+            }
+        }
+
         public async Task<SystemResponse> ProcessRoll(Guid rollId)
         {
             try
@@ -96,13 +130,13 @@ namespace Libs.Repositories
                     rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
                         roll.Order.OrderId,
                         "Rescans",
-                        roll.RollNumber.ToString() + "-" + DateTime.Now.ToString("yyyy_MM_dd_HHmmss")
+                        roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")
                     );
                     Directory.CreateDirectory(rollFolderPath);
                 }
 
                 // Get all files in the directory
-                    string[] files = Directory.GetFiles(latestRollDir);
+                string[] files = Directory.GetFiles(latestRollDir);
 
                 var imgCount = 1;
                 // Iterate through the files and check for image extensions
@@ -142,7 +176,7 @@ namespace Libs.Repositories
 
                 }
 
-                // Delete the rolol folder
+                // Delete the roll folder
                 // awaited to ensure proper execution
                 // Directory.Delete(latestRollDir);
                 await IOHelpers.DeleteDirAsync(latestRollDir);

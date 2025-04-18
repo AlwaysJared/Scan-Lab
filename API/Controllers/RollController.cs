@@ -20,6 +20,24 @@ namespace API.Controllers
             _rollRepository = rollRepository;
         }
 
+        [HttpPost("add")]
+        public async Task<IActionResult> AddRoll(AddRollRequest req)
+        {
+            try
+            {
+                var resp = await _rollRepository.AddRoll(req.OrderId, req.RollNumber);
+
+                if (!resp.IsSuccess)
+                    return BadRequest(resp.Message);
+                    
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         [HttpPost("complete")]
         public async Task<IActionResult> ProcessRoll(CompleteRollRequest req)
         {

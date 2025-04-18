@@ -15,6 +15,10 @@ using System.Linq;
 using Libs.Enums;
 using System.Text;
 using System.ComponentModel;
+using System.Windows.Input;
+using Client.Views;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace Client.ViewModels;
 
@@ -23,6 +27,13 @@ public partial class DashboardViewModel : ViewModelBase
     private readonly HttpClient _httpClient = new();
     private readonly ApiService _apiService;
     private readonly ScannerService _scannerService;
+
+    private bool _isLoading;
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => SetProperty(ref _isLoading, value);
+    }
 
     private bool _scannerSearchChecked = true;
 
@@ -111,6 +122,7 @@ public partial class DashboardViewModel : ViewModelBase
     [RelayCommand]
     public async Task LoadOrdersAsync()
     {
+        IsLoading = true;
         try
         {
             if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
@@ -168,10 +180,58 @@ public partial class DashboardViewModel : ViewModelBase
             }
             else
             {
-                var errMsg = await response.Content.ReadAsStringAsync(); 
+                var errMsg = await response.Content.ReadAsStringAsync();
                 await UiTools.ShowMessageAsync("Error", errMsg, UiTools.MessageType.Error);
             }
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", UiTools.MessageType.Error);
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
 
+    [RelayCommand]
+    public async Task DeleteOrder(Order order)
+    {
+        try
+        {
+            if (order is not null)
+            {
+                if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
+                {
+                    await UiTools.ShowMessageAsync("Error", $"[Error]: API Address is not configured.", UiTools.MessageType.Error);
+                    return;
+                }
+
+                string apiUrl = $"{_apiService.ApiAddress}/api/Order/Delete";
+                var content = new StringContent(JsonSerializer.Serialize(
+                    new { OrderId = order.OrderId }),
+                    System.Text.Encoding.UTF8, "application/json"
+                );
+                var response = await _httpClient.PostAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    LoadOrdersAsync();
+
+                    await UiTools.ShowMessageAsync("Success",
+                        $"Order #{order.OrderId} successfully deleted",
+                        UiTools.MessageType.Success
+                    );
+                }
+                else
+                {
+                    var errMsg = await response.Content.ReadAsStringAsync();
+                    await UiTools.ShowMessageAsync("Error",
+                        $"[Error]: {errMsg}",
+                        UiTools.MessageType.Error
+                    );
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -407,48 +467,24 @@ public partial class DashboardViewModel : ViewModelBase
         _searchDelayTimer.Start();
     }
 
-    private bool IsRollButtonVisible(RollStatus rollStatus, string action){
-        try{
-            switch (action.ToLower()){
-                case "start":
-                    switch(rollStatus){
-                        case RollStatus.Created:
-                        case RollStatus.ScanningPaused:
-                            return true;
-                        default:
-                            return false;
-                    }
-                case "pause":
-                    switch (rollStatus){
-                        case RollStatus.ScanningInProgress:
-                            return true;
-                        default:
-                            return false;
-                    }
-                case "complete":
-                    switch (rollStatus){
-                        case RollStatus.ScanningInProgress:
-                        case RollStatus.ScanningPaused:
-                            return true;
-                        default:
-                            return false;
-                    }
-                case "delete":
-                    switch (rollStatus){
-                        case RollStatus.Processing:
-                        case RollStatus.Processed:
-                        case RollStatus.ScanningCompleted:
-                            return false;
-                        default:
-                            return true;
-                    }
-                default:
-                    return false;
-            }
-        }
-        catch
+    public ICommand ShowAddRollModalCommand => new RelayCommand<string>(ShowAddRollModal);
+
+    private async void ShowAddRollModal(string? orderId)
+    {
+        if (string.IsNullOrWhiteSpace(orderId)) return;
+
+        var modal = new AddRollModal(orderId);
+        var owner = (Application.Current.ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)?.MainWindow;
+        var addResp = await modal.ShowDialogWithResult(owner);
+
+        if (addResp?.Success ?? false)
         {
-            return true;
+            LoadOrdersAsync();
+
+            await UiTools.ShowMessageAsync("Success",
+                    $"Roll #{addResp.RollNumber} sucessfully added",
+                    UiTools.MessageType.Success
+            );
         }
     }
 }

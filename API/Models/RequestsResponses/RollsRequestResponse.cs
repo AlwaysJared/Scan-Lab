@@ -6,6 +6,12 @@ using Libs.Enums;
 
 namespace API.Models.RequestsResponses
 {
+    public class AddRollRequest : BaseRequest
+    {
+        public  required string OrderId { get; set; }
+        public  required int RollNumber { get; set; }
+    }
+
     public class CompleteRollRequest : BaseRequest
     {
         public Guid RollId { get; set; }
