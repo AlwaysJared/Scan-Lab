@@ -60,7 +60,7 @@ namespace API.Controllers
                     Message = resp.Message
                 });
             }
-            return Ok($"Watcher disposed for ID {id}");
+            return Ok($"Scanner sucessfully deleted");
         }
 
         [HttpGet("scanners")]

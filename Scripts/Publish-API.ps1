@@ -13,6 +13,12 @@ dotnet publish $projectPath `
     /p:IncludeNativeLibrariesForSelfExtract=true `
     -o $outputDir
 
+Remove-Item ".\..\DB\ScanLab.*"
+
+Push-Location ".."
+dotnet ef database update --project Libs --startup-project API
+Pop-Location   
+ 
 New-Item -Path $dbCopyDir -ItemType Directory
 Copy-Item ".\..\DB\ScanLab.db" -Destination $dbCopyDir
 

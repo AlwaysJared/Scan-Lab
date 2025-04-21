@@ -148,15 +148,46 @@ namespace Libs.Repositories
                     if (Array.Exists(imageExtensions, ext => ext.Equals(extension)))
                     {
                         string fileName = Path.GetFileName(file);
+                        string fileDir = Path.GetDirectoryName(file) ?? "";
 
+                        #region Image File Conversions & EXIF data setting
+                        // If file is a .bmp file, convert it to a tiff image
                         if (extension.ToLower() == ".bmp")
                         {
-                            ImageFileHelpers.BmpToTiff(file);
-                            // Replace the file extension with .tiff
-                            fileName = Path.ChangeExtension(fileName, ".tiff");
+                            var tiffConversionResp = await ImageFileHelpers.BmpToTiff(file);
+
+                            if (tiffConversionResp.IsSuccess)
+                                // fileName = tiffConversionResp.ReturnObject?.ToString() ?? fileName;
+                                fileName = Path.ChangeExtension(fileName, ".tiff");
+                            else
+                            {
+                                await UpdateRollStatus(roll, RollStatus.Processing);
+
+                                return new SystemResponse { IsSuccess = false, Message = tiffConversionResp.Message };
+                            }
                         }
 
-                        string newFileName = $"{roll.Order.CustomerInitials}-{roll.Order.OrderId}-{roll.RollNumber}-{imgCount}" + extension;
+                        // Add relevant scanner data to image exif data
+                        var exifData = new ImageFileHelpers.ExifUpdateData
+                        {
+                            ArtistName = roll.Order.Scanner.ArtistName,
+                            CameraMake = roll.Order.Scanner.Make,
+                            CameraModel = roll.Order.Scanner.Model,
+                        };
+
+                        var exifUpdate = await ImageFileHelpers.UpdateExifData(Path.Combine(fileDir, fileName), exifData);
+
+                        if (!exifUpdate.IsSuccess)
+                            return new SystemResponse
+                            {
+                                IsSuccess = false,
+                                Message = $"Error updating exif data. [ERROR]: {exifUpdate.Message}"
+                            };
+                        #endregion
+
+
+                        // string newFileName = $"{roll.Order.CustomerInitials}-{roll.Order.OrderId}-{roll.RollNumber}-{imgCount}" + extension;
+                        string newFileName = $"{roll.Order.CustomerInitials}-{roll.Order.OrderId}-{roll.RollNumber}-{imgCount}" + Path.GetExtension(fileName);
 
                         string newFilePath = Path.Combine(rollFolderPath, newFileName);
 
@@ -169,9 +200,17 @@ namespace Libs.Repositories
                         // Move/Rename the file 
                         // (awaiting to avoid Directory.Delete conflict)
                         // File.Move(file, newFilePath);
-                        await IOHelpers.MoveFileAsync(file, newFilePath);
+                        await IOHelpers.MoveFileAsync(Path.Combine(fileDir, fileName), newFilePath);
 
                         imgCount++;
+                    }
+                    else
+                    {
+                        return new SystemResponse
+                        {
+                            IsSuccess = false,
+                            Message = $"File '{file}' not recognized as a valid image file type"
+                        };
                     }
 
                 }

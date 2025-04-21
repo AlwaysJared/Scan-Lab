@@ -63,6 +63,7 @@ namespace Client.Converters
                         switch (rollStatus)
                         {
                             case RollStatus.Processed:
+                            case RollStatus.Processing:
                                 return true;
                             default:
                                 return false;
