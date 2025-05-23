@@ -9,7 +9,6 @@ dotnet publish $projectPath `
     -c Release `
     -p:PublishProfile=$publishProfile `
     --self-contained true `
-    /p:PublishSingleFile=true `
     /p:IncludeNativeLibrariesForSelfExtract=true `
     -o $outputDir
 

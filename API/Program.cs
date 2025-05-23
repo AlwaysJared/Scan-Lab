@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Libs.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("https://0.0.0.0:7624");
+builder.WebHost.UseUrls("http://0.0.0.0:3624");
 
 // Add services to the container.
 builder.Services.AddDbContext<ScanLabContext>(options =>

@@ -89,7 +89,7 @@ namespace Libs.Repositories
                     return new SystemResponse() { IsSuccess = false, Message = "Order not associated with a scanner" };
 
                 if (!Directory.Exists(roll.Order.Scanner.WatchedDir))
-                    return new SystemResponse() { IsSuccess = false, Message = "Scanner's export directory not found" };
+                    return new SystemResponse() { IsSuccess = false, Message = $"Scanner's export directory '{roll.Order.Scanner.WatchedDir}' not found" };
 
                 if (!Directory.Exists(roll.Order.Scanner.DestinationDir))
                     return new SystemResponse() { IsSuccess = false, Message = "Scanner's destination directory not found" };
