@@ -14,10 +14,12 @@ namespace API.Controllers
     public class RollController : ControllerBase
     {
         private readonly RollRepository _rollRepository;
+        private readonly OrderRepository _orderRepository;
 
-        public RollController(RollRepository rollRepository)
+        public RollController(RollRepository rollRepository, OrderRepository orderRepository)
         {
             _rollRepository = rollRepository;
+            _orderRepository = orderRepository;
         }
 
         [HttpPost("add")]
@@ -53,17 +55,25 @@ namespace API.Controllers
                 if (!resp.IsSuccess)
                     return BadRequest(resp.Message);
 
-                var processedRollsResp = _rollRepository.AllRollsProcessed(roll.Order);
+                var processedRollsResp = await _rollRepository.AllRollsProcessed(roll.Order);
 
                 if(!processedRollsResp.IsSuccess)
                     return BadRequest(processedRollsResp.Message);
                 
                 var orderComplete = (bool)processedRollsResp.ReturnObject;
 
-                return Ok(new CompleteRollResponse{
-                    Success = true,
-                    ParentOrderComplete = orderComplete
-                });
+                if (orderComplete)
+                {
+                    var completeOrderResponse = await _orderRepository.UpdateOrderStatus(roll.Order, Libs.Enums.OrderStatus.Completed);
+                    
+                    if (!completeOrderResponse.IsSuccess)
+                        return BadRequest($"[ERROR]: Error marking order as completed. {Environment.NewLine} {completeOrderResponse.Message}");
+                }
+                return Ok(new CompleteRollResponse
+                    {
+                        Success = true,
+                        ParentOrderComplete = orderComplete
+                    });
             }
             catch (ArgumentException ex)
             {

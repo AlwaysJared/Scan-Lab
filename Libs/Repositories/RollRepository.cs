@@ -65,7 +65,7 @@ namespace Libs.Repositories
             }
             catch (Exception ex)
             {
-                return new SystemResponse { IsSuccess = false, Message = ex.Message};
+                return new SystemResponse { IsSuccess = false, Message = ex.Message };
             }
         }
 
@@ -76,6 +76,7 @@ namespace Libs.Repositories
                 var roll = await context.Rolls
                     .Include(r => r.Order)
                     .Include(r => r.Order.Scanner)
+                    .Include(r => r.Order.Rolls)
                     .Where(r => r.RollId == rollId)
                     .FirstOrDefaultAsync();
 
@@ -89,13 +90,13 @@ namespace Libs.Repositories
                     return new SystemResponse() { IsSuccess = false, Message = "Order not associated with a scanner" };
 
                 if (!Directory.Exists(roll.Order.Scanner.WatchedDir))
-                    return new SystemResponse() { IsSuccess = false, Message = $"Scanner's export directory '{roll.Order.Scanner.WatchedDir}' not found" };
+                    return new SystemResponse() { IsSuccess = false, Message = $"Scanner's export directory ('{roll.Order.Scanner.WatchedDir}') not found" };
 
                 if (!Directory.Exists(roll.Order.Scanner.DestinationDir))
-                    return new SystemResponse() { IsSuccess = false, Message = "Scanner's destination directory not found" };
+                    return new SystemResponse() { IsSuccess = false, Message = $"Scanner's destination directory ('{roll.Order.Scanner.DestinationDir}') not found" };
 
                 if (Directory.GetDirectories(roll.Order.Scanner.WatchedDir).ToList().Count == 0)
-                    return new SystemResponse() { IsSuccess = false, Message = "No rolls found in scanner's watched directory" };
+                    return new SystemResponse() { IsSuccess = false, Message = $"No rolls found in scanner's watched directory ('{roll.Order.Scanner.WatchedDir}')" };
 
                 // Attempt to update roll's status to 'in progress'
                 var statusResp = await UpdateRollStatus(roll, RollStatus.Processing);
@@ -116,7 +117,41 @@ namespace Libs.Repositories
 
                 var latestRollDir = rollDirsSorted.Select(dir => dir.Path).ToList()[0];
 
-                string rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir, roll.Order.OrderId, roll.RollNumber.ToString());
+                /*
+                    Looks for the latest interval directory within the scanner's destination directory.
+
+                    [NOTE]: This logic is currently desgined are the static requirement of each scanner's "destination" folder
+                        needing a "weekly" folder that is created every Monday. Therefore, that folder needs to be created and
+                        labeled w/ the date of the Monday of that week (formated as MM-DD-YY)
+                */
+                #region Interval folder retrieval 
+                string targetIntervalFolder = "";
+                var targetMonday = DateTimeHelpers.GetMondayOfWeek(roll.Order.DateCreated ?? DateTime.Today);
+
+                // //get monday of earliest "processed" roll in order
+                // var earliestProcessedRoll = roll.Order.Rolls
+                //     .Where(r => r.Status == RollStatus.Processed)
+                //     .OrderBy(r => r.DateUpdated)
+                //     .FirstOrDefault();
+
+                // /*  
+                //     determine if targeted interval folder needs to be updated (if there is a roll that was processed under
+                //     another interval folder) 
+                // */
+                // if (earliestProcessedRoll != null)
+                //     targetMonday = DateTimeHelpers.GetMondayOfWeek(earliestProcessedRoll.DateUpdated.Value);
+
+                if (!targetMonday.HasValue)
+                    return new SystemResponse() { IsSuccess = false, Message = "Error getting date for interval folder" };
+
+                targetIntervalFolder = targetMonday.Value.ToString("MM-dd-yy");
+                #endregion
+
+                string rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
+                    !String.IsNullOrWhiteSpace(targetIntervalFolder) ? targetIntervalFolder : String.Empty,
+                    roll.Order.OrderId,
+                    roll.RollNumber.ToString()
+                );
 
                 bool destFolderExists = false;
 
@@ -346,11 +381,30 @@ namespace Libs.Repositories
                 };
             }
         }
-        public SystemResponse AllRollsProcessed(Order order)
+        public async Task<SystemResponse> AllRollsProcessed(Order order)
         {
             try
             {
-                var unprocessedRolls = order.Rolls.Where(r => r.Status < RollStatus.Processed).ToList();
+                if (order == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "No order passed in to be checked for completion"
+                    };
+
+                var fullOrder = await context.Orders
+                    .Include(o => o.Rolls)
+                    .Where(o => o.OrderId == order.OrderId)
+                    .FirstOrDefaultAsync();
+
+                if (fullOrder == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "No order passed in to be checked for completion"
+                    };
+
+                var unprocessedRolls = fullOrder.Rolls.Where(r => r.Status < RollStatus.Processed).ToList();
 
                 return new SystemResponse
                 {

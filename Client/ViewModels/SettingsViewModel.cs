@@ -135,7 +135,7 @@ public partial class SettingsViewModel : ViewModelBase
                 // ✅ Ensure selected scanner is valid
                 if (_scannerService.SelectedScanner == null || !Scanners.Where(s => s.Id == _scannerService.SelectedScanner.Id).Any())
                 {
-                    if(refScanner?.Id != new Guid())
+                    if (refScanner?.Id != new Guid())
                     {
                         SelectedScanner = Scanners.Where(s => s.Id == refScanner.Id).FirstOrDefault();
                         OnPropertyChanged(nameof(SelectedScanner));
@@ -145,7 +145,7 @@ public partial class SettingsViewModel : ViewModelBase
                         _scannerService.SelectedScanner = Scanners.FirstOrDefault();
                         SelectedScanner = Scanners.FirstOrDefault();
                     }
-                    
+
                     SaveSelectedScanner();
                 }
                 else
@@ -181,101 +181,133 @@ public partial class SettingsViewModel : ViewModelBase
     }
     private async Task SelectFolderAsync(string propertyName)
     {
-        if (App.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-            return;
-
-        var window = desktop.MainWindow;
-        var storageProvider = window?.StorageProvider;
-        if (storageProvider is null) return;
-
-        var titleFolder = "";
-        switch (propertyName)
+        try
         {
-            case "WatchedDir":
-                titleFolder = "Watched";
-                break;
-            case "DestinationDir":
-                titleFolder = "Destination";
-                break;
-            case "ArchiveDir":
-                titleFolder = "Archive";
-                break;
-        }
+            if (App.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                return;
 
-        var result = await storageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
-        {
-            Title = $"Select {titleFolder} Folder",
-            AllowMultiple = false
-        });
+            var window = desktop.MainWindow;
+            var storageProvider = window?.StorageProvider;
+            if (storageProvider is null) return;
 
-
-        if (SelectedScanner != null && result?.Count > 0)
-        {
-            string selectedPath = result[0].Path.LocalPath;
-
+            var titleFolder = "";
+            var startDir = "";
             switch (propertyName)
             {
                 case "WatchedDir":
-                    SelectedScanner.WatchedDir = selectedPath;
-                    WatchedFolderPath = selectedPath;
-                    OnPropertyChanged(nameof(SelectedScanner));
+                    titleFolder = "Watched";
+                    startDir = WatchedFolderPath;
                     break;
                 case "DestinationDir":
-                    SelectedScanner.DestinationDir = selectedPath;
-                    DestFolderPath = selectedPath;
-                    OnPropertyChanged(nameof(SelectedScanner));
+                    titleFolder = "Destination";
+                    startDir = DestFolderPath;
                     break;
                 case "ArchiveDir":
-                    SelectedScanner.ArchiveDir = selectedPath;
-                    ArchiveFolderPath = selectedPath;
-                    OnPropertyChanged(nameof(SelectedScanner));
+                    titleFolder = "Archive";
+                    startDir = ArchiveFolderPath;
                     break;
             }
+
+            var options = new FolderPickerOpenOptions
+            {
+                Title = $"Select {titleFolder} Folder",
+                AllowMultiple = false,
+                SuggestedStartLocation = await storageProvider.TryGetFolderFromPathAsync(startDir)
+            };
+
+            var result = await storageProvider.OpenFolderPickerAsync(options);
+
+            if (SelectedScanner != null && result?.Count > 0)
+            {
+                string selectedPath = result[0].Path.LocalPath;
+
+                switch (propertyName)
+                {
+                    case "WatchedDir":
+                        SelectedScanner.WatchedDir = selectedPath;
+                        WatchedFolderPath = selectedPath;
+                        OnPropertyChanged(nameof(SelectedScanner));
+                        break;
+                    case "DestinationDir":
+                        SelectedScanner.DestinationDir = selectedPath;
+                        DestFolderPath = selectedPath;
+                        OnPropertyChanged(nameof(SelectedScanner));
+                        break;
+                    case "ArchiveDir":
+                        SelectedScanner.ArchiveDir = selectedPath;
+                        ArchiveFolderPath = selectedPath;
+                        OnPropertyChanged(nameof(SelectedScanner));
+                        break;
+                }
+            }
+
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", ex.Message, MessageType.Error);
         }
     }
+
     [RelayCommand]
     private async Task UpdateScanner()
     {
-        var apiUrl = $"{_apiService.ApiAddress}/api/Scanner/update";
-
-        var updateScannerRequest = new
+        try
         {
-            Scnr = SelectedScanner
-        };
+            var apiUrl = $"{_apiService.ApiAddress}/api/Scanner/update";
 
-        // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
-        string jsonRequest = JsonSerializer.Serialize(updateScannerRequest);
-        var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+            var updateScannerRequest = new
+            {
+                Scnr = SelectedScanner
+            };
 
-        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
-        // Check if the request was successful
-        if (response.IsSuccessStatusCode)
-        {
-            await UiTools.ShowMessageAsync("Success", "Scanner successfully updated", MessageType.Success);
-            await LoadScannersAsync();
+            // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+            string jsonRequest = JsonSerializer.Serialize(updateScannerRequest);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            // Check if the request was successful
+            if (response.IsSuccessStatusCode)
+            {
+                await UiTools.ShowMessageAsync("Success", "Scanner successfully updated", MessageType.Success);
+                await LoadScannersAsync();
+            }
+            else
+            {
+                var errMsg = await response.Content.ReadAsStringAsync();
+                await UiTools.ShowMessageAsync("Error", $"[Error]: {errMsg}", MessageType.Error);
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var errMsg = await response.Content.ReadAsStringAsync(); 
-            await UiTools.ShowMessageAsync("Error", $"[Error]: {errMsg}", MessageType.Error);
+
+            await UiTools.ShowMessageAsync("Error", ex.Message, MessageType.Error);
         }
+
     }
+
     [RelayCommand]
-    private void CancelUpdateScanner()
+    private async Task CancelUpdateScanner()
     {
-        
-        SelectedScanner.Id = refScanner?.Id ?? new Guid();
-        SelectedScanner.Make = refScanner?.Make ?? "";
-        SelectedScanner.Model = refScanner?.Model ?? "";
-        SelectedScanner.ScannerName = refScanner?.ScannerName ?? "";
-        SelectedScanner.ArtistName = refScanner?.ArtistName ?? "";
-        SelectedScanner.WatchedDir = refScanner?.WatchedDir ?? "";
-        SelectedScanner.DestinationDir = refScanner?.DestinationDir ?? "";
-        SelectedScanner.ArchiveDir = refScanner?.ArchiveDir ?? "";
-        WatchedFolderPath = refScanner.WatchedDir;
-        DestFolderPath = refScanner.DestinationDir;
-        ArchiveFolderPath = refScanner.ArchiveDir;
-        OnPropertyChanged(nameof(SelectedScanner));
+        try
+        {
+            SelectedScanner.Id = refScanner?.Id ?? new Guid();
+            SelectedScanner.Make = refScanner?.Make ?? "";
+            SelectedScanner.Model = refScanner?.Model ?? "";
+            SelectedScanner.ScannerName = refScanner?.ScannerName ?? "";
+            SelectedScanner.ArtistName = refScanner?.ArtistName ?? "";
+            SelectedScanner.WatchedDir = refScanner?.WatchedDir ?? "";
+            SelectedScanner.DestinationDir = refScanner?.DestinationDir ?? "";
+            SelectedScanner.ArchiveDir = refScanner?.ArchiveDir ?? "";
+            WatchedFolderPath = refScanner.WatchedDir;
+            DestFolderPath = refScanner.DestinationDir;
+            ArchiveFolderPath = refScanner.ArchiveDir;
+            OnPropertyChanged(nameof(SelectedScanner));
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", ex.Message, MessageType.Error);
+        }
+
     }
     #endregion
 
@@ -298,7 +330,7 @@ public partial class SettingsViewModel : ViewModelBase
             }
             else
             {
-                var errMsg = await response.Content.ReadAsStringAsync(); 
+                var errMsg = await response.Content.ReadAsStringAsync();
                 await UiTools.ShowMessageAsync("Error", $"[API test failed]: {errMsg}", UiTools.MessageType.Error);
             }
         }

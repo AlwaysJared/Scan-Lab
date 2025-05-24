@@ -1,6 +1,7 @@
 using Libs.Classes;
 using Libs.Data.Context;
 using Libs.Data.Models;
+using Libs.Helpers;
 using Libs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -94,12 +95,27 @@ namespace Libs.Repositories
                     return new SystemResponse{IsSuccess = false, Message = "Scanner not found"}; 
                 }
 
+
+                var compatibleWatchedDir = scanner.WatchedDir;
+                var compatibleDestDir = scanner.DestinationDir;
+                var compatibleArchiveDir = scanner.ArchiveDir;
+
+
+                if(!Directory.Exists(compatibleWatchedDir))
+                    compatibleWatchedDir = IOHelpers.NetworkPathConverter.ConvertToUncPath(scanner.WatchedDir);
+                
+                if(!Directory.Exists(compatibleDestDir))
+                    compatibleDestDir = IOHelpers.NetworkPathConverter.ConvertToUncPath(scanner.DestinationDir);
+
+                if(!Directory.Exists(compatibleArchiveDir))
+                    compatibleArchiveDir = IOHelpers.NetworkPathConverter.ConvertToUncPath(scanner.ArchiveDir);
+
                 dbScnr.ScannerName = scanner.ScannerName;
                 dbScnr.Make = scanner.Make;
                 dbScnr.Model = scanner.Model;
-                dbScnr.WatchedDir = scanner.WatchedDir;
-                dbScnr.DestinationDir = scanner.DestinationDir;
-                dbScnr.ArchiveDir = scanner.ArchiveDir;
+                dbScnr.WatchedDir = compatibleWatchedDir;
+                dbScnr.DestinationDir = compatibleDestDir;
+                dbScnr.ArchiveDir = compatibleArchiveDir;
                 dbScnr.ArtistName = scanner.ArtistName;
 
                 await context.SaveChangesAsync();
