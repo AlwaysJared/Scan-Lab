@@ -98,7 +98,7 @@ namespace API.Controllers
         {
             try
             {
-                var orders = await _orderRepository.GetOrders(req.search, req.orderStatus, req.scannerId);
+                var orders = await _orderRepository.GetOrders(req.search, req.orderStatus, req.scannerId, req.fetchCompletedOrders);
                 var options = new JsonSerializerOptions
                 {
                     ReferenceHandler = ReferenceHandler.Preserve,

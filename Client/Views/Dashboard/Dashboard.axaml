@@ -47,6 +47,7 @@
                     </ComboBox.ItemTemplate>
                 </ComboBox>
                 <CheckBox Content="Only orders for this scanner" IsChecked="{Binding ScannerSearchChecked}" />
+                <CheckBox Content="Show completed orders" IsChecked="{Binding CompletedOrdersChecked}" />
             </StackPanel>
         </Border>
 

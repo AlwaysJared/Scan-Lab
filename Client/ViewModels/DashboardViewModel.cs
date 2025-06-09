@@ -35,6 +35,21 @@ public partial class DashboardViewModel : ViewModelBase
         set => SetProperty(ref _isLoading, value);
     }
 
+    private bool _completedOrdersChecked = false;
+    public bool CompletedOrdersChecked
+    {
+        get => _completedOrdersChecked;
+        set
+        {
+            if (_completedOrdersChecked != value)
+            {
+                _completedOrdersChecked = value;
+                OnPropertyChanged(nameof(CompletedOrdersChecked));
+                RestartSearchDelay();
+            }
+        }
+    }
+
     private bool _scannerSearchChecked = true;
 
     public bool ScannerSearchChecked
@@ -141,6 +156,7 @@ public partial class DashboardViewModel : ViewModelBase
                 search = SearchQuery,
                 orderStatus = statusFilter,
                 scannerId = _scannerSearchChecked ? (Guid?)_scannerService.SelectedScanner.Id : null
+                fetchCompletedOrders = 
             };
 
 

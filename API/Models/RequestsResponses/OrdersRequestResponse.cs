@@ -33,6 +33,7 @@ namespace API.Models.RequestsResponses
         public string? search { get; set; }
         public OrderStatus? orderStatus { get; set; }
         public Guid? scannerId { get; set; }
+        public bool fetchCompletedOrders { get; set; } = false;
     }
 
     public class DeleteOrderRequest : BaseRequest

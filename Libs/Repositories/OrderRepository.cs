@@ -73,7 +73,7 @@ namespace Libs.Repositories
             }
         }
 
-        public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status, Guid? scannerId)
+        public async Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status, Guid? scannerId, bool fetchCompletedOrders = false)
         {
             var orders = await context.Orders
             .Include(o => o.Rolls)
@@ -87,6 +87,12 @@ namespace Libs.Repositories
             .Where(o => status.HasValue ? (o.Status == status) : true)
             .Where(o => scannerId.HasValue ? (o.Scanner.Id == scannerId) : true)
             .ToListAsync();
+
+            if(!fetchCompletedOrders)
+                orders.RemoveAll(o => o.Status == OrderStatus.Completed);
+            
+            
+
             return orders;
         }
 

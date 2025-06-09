@@ -6,7 +6,7 @@ namespace Libs.Interfaces
 {
     public interface IOrderRepository : IDisposable
     {
-        Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status, Guid? scannerId);
+        Task<IEnumerable<Order>> GetOrders(string? search, OrderStatus? status, Guid? scannerId, bool fetchCompletedOrders);
         Task<Order?> GetOrder(string orderId);
         Task<SystemResponse> AddOrder(Order order);
         Task<SystemResponse> UpdateOrder(Order order);
