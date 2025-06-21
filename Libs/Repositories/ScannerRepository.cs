@@ -101,14 +101,32 @@ namespace Libs.Repositories
                 var compatibleArchiveDir = scanner.ArchiveDir;
 
 
-                if(!Directory.Exists(compatibleWatchedDir))
-                    compatibleWatchedDir = IOHelpers.NetworkPathConverter.ConvertToUncPath(scanner.WatchedDir);
-                
-                if(!Directory.Exists(compatibleDestDir))
-                    compatibleDestDir = IOHelpers.NetworkPathConverter.ConvertToUncPath(scanner.DestinationDir);
+                if (!Directory.Exists(compatibleWatchedDir))
+                {
+                    compatibleWatchedDir = IOHelpers.NetworkPathConverter.ResolvePath(scanner.WatchedDir);
 
-                if(!Directory.Exists(compatibleArchiveDir))
-                    compatibleArchiveDir = IOHelpers.NetworkPathConverter.ConvertToUncPath(scanner.ArchiveDir);
+                    if (compatibleWatchedDir == null)
+                        return new SystemResponse { IsSuccess = false, Message = $"Could not find path {scanner.WatchedDir} on server" };
+                }
+
+
+                if (!Directory.Exists(compatibleDestDir))
+                {
+                    compatibleDestDir = IOHelpers.NetworkPathConverter.ResolvePath(scanner.DestinationDir);
+                    
+                    if (compatibleDestDir == null)
+                        return new SystemResponse { IsSuccess = false, Message = $"Could not find path {scanner.DestinationDir} on server" };
+                }
+
+
+                if (!Directory.Exists(compatibleArchiveDir))
+                {
+                    compatibleArchiveDir = IOHelpers.NetworkPathConverter.ResolvePath(scanner.ArchiveDir);
+                    
+                    if (compatibleArchiveDir == null)
+                        return new SystemResponse { IsSuccess = false, Message = $"Could not find path {scanner.ArchiveDir} on server" };
+                }
+                    
 
                 dbScnr.ScannerName = scanner.ScannerName;
                 dbScnr.Make = scanner.Make;

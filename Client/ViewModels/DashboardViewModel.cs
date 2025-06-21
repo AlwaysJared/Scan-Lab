@@ -19,6 +19,9 @@ using System.Windows.Input;
 using Client.Views;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using static Client.Tools.UiTools;
+using System.IO;
+using System.Diagnostics;
 
 namespace Client.ViewModels;
 
@@ -155,8 +158,8 @@ public partial class DashboardViewModel : ViewModelBase
             {
                 search = SearchQuery,
                 orderStatus = statusFilter,
-                scannerId = _scannerSearchChecked ? (Guid?)_scannerService.SelectedScanner.Id : null
-                fetchCompletedOrders = 
+                scannerId = _scannerSearchChecked ? (Guid?)_scannerService.SelectedScanner.Id : null,
+                fetchCompletedOrders = _completedOrdersChecked
             };
 
 
@@ -476,6 +479,50 @@ public partial class DashboardViewModel : ViewModelBase
             await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", UiTools.MessageType.Error);
         }
     }
+
+    [RelayCommand]
+    public async Task OpenOrderFolder(string orderPath)
+    {
+        try
+        {
+            string pathToOpen;
+
+            if (!string.IsNullOrWhiteSpace(orderPath) && Directory.Exists(orderPath))
+            {
+                pathToOpen = orderPath;
+            }
+            else
+            {
+                await UiTools.ShowMessageAsync("Path Not Found",
+                    string.IsNullOrWhiteSpace(orderPath) ? "Path not provided" : $"Path {orderPath} not found.",
+                    MessageType.Info);
+                // Fallback to a default known-good directory
+                // Cross-platform default (Documents folder)
+                pathToOpen = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = pathToOpen,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                // Optional: log or show error message
+                Debug.WriteLine($"Failed to open folder: {ex.Message}");
+            }
+
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", ex.Message, MessageType.Error);
+        }
+    }
+
 
     private void RestartSearchDelay()
     {

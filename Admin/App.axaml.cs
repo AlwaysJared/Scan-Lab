@@ -29,7 +29,7 @@ public partial class App : Application
             //Demo functionality (SHOULD BE REMOVED IN V1 RELEASE)
             // Set expiration date and time (UTC)
 
-            var expirationDate = new DateTime(2025, 6, 31, 2, 0, 0, DateTimeKind.Utc);
+            var expirationDate = new DateTime(2025, 6, 30, 2, 0, 0, DateTimeKind.Utc);
             var currentDate = DateTime.UtcNow;
 
             if (currentDate > expirationDate)

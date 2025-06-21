@@ -30,11 +30,12 @@
                 Margin="5"
                 Orientation="Horizontal"
                 Spacing="10">
+                <!--  Text search for orders  -->
                 <TextBox
                     Width="200"
                     Text="{Binding SearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Watermark="Search orders..." />
-
+                <!--  Status Filter  -->
                 <ComboBox
                     Width="150"
                     DockPanel.Dock="Left"
@@ -46,11 +47,14 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                <!--  Limit search to just the selected scanner profile (checked by default)  -->
                 <CheckBox Content="Only orders for this scanner" IsChecked="{Binding ScannerSearchChecked}" />
+                <!--  Show completed orders (unchecked by default)  -->
                 <CheckBox Content="Show completed orders" IsChecked="{Binding CompletedOrdersChecked}" />
             </StackPanel>
         </Border>
 
+        <!--  Orders table  -->
         <DataGrid
             Grid.Row="1"
             Margin="10"
@@ -63,16 +67,39 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding OrderId}" Header="Order ID" />
-                <DataGridTextColumn Binding="{Binding DateCreated}" Header="Created" />
-                <DataGridTextColumn Binding="{Binding DateUpdated}" Header="Updated" />
+                <!-- <DataGridTextColumn Binding="{Binding DateCreated, StringFormat='MMM d, yyyy, hh:mm tt'}" Header="Created" /> -->
+                <DataGridTemplateColumn Header="Created" SortMemberPath="DateCreated">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateCreated" />
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <!-- <DataGridTextColumn Binding="{Binding DateUpdated, StringFormat='MMM d, yyyy, hh:mm tt'}" Header="Updated" /> -->
+                <DataGridTemplateColumn Header="Updated" SortMemberPath="DateUpdated">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateUpdated" />
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Binding="{Binding Customer.FirstName}" Header="Customer" />
                 <DataGridTextColumn Binding="{Binding Scanner.ScannerName}" Header="Scanner" />
                 <DataGridTextColumn Binding="{Binding Status}" Header="Status" />
+
                 <DataGridTemplateColumn Width="Auto" Header="Actions">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" Spacing="5">
-                                <!--  Delete Roll  -->
+                                <!--  Delete Order  -->
                                 <Button
                                     Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).DeleteOrderCommand}"
                                     CommandParameter="{Binding}"
@@ -81,6 +108,16 @@
                                         Width="16"
                                         Height="16"
                                         Source="{SvgImage avares://Client/Assets/trash.svg}" />
+                                </Button>
+                                <!--  Open Order Folder  -->
+                                <Button
+                                    Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).OpenOrderFolderCommand}"
+                                    CommandParameter="{Binding Scanner.WatchedDir}"
+                                    ToolTip.Tip="Open Order Folder">
+                                    <Image
+                                        Width="16"
+                                        Height="16"
+                                        Source="{SvgImage avares://Client/Assets/folder-open.svg}" />
                                 </Button>
                             </StackPanel>
                         </DataTemplate>
@@ -106,14 +143,36 @@
                                         Binding="{Binding RollNumber}"
                                         Header="Roll #"
                                         IsReadOnly="True" />
-                                    <DataGridTextColumn
+                                    <!-- <DataGridTextColumn
                                         Binding="{Binding DateCreated}"
                                         Header="Created"
-                                        IsReadOnly="True" />
-                                    <DataGridTextColumn
-                                        Binding="{Binding DateUpdated}"
+                                        IsReadOnly="True" />-->
+                                    <DataGridTemplateColumn Header="Created" SortMemberPath="DateCreated">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateCreated" />
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <!-- <DataGridTextColumn
+                                        Binding="{Binding DateUpdated, StringFormat='MMM d, yyyy, hh:mm tt'}"
                                         Header="Updated"
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True" />-->
+                                    <DataGridTemplateColumn Header="Updated" SortMemberPath="DateUpdated">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock.Text>
+                                                        <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateUpdated" />
+                                                    </TextBlock.Text>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTextColumn
                                         Binding="{Binding Status}"
                                         Header="Status"
@@ -230,7 +289,7 @@
                 </DataTemplate>
             </DataGrid.RowDetailsTemplate>
         </DataGrid>
-    
+
         <!--  Loading Layer  -->
         <Border
             Grid.Row="2"

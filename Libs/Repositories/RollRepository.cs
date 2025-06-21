@@ -357,9 +357,10 @@ namespace Libs.Repositories
                     dbRoll.Order.Status = OrderStatus.Processing;
                 }
 
-                if (status == RollStatus.ScanningPaused)
+                if (status == RollStatus.ScanningPaused || status == RollStatus.Created)
                 {
-                    dbRoll.Order.Status = OrderStatus.Created;
+                    if(dbRoll.Order.Status != OrderStatus.Processing)
+                        dbRoll.Order.Status = OrderStatus.Created;
                 }
 
                 dbRoll.Status = status;
