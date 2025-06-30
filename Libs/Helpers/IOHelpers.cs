@@ -32,7 +32,9 @@ namespace Libs.Helpers
                 if (string.IsNullOrWhiteSpace(inputPath))
                     return null;
 
-                inputPath = inputPath.Trim();
+                // inputPath = inputPath.Trim();
+                // Decode percent-encoded characters like %20, %2F
+                inputPath = Uri.UnescapeDataString(inputPath.Trim());
 
                 if (IsValidPath(inputPath, out var resolved)) return resolved;
                 if (TryWindowsUncConversions(inputPath, out resolved)) return resolved;
