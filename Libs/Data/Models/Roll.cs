@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Libs.Data.Models
 {
-    [Index(nameof(RollNumber), IsUnique = true)]
+    // [Index(nameof(RollNumber), IsUnique = true)]
     public class Roll
     {
         [Key]
@@ -20,7 +20,7 @@ namespace Libs.Data.Models
         public string? OrderId { get; set; }
         public Order? Order { get; set; }
         public RollStatus Status { get; set; } = RollStatus.Created;
-        public DateTime? DateCreated { get; set; } = DateTime.Now;
+        public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
         public DateTime? DateUpdated { get; set; }
     }
 }

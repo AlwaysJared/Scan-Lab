@@ -40,15 +40,17 @@ namespace Libs.Repositories
         {
             try
             {
-                var dbOrder = await context.Orders.Where(o => o.OrderId == orderId).FirstOrDefaultAsync();
+                var dbOrder = await context.Orders
+                    .Include(o => o.Rolls)
+                    .Where(o => o.OrderId == orderId).FirstOrDefaultAsync();
 
                 if (dbOrder == null)
                     return new SystemResponse { IsSuccess = true, Message = $"Order ID '{orderId}' not found" };
 
-                var dupRoll = await context.Rolls.Where(r => r.RollNumber == rollNumber).FirstOrDefaultAsync();
+                var dupRoll = dbOrder.Rolls.Where(r => r.RollNumber == rollNumber).FirstOrDefault();
 
                 if (dupRoll != null)
-                    return new SystemResponse { IsSuccess = false, Message = $"roll #{rollNumber} already exists" };
+                    return new SystemResponse { IsSuccess = false, Message = $"roll #{rollNumber} already exists in order '{dbOrder.OrderId}'" };
 
                 var newRoll = new Roll
                 {
@@ -110,9 +112,11 @@ namespace Libs.Repositories
                 var rollDirsSorted = Directory.GetDirectories(roll.Order.Scanner.WatchedDir).Select(dir => new
                 {
                     Path = dir,
-                    CreationDate = Directory.GetCreationTime(dir)
+                    CreationDate = Directory.GetCreationTime(dir),
+                    WriteTime = Directory.GetLastWriteTimeUtc(dir)
                 })
-                .OrderBy(dir => dir.CreationDate) // Sort by creation date
+                // .OrderBy(dir => dir.CreationDate) // Sort by creation date
+                .OrderByDescending(dir => dir.WriteTime) // Sort by creation date
                 .ToList();
 
                 var latestRollDir = rollDirsSorted.Select(dir => dir.Path).ToList()[0];
@@ -364,7 +368,7 @@ namespace Libs.Repositories
                 }
 
                 dbRoll.Status = status;
-                dbRoll.DateUpdated = DateTime.Now;
+                dbRoll.DateUpdated = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();
 

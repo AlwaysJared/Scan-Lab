@@ -219,7 +219,19 @@ public partial class SettingsViewModel : ViewModelBase
 
             if (SelectedScanner != null && result?.Count > 0)
             {
-                string selectedPath = result[0].Path.LocalPath;
+                // string selectedPath = result[0].Path.LocalPath;
+                var folderUri = result[0].Path;
+
+                string selectedPath;
+                if (folderUri.IsAbsoluteUri)
+                {
+                    selectedPath = folderUri.LocalPath;
+                }
+                else
+                {
+                    // Fall back to .ToString() for relative or UNC paths
+                    selectedPath = folderUri.ToString();
+                }
 
                 switch (propertyName)
                 {

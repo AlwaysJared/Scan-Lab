@@ -12,7 +12,7 @@ namespace Libs.Data.Models
         public OrderStatus Status { get; set; } = OrderStatus.Created;
         public List<Roll>? Rolls{ get; set; }
         public Scanner? Scanner{ get; set; }
-        public DateTime? DateCreated { get; set; } = DateTime.Now;
+        public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
         public DateTime? DateUpdated { get; set; }
     }
 }

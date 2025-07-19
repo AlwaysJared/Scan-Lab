@@ -7,8 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3624");
 
 // Add services to the container.
+// REMOVED AFTER MIGRATION TO POSTGRESQL INSTANCE
+// builder.Services.AddDbContext<ScanLabContext>(options =>
+//             options.UseSqlite($"Data Source=.\\..\\DB\\ScanLab.db"));
 builder.Services.AddDbContext<ScanLabContext>(options =>
-            options.UseSqlite($"Data Source=.\\..\\DB\\ScanLab.db"));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("ScanLabDBConnection")));
+
 builder.Services.AddSingleton<FileSystemWatcherService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ScannerRepository>();

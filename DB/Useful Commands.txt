@@ -1,2 +1,0 @@
-dotnet ef migrations add init --project Libs --startup-project API
-dotnet ef database update --project Libs --startup-project API

@@ -178,8 +178,20 @@ namespace Admin.ViewModels
 
                 if (result?.Count > 0)
                 {
-                    string selectedPath = result[0].Path.LocalPath;
+                    // string selectedPath = result[0].Path.LocalPath;
+                    var folderUri = result[0].Path;
 
+                    string selectedPath;
+                    if (folderUri.IsAbsoluteUri)
+                    {
+                        selectedPath = folderUri.LocalPath;
+                    }
+                    else
+                    {
+                        // Fall back to .ToString() for relative or UNC paths
+                        selectedPath = folderUri.ToString();
+                    }
+                    
                     switch (propertyName)
                     {
                         case "WatchedDir":
@@ -196,7 +208,7 @@ namespace Admin.ViewModels
             }
             catch (Exception ex)
             {
-                await UiTools.ShowMessageAsync("Error", $"Error fetching scanners: {ex.Message}", MessageType.Error);
+                await UiTools.ShowMessageAsync("Error", $"Error selecting directory: {ex.Message}", MessageType.Error);
             }
 
         }

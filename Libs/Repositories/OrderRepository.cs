@@ -28,7 +28,7 @@ namespace Libs.Repositories
                     .FirstOrDefaultAsync(o => o.OrderId.ToLower() == req.OrderId.ToLower());
 
                 if (dupeCheck != null)
-                    return new SystemResponse { IsSuccess = false, Message = "Order ID alread exists" };
+                    return new SystemResponse { IsSuccess = false, Message = $"Order ID '{req.OrderId}' alread exists" };
 
                 var newOrder = new Order
                 {
@@ -205,7 +205,7 @@ namespace Libs.Repositories
                 }
 
                 dbOrder.Status = status;
-                dbOrder.DateUpdated = DateTime.Now;
+                dbOrder.DateUpdated = DateTime.UtcNow;
 
                 await context.SaveChangesAsync();
 

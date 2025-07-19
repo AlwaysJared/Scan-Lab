@@ -28,16 +28,16 @@ public class App : Application
             //Demo functionality (SHOULD BE REMOVED IN V1 RELEASE)
             // Set expiration date and time (UTC)
             
-            var expirationDate = new DateTime(2025, 6, 30, 2, 0, 0, DateTimeKind.Utc);
-            var currentDate = DateTime.UtcNow;
+            // var expirationDate = new DateTime(2025, 7, 30, 2, 0, 0, DateTimeKind.Utc);
+            // var currentDate = DateTime.UtcNow;
 
-            if (currentDate > expirationDate)
-            {
-                desktop.MainWindow = new Window { Height = 0, Width = 0 };
-                await UiTools.ShowMessageAsync("Demo Expired", "This demo version of the Scan Lab - Client app is expired. Please contact the developer to receive the full version", UiTools.MessageType.Error);
-                Environment.Exit(0);
-                return;
-            }
+            // if (currentDate > expirationDate)
+            // {
+            //     desktop.MainWindow = new Window { Height = 0, Width = 0 };
+            //     await UiTools.ShowMessageAsync("Demo Expired", "This demo version of the Scan Lab - Client app is expired. Please contact the developer to receive the full version", UiTools.MessageType.Error);
+            //     Environment.Exit(0);
+            //     return;
+            // }
 
             desktop.MainWindow = new MainWindow
             {
