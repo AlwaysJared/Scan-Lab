@@ -2,7 +2,7 @@
 $projectPath = ".\..\API\API.csproj"
 $publishProfile = "Production"
 $outputDir = ".\..\API\Publish\API"
-$dbCopyDir = ".\..\API\Publish\DB\"
+# $dbCopyDir = ".\..\API\Publish\DB\"
 
 # Run the publish command
 dotnet publish $projectPath `
@@ -12,13 +12,13 @@ dotnet publish $projectPath `
     /p:IncludeNativeLibrariesForSelfExtract=true `
     -o $outputDir
 
-Remove-Item ".\..\DB\ScanLab.*"
+# Remove-Item ".\..\DB\ScanLab.*"
 
 Push-Location ".."
 dotnet ef database update --project Libs --startup-project API
 Pop-Location   
  
-New-Item -Path $dbCopyDir -ItemType Directory
-Copy-Item ".\..\DB\ScanLab.db" -Destination $dbCopyDir
+# New-Item -Path $dbCopyDir -ItemType Directory
+# Copy-Item ".\..\DB\ScanLab.db" -Destination $dbCopyDir
 
 Write-Host "Publish completed successfully."
