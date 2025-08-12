@@ -9,6 +9,8 @@ using Libs.Enums;
 using API.Models.RequestsResponses;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Serilog.Context;
+using Serilog;
 
 namespace API.Controllers
 {
@@ -18,11 +20,21 @@ namespace API.Controllers
     {
         private readonly FileSystemWatcherService _watcherService;
         private readonly OrderRepository _orderRepository;
+        // private readonly ILogger<OrderController> _logger;
+        private readonly Serilog.ILogger _logger;
 
-        public OrderController(FileSystemWatcherService watcherService, OrderRepository orderRepository)
+        public OrderController(FileSystemWatcherService watcherService,
+            OrderRepository orderRepository,
+            //  ILogger<OrderController> logger
+            Serilog.ILogger logger
+        )
         {
             _watcherService = watcherService;
             _orderRepository = orderRepository;
+            // _logger = logger;
+            _logger = logger
+                .ForContext<OrderController>()
+                .ForContext("Area", "Orders");
         }
 
         [HttpPost("submit")]
@@ -98,6 +110,8 @@ namespace API.Controllers
         {
             try
             {
+                _logger.Information("Orders queried at {Time}", DateTime.UtcNow);
+
                 var orders = await _orderRepository.GetOrders(req.search, req.orderStatus, req.scannerId, req.fetchCompletedOrders);
                 var options = new JsonSerializerOptions
                 {

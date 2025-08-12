@@ -35,6 +35,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <!--  Spacer to push settings button to bottom  -->
                 <RowDefinition Height="Auto" />
@@ -70,12 +71,22 @@
                     Height="25"
                     Source="{SvgImage avares://Admin/Assets/scanner-image.svg}" />
             </Button>
+            <Button Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="ActivityLog"
+                DockPanel.Dock="Top"
+                ToolTip.Tip="System Activity Log">
+                <Image
+                    Width="25"
+                    Height="25"
+                    Source="{SvgImage avares://Admin/Assets/log-file.svg}" />
+            </Button>
             <!--  Spacer (push the settings button to the bottom)  -->
             <GridSplitter
-                Grid.Row="3"
+                Grid.Row="4"
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch" />
-            <Button Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+            <Button Grid.Row="5" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Settings"
                 Content="Settings"
