@@ -6,6 +6,8 @@ using Libs.Data.Models;
 using Libs.Services;
 using Libs.Repositories;
 using API.Models.RequestsResponses;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace API.Controllers
 {
@@ -19,6 +21,7 @@ namespace API.Controllers
             _scannerRepository = scannerRepository;
         }
 
+        [Authorize]
         [HttpPost("add")]
         public async Task<IActionResult> AddScanner(AddScannerRequest req)
         {

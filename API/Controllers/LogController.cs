@@ -16,7 +16,6 @@ namespace API.Controllers
     public class LogController : BaseController
     {
         private readonly LogRepository _logRepository;
-        // private readonly ILogger<OrderController> _logger;
         private readonly Serilog.ILogger _logger;
 
         public LogController(LogRepository logRepository, Serilog.ILogger logger)

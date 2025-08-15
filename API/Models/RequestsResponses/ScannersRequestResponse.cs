@@ -3,7 +3,7 @@ using Libs.Data.Models;
 
 namespace API.Models.RequestsResponses
 {
-    public class AddScannerRequest
+    public class AddScannerRequest : BaseRequest
     {
         public required string ScannerName { get; set; }
         public string? Make { get; set; }

@@ -6,6 +6,12 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.PostgreSQL;
+using Microsoft.AspNetCore.Identity;
+using Libs.Data.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.AspNetCore.Authorization;
 
 
 
@@ -13,23 +19,57 @@ var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3624");
 
 // Add services to the container.
-// REMOVED AFTER MIGRATION TO POSTGRESQL INSTANCE
-// builder.Services.AddDbContext<ScanLabContext>(options =>
-//             options.UseSqlite($"Data Source=.\\..\\DB\\ScanLab.db"));
 builder.Services.AddDbContext<ScanLabContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ScanLabDBConnection")));
+
 builder.Services.AddDbContext<ScanLab_LogContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("ScanLab_LogsDBConnection")));
 
+builder.Services
+    .AddIdentity<Staff, IdentityRole<Guid>>(options =>
+    {
+        options.Password.RequireDigit = true;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 8;
+    })
+    .AddEntityFrameworkStores<ScanLabContext>()
+    .AddDefaultTokenProviders();
 
-// Add Serilog
-// builder.Host.UseSerilog((context, services, configuration) =>
-// {
-//     configuration
-//         .ReadFrom.Configuration(context.Configuration)
-//         .ReadFrom.Services(services)
-//         .Enrich.FromLogContext();
-// });
+// JWT Config
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                Console.WriteLine($"JWT auth failed: {context.Exception}");
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 
 builder.Host.UseSerilog((context, services, configuration) =>
@@ -66,6 +106,7 @@ builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ScannerRepository>();
 builder.Services.AddScoped<RollRepository>();
 builder.Services.AddScoped<LogRepository>();
+builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -85,6 +126,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 // app.MapGet("/ping", () => "pong from root");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

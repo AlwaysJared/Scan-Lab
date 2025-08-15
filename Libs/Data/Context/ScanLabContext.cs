@@ -2,10 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using Libs.Data.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace Libs.Data.Context
 {
-    public class ScanLabContext : DbContext
+    public class ScanLabContext 
+        : IdentityDbContext<Staff, IdentityRole<Guid>, Guid>
     {
         public ScanLabContext(DbContextOptions<ScanLabContext> options) : base(options) { }
 
@@ -23,6 +26,15 @@ namespace Libs.Data.Context
                 .WithOne(r => r.Order)
                 .HasForeignKey(r => r.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // Rename Identity tables to match "Staff"
+            modelBuilder.Entity<Staff>().ToTable("Staff");
+            modelBuilder.Entity<IdentityRole<Guid>>().ToTable("Roles");
+            modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("StaffRoles");
+            modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("StaffClaims");
+            modelBuilder.Entity<IdentityUserLogin<Guid>>().ToTable("StaffLogins");
+            modelBuilder.Entity<IdentityRoleClaim<Guid>>().ToTable("RoleClaims");
+            modelBuilder.Entity<IdentityUserToken<Guid>>().ToTable("StaffTokens");
         }
     }
 }
