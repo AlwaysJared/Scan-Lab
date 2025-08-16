@@ -29,6 +29,7 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="ReactiveUI" Version="20.2.45" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.1" />
   </ItemGroup>
 
   <ItemGroup>

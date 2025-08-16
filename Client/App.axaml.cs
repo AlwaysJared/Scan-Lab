@@ -14,7 +14,9 @@ namespace Client;
 public class App : Application
 {
     public static ScannerService ScannerService { get; } = new(); // ✅ Global instance
-    public static ApiService ApiService { get; } = new(); // ✅ Global instance
+    public static TokenService TokenService { get; } = new(); // ✅ Global instance
+    public static ApiService ApiService { get; } = new(TokenService); // ✅ Global instance
+    public static AuthService AuthService { get; } = new(ApiService); // ✅ Global instance
 
     public override void Initialize()
     {
@@ -41,7 +43,7 @@ public class App : Application
 
             desktop.MainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel(ApiService, ScannerService)
+                DataContext = new MainWindowViewModel(ApiService, ScannerService, TokenService, AuthService)
             };
         }
 

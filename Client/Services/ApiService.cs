@@ -1,11 +1,15 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace Client.Services;
 
 public class ApiService
 {
+    private readonly TokenService _tokenService;
+    public readonly HttpClient _httpClient;
+
     private static readonly string ApiConfigFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ScanLab", "api_config.json");
 
     private string _apiAddress = string.Empty;
@@ -25,9 +29,21 @@ public class ApiService
         }
     }
 
-    public ApiService()
+    public ApiService(TokenService tokenService)
     {
+        _tokenService = tokenService;
+        _httpClient = new HttpClient();
         LoadApiAddress(); // ✅ Load API address on startup
+    }
+
+    public void AddAuthHeader()
+    {
+        _httpClient.DefaultRequestHeaders.Authorization = null;
+        if (_tokenService.HasValidToken())
+        {
+            _httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _tokenService.JwtToken);
+        }
     }
 
     private void LoadApiAddress()

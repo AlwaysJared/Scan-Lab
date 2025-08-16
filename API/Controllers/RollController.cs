@@ -5,11 +5,13 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using API.Models.RequestsResponses;
 using Libs.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class RollController : ControllerBase
     {

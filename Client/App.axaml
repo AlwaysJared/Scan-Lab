@@ -12,7 +12,7 @@
     </Application.DataTemplates>
 
     <Application.Resources>
-        <converters:RollActionVisibilityMultiConver x:Key="RollActionVis"/>
+        <converters:RollActionVisibilityMultiConverter x:Key="RollActionVis"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <converters:NullableDateTimeConverter x:Key="NullableDateTimeConverter"/>
     </Application.Resources>

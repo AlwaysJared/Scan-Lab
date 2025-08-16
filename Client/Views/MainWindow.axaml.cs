@@ -16,7 +16,7 @@ public partial class MainWindow : Window
         var stream = AssetLoader.Open(uri); // Will throw if path is wrong
         Icon = new WindowIcon(stream);
 
-        Resources["RollActionVis"] = new RollActionVisibilityMultiConver();
-        Resources["InverseBooleanToVisibilityConverter"] = new InverseBooleanToVisibilityConverter();
+        // Resources["RollActionVis"] = new RollActionVisibilityMultiConverter();
+        // Resources["InverseBooleanToVisibilityConverter"] = new InverseBooleanToVisibilityConverter();
     }
 }

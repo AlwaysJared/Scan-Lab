@@ -22,6 +22,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using static Client.Tools.UiTools;
 using System.IO;
 using System.Diagnostics;
+using System.Net;
 
 namespace Client.ViewModels;
 
@@ -30,6 +31,8 @@ public partial class DashboardViewModel : ViewModelBase
     private readonly HttpClient _httpClient = new();
     private readonly ApiService _apiService;
     private readonly ScannerService _scannerService;
+    private readonly AuthService _authService;
+    private readonly MainWindowViewModel _mainWindowVm;
 
     private bool _isLoading;
     public bool IsLoading
@@ -109,10 +112,16 @@ public partial class DashboardViewModel : ViewModelBase
     // public DashboardViewModel() : this(App.ApiService) { }
     public DashboardViewModel() { }
 
-    public DashboardViewModel(ApiService apiService, ScannerService scannerService)
+    public DashboardViewModel(ApiService apiService,
+        ScannerService scannerService,
+        AuthService authService,
+        MainWindowViewModel mainWindowVm
+    )
     {
         _apiService = apiService;
         _scannerService = scannerService;
+        _authService = authService;
+        _mainWindowVm = mainWindowVm;
 
         // ✅ Populate dropdown with int? values
         OrderStatusOptions = new List<KeyValuePair<string, int?>>
@@ -167,7 +176,9 @@ public partial class DashboardViewModel : ViewModelBase
             string jsonRequest = JsonSerializer.Serialize(getOrdersRequest);
             var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
 
-            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            _apiService.AddAuthHeader();
+            // HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            HttpResponseMessage response = await _apiService._httpClient.PostAsync(apiUrl, content);
             // Check if the request was successful
             if (response.IsSuccessStatusCode)
             {
@@ -199,6 +210,12 @@ public partial class DashboardViewModel : ViewModelBase
             }
             else
             {
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                    _mainWindowVm.Logout();
+                    return;
+                }
                 var errMsg = await response.Content.ReadAsStringAsync();
                 await UiTools.ShowMessageAsync("Error", errMsg, UiTools.MessageType.Error);
             }
@@ -231,7 +248,9 @@ public partial class DashboardViewModel : ViewModelBase
                     new { OrderId = order.OrderId }),
                     System.Text.Encoding.UTF8, "application/json"
                 );
-                var response = await _httpClient.PostAsync(apiUrl, content);
+                _apiService.AddAuthHeader();
+                // var response = await _httpClient.PostAsync(apiUrl, content);
+                var response = await _apiService._httpClient.PostAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -244,6 +263,12 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        _mainWindowVm.Logout();
+                        return;
+                    }
                     var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
                         $"[Error]: {errMsg}",
@@ -276,7 +301,8 @@ public partial class DashboardViewModel : ViewModelBase
                     new { RollId = roll.RollId, Status = RollStatus.ScanningInProgress }),
                     System.Text.Encoding.UTF8, "application/json"
                 );
-                var response = await _httpClient.PutAsync(apiUrl, content);
+                _apiService.AddAuthHeader();
+                var response = await _apiService._httpClient.PutAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -288,6 +314,12 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        _mainWindowVm.Logout();
+                        return;
+                    }
                     var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
                         $"[Error]: {errMsg}",
@@ -322,7 +354,8 @@ public partial class DashboardViewModel : ViewModelBase
                     new { RollId = roll.RollId, Status = RollStatus.ScanningPaused }),
                     System.Text.Encoding.UTF8, "application/json"
                 );
-                var response = await _httpClient.PutAsync(apiUrl, content);
+                _apiService.AddAuthHeader();
+                var response = await _apiService._httpClient.PutAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -334,6 +367,12 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        _mainWindowVm.Logout();
+                        return;
+                    }
                     var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
                         $"[Error]: {errMsg}",
@@ -366,7 +405,8 @@ public partial class DashboardViewModel : ViewModelBase
                     new { RollId = roll.RollId }),
                     System.Text.Encoding.UTF8, "application/json"
                 );
-                var response = await _httpClient.PostAsync(apiUrl, content);
+                _apiService.AddAuthHeader();
+                var response = await _apiService._httpClient.PostAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -378,6 +418,12 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        _mainWindowVm.Logout();
+                        return;
+                    }
                     var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
                         $"[Error]: {errMsg}",
@@ -410,7 +456,8 @@ public partial class DashboardViewModel : ViewModelBase
                     new { RollId = roll.RollId, Status = RollStatus.Created }),
                     System.Text.Encoding.UTF8, "application/json"
                 );
-                var response = await _httpClient.PutAsync(apiUrl, content);
+                _apiService.AddAuthHeader();
+                var response = await _apiService._httpClient.PutAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -422,6 +469,12 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        _mainWindowVm.Logout();
+                        return;
+                    }
                     var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
                         $"[Error]: {errMsg}",
@@ -454,7 +507,8 @@ public partial class DashboardViewModel : ViewModelBase
                     new { RollId = roll.RollId }),
                     System.Text.Encoding.UTF8, "application/json"
                 );
-                var response = await _httpClient.PostAsync(apiUrl, content);
+                _apiService.AddAuthHeader();
+                var response = await _apiService._httpClient.PostAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -466,6 +520,12 @@ public partial class DashboardViewModel : ViewModelBase
                 }
                 else
                 {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        _mainWindowVm.Logout();
+                        return;
+                    }
                     var errMsg = await response.Content.ReadAsStringAsync();
                     await UiTools.ShowMessageAsync("Error",
                         $"[Error]: {errMsg}",

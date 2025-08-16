@@ -21,6 +21,7 @@ public partial class OrderFormViewModel : ViewModelBase
     private readonly HttpClient _httpClient = new();
     private readonly ScannerService _scannerService;
     private readonly ApiService _apiService;
+    private readonly AuthService _authService;
 
     private bool _isLoading;
     public bool IsLoading
@@ -51,14 +52,15 @@ public partial class OrderFormViewModel : ViewModelBase
     private string rollCount = string.Empty;
     public Scanner? SelectedScanner => _scannerService.SelectedScanner;
 
-    public OrderFormViewModel() : this(App.ApiService, App.ScannerService) { }
+    public OrderFormViewModel() : this(App.ApiService, App.ScannerService, App.AuthService) { }
 
-    public OrderFormViewModel(ApiService apiService, ScannerService scannerService)
+    public OrderFormViewModel(ApiService apiService, ScannerService scannerService, AuthService authService)
     {
         NumberOnlyCommand = new RelayCommand<KeyEventArgs>(OnNumberOnlyKeyPress);
         // Load the currently selected scanner from SettingsViewModel
         _scannerService = scannerService;
         _apiService = apiService;
+        _authService = authService;
     }
 
     public RelayCommand<KeyEventArgs> NumberOnlyCommand { get; }
@@ -119,8 +121,10 @@ public partial class OrderFormViewModel : ViewModelBase
                 new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
             );
             var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            
+            _apiService.AddAuthHeader();
+            // HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+            HttpResponseMessage response = await _apiService._httpClient.PostAsync(apiUrl, content);
 
             if (response.IsSuccessStatusCode)
             {

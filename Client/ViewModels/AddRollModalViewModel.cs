@@ -64,7 +64,9 @@ public partial class AddRollModalViewModel : ViewModelBase
                 new { OrderId, RollNumber }),
                 System.Text.Encoding.UTF8, "application/json"
             );
-            var response = await _httpClient.PostAsync(apiUrl, content);
+            _apiService.AddAuthHeader();
+            // var response = await _httpClient.PostAsync(apiUrl, content);
+            var response = await _apiService._httpClient.PostAsync(apiUrl, content);
 
             if (response.IsSuccessStatusCode)
             {

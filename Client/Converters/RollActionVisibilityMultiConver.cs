@@ -9,7 +9,7 @@ using Libs.Enums;
 
 namespace Client.Converters
 {
-    public class RollActionVisibilityMultiConver : IMultiValueConverter
+    public class RollActionVisibilityMultiConverter : IMultiValueConverter
     {
         public object? Convert(IList<object?> values, Type targetType, object? parameter, CultureInfo culture)
         {

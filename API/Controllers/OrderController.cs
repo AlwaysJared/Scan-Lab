@@ -11,10 +11,12 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Serilog.Context;
 using Serilog;
+using Microsoft.AspNetCore.Authorization;
 
 namespace API.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class OrderController : ControllerBase
     {

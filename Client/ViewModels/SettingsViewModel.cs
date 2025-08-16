@@ -24,6 +24,7 @@ public partial class SettingsViewModel : ViewModelBase
     private readonly HttpClient _httpClient = new();
     private readonly ScannerService _scannerService;
     private readonly ApiService _apiService;
+    private readonly AuthService _authService;
 
     [ObservableProperty]
     private ObservableCollection<Scanner> scanners = new();
@@ -39,19 +40,6 @@ public partial class SettingsViewModel : ViewModelBase
         DestinationDir = "",
         ArchiveDir = "",
     };
-    // {
-    //     get; set;
-    //     // get => _scannerService.SelectedScanner;
-    //     // set
-    //     // {
-    //     //     if (_scannerService.SelectedScanner != value)
-    //     //     {
-    //     //         _scannerService.SelectedScanner = value;
-    //     //         OnPropertyChanged(nameof(refScanner));
-    //     //         SaveSelectedScanner(); // ✅ Save whenever scanner changes
-    //     //     }
-    //     // }
-    // }
 
     public Scanner? SelectedScanner
     {
@@ -101,12 +89,13 @@ public partial class SettingsViewModel : ViewModelBase
         get => _scannerService.SelectedScanner != null ? _scannerService.SelectedScanner.ArchiveDir : "";
         set => SetProperty(ref _archivefolderPath, value); // SetProperty is provided by ObservableObject
     }
-    public SettingsViewModel() : this(App.ApiService, App.ScannerService) { }
+    public SettingsViewModel() : this(App.ApiService, App.ScannerService, App.AuthService) { }
 
-    public SettingsViewModel(ApiService apiService, ScannerService scannerService)
+    public SettingsViewModel(ApiService apiService, ScannerService scannerService, AuthService authService)
     {
         _apiService = apiService;
         _scannerService = scannerService;
+        _authService = authService;
         SelectedScanner = _scannerService.SelectedScanner;
 
         SelectFolderCommand = new RelayCommand<string>(async (propertyName) => await SelectFolderAsync(propertyName));

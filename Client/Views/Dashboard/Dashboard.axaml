@@ -71,7 +71,7 @@
                 <DataGridTemplateColumn Header="Created" SortMemberPath="DateCreated">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock>
+                            <TextBlock VerticalAlignment="Center">
                                 <TextBlock.Text>
                                     <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateCreated" />
                                 </TextBlock.Text>
@@ -83,7 +83,7 @@
                 <DataGridTemplateColumn Header="Updated" SortMemberPath="DateUpdated">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock>
+                            <TextBlock VerticalAlignment="Center">
                                 <TextBlock.Text>
                                     <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateUpdated" />
                                 </TextBlock.Text>
@@ -150,7 +150,7 @@
                                     <DataGridTemplateColumn Header="Created" SortMemberPath="DateCreated">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock>
+                                                <TextBlock VerticalAlignment="Center">
                                                     <TextBlock.Text>
                                                         <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateCreated" />
                                                     </TextBlock.Text>
@@ -165,7 +165,7 @@
                                     <DataGridTemplateColumn Header="Updated" SortMemberPath="DateUpdated">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBlock>
+                                                <TextBlock VerticalAlignment="Center">
                                                     <TextBlock.Text>
                                                         <Binding Converter="{StaticResource NullableDateTimeConverter}" Path="DateUpdated" />
                                                     </TextBlock.Text>

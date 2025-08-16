@@ -28,7 +28,8 @@
             Background="LightGray"
             DockPanel.Dock="Left">-->
 
-        <Grid Background="LightGray">
+        <Grid Background="LightGray"
+            IsVisible="{Binding IsLoggedIn}">
             <!--  Define the grid structure  -->
             <Grid.RowDefinitions>
                 <!--  Top buttons take equal space, but settings button is floated at bottom  -->
@@ -36,6 +37,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <!--  Spacer to push settings button to bottom  -->
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
@@ -66,6 +68,14 @@
                 VerticalAlignment="Stretch"
                 Background="LightGray"/>
             <Button Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+                Command="{Binding LogoutCommand}"
+                ToolTip.Tip="Logout">
+                <Image
+                    Width="25"
+                    Height="25"
+                    Source="{SvgImage avares://Client/Assets/user-logout.svg}" />
+            </Button>
+            <Button Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Settings"
                 Content="Settings"
