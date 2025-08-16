@@ -15,7 +15,8 @@ dotnet publish $projectPath `
 # Remove-Item ".\..\DB\ScanLab.*"
 
 Push-Location ".."
-dotnet ef database update --project Libs --startup-project API
+dotnet ef database update -c ScanLabContext --project Libs --startup-project API
+dotnet ef database update -c ScanLab_LogContext --project Libs --startup-project API
 Pop-Location   
  
 # New-Item -Path $dbCopyDir -ItemType Directory
