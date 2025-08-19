@@ -33,6 +33,7 @@ public partial class MainWindowViewModel : ViewModelBase
             "Dashboard" => new Dashboard { DataContext = new DashboardViewModel() },
             "Settings" => new Settings { DataContext = new SettingsViewModel(_apiService) },
             "ActivityLog" => new ActivityLog { DataContext = new ActivityLogViewModel(_apiService) },
+            "StaffManagement" => new StaffManagement { DataContext = new StaffManagementViewModel(_apiService) },
             _ => CurrentView
         };
     }

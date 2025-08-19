@@ -15,7 +15,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Libs.Data.Models;
-using static Admin.Models.DTOs.Logs;
+using Admin.Models.DTOs.Logs;
 using static Admin.Tools.UiTools;
 
 namespace Admin.ViewModels
@@ -239,7 +239,7 @@ namespace Admin.ViewModels
                         PropertyNameCaseInsensitive = true,
                         ReferenceHandler = ReferenceHandler.Preserve
                     };
-                    var logsDTO = JsonSerializer.Deserialize<GetLogsDTO>(json, options);
+                    var logsDTO = JsonSerializer.Deserialize<Models.DTOs.Logs.GetLogsDTO>(json, options);
 
                     if (logsDTO.Logs.Any())
                     {

@@ -16,6 +16,8 @@ namespace Libs.Data.Context
         public DbSet<Scanner> Scanners { get; set; }
         public DbSet<Roll> Rolls { get; set; }
         public DbSet<Customer> Customers { get; set; }
+        public DbSet<Staff> Staff { get; set; }
+        public DbSet<ConfigSetting> ConfigSettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

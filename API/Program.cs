@@ -107,6 +107,8 @@ builder.Services.AddScoped<ScannerRepository>();
 builder.Services.AddScoped<RollRepository>();
 builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<StaffRepository>();
+builder.Services.AddScoped<GmailService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

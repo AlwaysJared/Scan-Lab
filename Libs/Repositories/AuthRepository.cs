@@ -8,6 +8,7 @@ using Libs.Data.Models;
 using Libs.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Libs.Repositories
 {
@@ -52,7 +53,7 @@ namespace Libs.Repositories
                 return new SystemResponse
                 {
                     IsSuccess = true,
-                    ReturnObject = newStaff.Id
+                    ReturnObject = newStaff.Id.ToString()
                 };
             }
             catch (Exception ex)
@@ -61,6 +62,89 @@ namespace Libs.Repositories
                 {
                     IsSuccess = false,
                     Message = ex.Message,
+                    ReturnObject = ex
+                };
+            }
+        }
+
+        public async Task<SystemResponse> ResetPassword(string staffId, string token, string newPassword, string confirmPassword)
+        {
+            try
+            {
+                if (newPassword != confirmPassword)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Staff not provided",
+                    };
+
+                var staff = await _userManager.FindByIdAsync(staffId);
+                if (staff == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Staff not provided",
+                    };
+
+                if (context.Staff.Where(s => s.Id == staff.Id).FirstOrDefault() == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = $"Staff id '{staff.Id}' not found"
+                    };
+
+                var result = await _userManager.ResetPasswordAsync(staff, token, newPassword);
+
+                return new SystemResponse
+                {
+                    IsSuccess = true,
+                    ReturnObject = result
+                };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse
+                {
+                    IsSuccess = false,
+                    IsError = true,
+                    ReturnObject = ex
+                };
+            }
+        }
+
+        public async Task<SystemResponse> GetResetPasswordToken(string staffId)
+        {
+            try
+            {
+                var staff = await _userManager.FindByIdAsync(staffId);
+                if (staff == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Staff not provided",
+                    };
+
+                var token = await _userManager.GeneratePasswordResetTokenAsync(staff);
+
+                if (token == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Error when creating token"
+                    };
+
+                return new SystemResponse
+                    {
+                        IsSuccess = true,
+                        ReturnObject = token
+                    };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse
+                {
+                    IsSuccess = false,
+                    IsError = true,
                     ReturnObject = ex
                 };
             }
