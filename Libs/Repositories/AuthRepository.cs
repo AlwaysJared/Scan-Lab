@@ -46,7 +46,8 @@ namespace Libs.Repositories
                     return new SystemResponse
                     {
                         IsSuccess = false,
-                        Message = result.Errors.ToString(),
+                        // Message = result.Errors.ToString(),
+                        Message = string.Join("\n", result.Errors.Select(e => e.Description)),
                         ReturnObject = result.Errors
                     };
 
@@ -61,6 +62,7 @@ namespace Libs.Repositories
                 return new SystemResponse
                 {
                     IsSuccess = false,
+                    IsError = true,
                     Message = ex.Message,
                     ReturnObject = ex
                 };

@@ -9,7 +9,7 @@ namespace Libs.Interfaces
 {
     public interface IStaffRepository : IDisposable
     {
-        Task<SystemResponse> GetStaff(Guid? staffId, int? page, int? pageSize);
+        Task<SystemResponse> GetStaff(Guid? staffId, int? page, int? pageSize, string email);
         // Task<SystemResponse> AddStaff(Staff staff);
         Task<SystemResponse> EditStaff(Staff staff);
     }

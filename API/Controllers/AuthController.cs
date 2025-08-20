@@ -22,16 +22,18 @@ namespace API.Controllers
     {
         private readonly Serilog.ILogger _logger;
         private readonly AuthRepository _authRepository;
+        private readonly StaffRepository _staffRepository;
         private readonly UserManager<Staff> _userManager;
         private readonly IConfiguration _config;
         private readonly GmailService _gmailService;
 
         public AuthController(Serilog.ILogger logger, AuthRepository authRepository,
-            UserManager<Staff> userManager, IConfiguration config, GmailService gmailService)
+            UserManager<Staff> userManager, IConfiguration config, GmailService gmailService, StaffRepository staffRepository)
         {
             _userManager = userManager;
             _config = config;
             _authRepository = authRepository;
+            _staffRepository = staffRepository;
             _gmailService = gmailService;
             _logger = logger
                 .ForContext<AuthController>()
@@ -53,25 +55,37 @@ namespace API.Controllers
                 if (!result.IsSuccess)
                 {
                     _logger.Error(result.Message);
-                    return StatusCode(500, result.Message);
+                    return StatusCode(result.IsError ? 500 : 400, result.Message);
                 }
 
                 if (!String.IsNullOrEmpty(req.Email.Trim()))
                 {
-                    var tokenResp = await _authRepository.GetResetPasswordToken((string)result.ReturnObject);
-                    if (!tokenResp.IsSuccess)
-                    {
-                        return Ok($"Staff registered. However, there was an error generating password reset token.\n{tokenResp.Message}\n Please reset staff password manually.");
-                    }
-                    var resetUrl = $"{_config["AppSettings:BaseUrl"]}/api/auth/password-reset?userId={(string)result.ReturnObject}&token={Uri.EscapeDataString((string)tokenResp.ReturnObject)}";
+                    // var tokenResp = await _authRepository.GetResetPasswordToken((string)result.ReturnObject);
+                    // if (!tokenResp.IsSuccess)
+                    // {
+                    //     return Ok($"Staff registered. However, there was an error generating password reset token.\n{tokenResp.Message}\n Please reset staff password manually.");
+                    // }
+                    // var resetUrl = $"{_config["AppSettings:BaseUrl"]}/api/auth/password-reset?userId={(string)result.ReturnObject}&token={Uri.EscapeDataString((string)tokenResp.ReturnObject)}";
                     string subject = "ScanLab - [Action Required]: Set Password";
-                    string body = $@"
+                    string body = @"
                     <p>Your staff account was successfully created.</p>
-                    <p>Click <a href='{resetUrl}'>here</a> to set your password.</p>";
-                    var resetEmailResult = await _gmailService.SendEmailAsync(req.Email, subject, body);
-                    if (!resetEmailResult.IsSuccess)
+                    <p>Click <a href='{0}'>here</a> to set your password.</p>";
+                    // var resetEmailResult = await _gmailService.SendEmailAsync(req.Email, subject, body);
+                    // if (!resetEmailResult.IsSuccess)
+                    // {
+                    //     return Ok($"Staff registered. However, there sending the password. \n{resetEmailResult.Message}\n Please reset staff password manually");
+                    // }
+                    var resetEmailResp = await SendPasswordResetEmail(
+                        (string)result.ReturnObject,
+                        req.Email.Trim(), subject, body);
+
+                    if (!resetEmailResp.IsSuccess)
                     {
-                        return Ok($"Staff registered. However, there sending the password. \n{resetEmailResult.Message}\n Please reset staff password manually");
+                        _logger.Error((Exception)resetEmailResp.ReturnObject, resetEmailResp.Message);
+                        return Ok($@"Staff registered, but an error ocurred sending password reset email:
+                            {resetEmailResp.Message}
+                            Please reset password manually."
+                        );
                     }
                 }
                 return Ok("Staff registered");
@@ -192,6 +206,47 @@ namespace API.Controllers
             return Content("<h2>Password reset successful. You may now close this page.</h2>", "text/html");
         }
 
+        [HttpPost("request-pw-reset")]
+        public async Task<IActionResult> RequestPasswordResetEmail([FromBody] string email)
+        {
+            try
+            {
+                var staffResp = await _staffRepository.GetStaff(email: email);
+                if (!staffResp.IsSuccess)
+                {
+                    _logger.Error((Exception)staffResp.ReturnObject, $"Error retrieving staff: {(Exception)staffResp.ReturnObject}");
+                    return StatusCode(500, $"Error retrieving staff: {(Exception)staffResp.ReturnObject}");
+                }
+                var staff = ((Libs.Data.RequestResponse.Staff.GetStaffResponse)staffResp.ReturnObject).Staff ?? new List<Staff>();
+
+                if (!staff.Any())
+                {
+                    return BadRequest($"Staff member with email '{email}' not found");
+                }
+                if (staff.Count() > 1)
+                {
+                    return BadRequest($"Multiple staff members found. Email not sent");
+                }
+
+                var staffMatch = staff.FirstOrDefault();
+
+                string subject = "ScanLab - Reset Password";
+                string body = @"
+                    <p>You requested a password reset.</p>
+                    <p>Click <a href='{0}'>here</a> to reset your password.</p>
+                    <p>If you did not request this, please ignore this email.</p>";
+
+                var result = await SendPasswordResetEmail(staffMatch.Id.ToString(), staffMatch.Email, subject, body);
+
+                return Ok("Reset email sent successfully");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, ex.Message);
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         private async Task<SystemResponse> GenerateJwtToken(Staff user)
         {
             try
@@ -227,6 +282,52 @@ namespace API.Controllers
                 {
                     IsSuccess = true,
                     ReturnObject = new JwtSecurityTokenHandler().WriteToken(token)
+                };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse
+                {
+                    IsSuccess = false,
+                    Message = ex.Message,
+                    ReturnObject = ex
+                };
+            }
+        }
+
+        private async Task<SystemResponse> SendPasswordResetEmail(
+            string staffID,
+            string toEmail,
+            string subject,
+            string body)
+        {
+            try
+            {
+                var tokenResp = await _authRepository.GetResetPasswordToken(staffID);
+                if (!tokenResp.IsSuccess)
+                {
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = tokenResp.Message,
+                        ReturnObject = tokenResp.ReturnObject
+                    };
+                }
+                var resetUrl = $"{_config["AppSettings:BaseUrl"]}/api/auth/password-reset?userId={staffID}&token={Uri.EscapeDataString((string)tokenResp.ReturnObject)}";
+                var resetEmailResult = await _gmailService.SendEmailAsync(toEmail, subject, String.Format(body,resetUrl));
+                if (!resetEmailResult.IsSuccess)
+                {
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = resetEmailResult.Message,
+                        ReturnObject = resetEmailResult.ReturnObject
+                    };
+                }
+
+                return new SystemResponse
+                {
+                    IsSuccess = true
                 };
             }
             catch (Exception ex)

@@ -49,7 +49,7 @@ namespace Libs.Repositories
                 _fromEmail = JsonSerializer.Deserialize<EmailConfig>(emailConfig.Value).Email;
                 _appPassword = JsonSerializer.Deserialize<EmailConfig>(emailConfig.Value).Password;
 
-                
+
 
                 var message = new MimeMessage();
                 message.From.Add(new MailboxAddress("ScanLab", _fromEmail));
@@ -69,6 +69,15 @@ namespace Libs.Repositories
                 using var client = new SmtpClient();
                 await client.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
                 await client.AuthenticateAsync(_fromEmail, _appPassword);
+                if (!client.IsAuthenticated)
+                {
+                    await client.DisconnectAsync(true);
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = "Email authenticaiton failed. Please verify email configuration."
+                    };
+                }
                 await client.SendAsync(message);
                 await client.DisconnectAsync(true);
 
@@ -76,6 +85,10 @@ namespace Libs.Repositories
                 {
                     IsSuccess = true
                 };
+            }
+            catch (AuthenticationException ex)
+            {
+                Console.WriteLine($"Email Authentication failed: {ex.Message}");
             }
             catch (Exception ex)
             {

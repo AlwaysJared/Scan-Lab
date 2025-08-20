@@ -28,6 +28,7 @@ builder.Services.AddDbContext<ScanLab_LogContext>(options =>
 builder.Services
     .AddIdentity<Staff, IdentityRole<Guid>>(options =>
     {
+        options.User.RequireUniqueEmail = true;
         options.Password.RequireDigit = true;
         options.Password.RequireUppercase = false;
         options.Password.RequireNonAlphanumeric = false;

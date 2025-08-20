@@ -28,9 +28,14 @@ namespace Libs.Data.Context
                 .WithOne(r => r.Order)
                 .HasForeignKey(r => r.OrderId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             // Rename Identity tables to match "Staff"
-            modelBuilder.Entity<Staff>().ToTable("Staff");
+            modelBuilder.Entity<Staff>(entity =>
+            {
+                entity.ToTable("Staff");
+                entity.HasIndex(s => s.Email).IsUnique();
+                entity.HasIndex(s => s.UserName).IsUnique();
+            });
             modelBuilder.Entity<IdentityRole<Guid>>().ToTable("Roles");
             modelBuilder.Entity<IdentityUserRole<Guid>>().ToTable("StaffRoles");
             modelBuilder.Entity<IdentityUserClaim<Guid>>().ToTable("StaffClaims");

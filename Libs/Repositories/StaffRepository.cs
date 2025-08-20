@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Libs.Classes;
 using Libs.Data.Context;
 using Libs.Data.Models;
+using Libs.Data.RequestResponse.Staff;
 using Libs.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,13 +34,21 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<SystemResponse> GetStaff(Guid? staffId, int? page = 1, int? pageSize = 10)
+        public async Task<SystemResponse> GetStaff(Guid? staffId = null, int? page = 1, int? pageSize = 10, string? email="")
         {
             try
             {
-                var staff = await context.Staff.Where(s =>
-                    staffId.HasValue ? s.Id == staffId : true)
-                    .ToListAsync();
+                var staff = await context.Staff.ToListAsync();
+                if (staffId != null)
+                {
+                    staff = staff.Where(s => s.Id == staffId).ToList();
+                }
+                
+                if(!String.IsNullOrEmpty(email.Trim()))
+                {
+                    staff = staff.Where(s => s.Email.ToLower() == email.ToLower()).ToList();
+                }
+                
 
                 var totalPages = (int)Math.Ceiling((staff?.Count ?? 0) / (double)pageSize);
 
@@ -53,7 +62,7 @@ namespace Libs.Repositories
                 return new SystemResponse
                 {
                     IsSuccess = true,
-                    ReturnObject = new
+                    ReturnObject = new GetStaffResponse
                     {
                         Staff = staff,
                         TotalPages = totalPages,
