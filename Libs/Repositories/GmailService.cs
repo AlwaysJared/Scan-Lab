@@ -88,7 +88,12 @@ namespace Libs.Repositories
             }
             catch (AuthenticationException ex)
             {
-                Console.WriteLine($"Email Authentication failed: {ex.Message}");
+                return new SystemResponse
+                {
+                    IsSuccess = false,
+                    IsError = true,
+                    ReturnObject = ex
+                };
             }
             catch (Exception ex)
             {

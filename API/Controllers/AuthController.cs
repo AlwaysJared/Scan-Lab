@@ -13,6 +13,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Libs.Classes;
+using API.Services;
 
 namespace API.Controllers
 {
@@ -26,15 +27,18 @@ namespace API.Controllers
         private readonly UserManager<Staff> _userManager;
         private readonly IConfiguration _config;
         private readonly GmailService _gmailService;
+        private readonly TokenService _tokenService;
 
         public AuthController(Serilog.ILogger logger, AuthRepository authRepository,
-            UserManager<Staff> userManager, IConfiguration config, GmailService gmailService, StaffRepository staffRepository)
+            UserManager<Staff> userManager, IConfiguration config, GmailService gmailService,
+            StaffRepository staffRepository, TokenService tokenService)
         {
             _userManager = userManager;
             _config = config;
             _authRepository = authRepository;
             _staffRepository = staffRepository;
             _gmailService = gmailService;
+            _tokenService = tokenService;
             _logger = logger
                 .ForContext<AuthController>()
                 .ForContext("Area", "Authentication");
@@ -106,7 +110,8 @@ namespace API.Controllers
                 if (user == null || !await _userManager.CheckPasswordAsync(user, request.Password))
                     return Unauthorized("Invalid username or password");
 
-                var tokenResp = await GenerateJwtToken(user);
+                // var tokenResp = await GenerateJwtToken(user);
+                var tokenResp = await _tokenService.GenerateJwtToken(user);
                 if (!tokenResp.IsSuccess)
                 {
                     _logger.Error((Exception)tokenResp.ReturnObject, tokenResp.Message);
