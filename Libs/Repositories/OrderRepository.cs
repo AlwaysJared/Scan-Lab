@@ -36,6 +36,7 @@ namespace Libs.Repositories
                     CustomerInitials = req.CustomerInitials,
                     Rolls = req.Rolls,
                     Scanner = scnr,
+                    CreatedBy = req.CreatedBy
                 };
                 var res = context.Orders.Add(newOrder);
                 await context.SaveChangesAsync();

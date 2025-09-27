@@ -174,7 +174,7 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
                                     <DataGridTextColumn
-                                        Binding="{Binding Status}"
+                                        Binding="{Binding Status, Converter={StaticResource EnumDescriptionConverter}}"
                                         Header="Status"
                                         IsReadOnly="True" />
 

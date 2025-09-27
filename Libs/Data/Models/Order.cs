@@ -14,5 +14,7 @@ namespace Libs.Data.Models
         public Scanner? Scanner{ get; set; }
         public DateTime? DateCreated { get; set; } = DateTime.UtcNow;
         public DateTime? DateUpdated { get; set; }
+        public Guid? CreatedBy { get; set; }
+        public Guid? UpdatedBy { get; set; }
     }
 }
