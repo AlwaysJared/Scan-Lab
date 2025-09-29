@@ -71,7 +71,7 @@ namespace Libs.Repositories
             }
         }
 
-        public async Task<SystemResponse> ProcessRoll(Guid rollId)
+        public async Task<SystemResponse> ProcessRoll(Guid rollId, Guid? staffId)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace Libs.Repositories
                     return new SystemResponse() { IsSuccess = false, Message = $"No rolls found in scanner's watched directory ('{roll.Order.Scanner.WatchedDir}')" };
 
                 // Attempt to update roll's status to 'in progress'
-                var statusResp = await UpdateRollStatus(roll, RollStatus.Processing);
+                var statusResp = await UpdateRollStatus(roll, RollStatus.Processing, staffId);
 
                 if (!statusResp.IsSuccess)
                     return new SystemResponse() { IsSuccess = false, Message = statusResp.Message };
@@ -200,7 +200,7 @@ namespace Libs.Repositories
                                 fileName = Path.ChangeExtension(fileName, ".tiff");
                             else
                             {
-                                await UpdateRollStatus(roll, RollStatus.Processing);
+                                await UpdateRollStatus(roll, RollStatus.Processing, staffId);
 
                                 return new SystemResponse { IsSuccess = false, Message = tiffConversionResp.Message };
                             }
@@ -259,7 +259,7 @@ namespace Libs.Repositories
                 // Directory.Delete(latestRollDir);
                 await IOHelpers.DeleteDirAsync(latestRollDir);
 
-                statusResp = await UpdateRollStatus(roll, RollStatus.Processed);
+                statusResp = await UpdateRollStatus(roll, RollStatus.Processed, staffId);
 
                 if (!statusResp.IsSuccess)
                     return new SystemResponse
@@ -307,7 +307,7 @@ namespace Libs.Repositories
                 return new List<Roll>();
             }
         }
-        public async Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status)
+        public async Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status, Guid? staffId)
         {
             try
             {
@@ -369,6 +369,7 @@ namespace Libs.Repositories
 
                 dbRoll.Status = status;
                 dbRoll.DateUpdated = DateTime.UtcNow;
+                dbRoll.UpdatedBy = staffId;
 
                 await context.SaveChangesAsync();
 

@@ -38,24 +38,30 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<SystemResponse> RollsPerStaffInTimeframe(List<Guid> staffIds, DateTime startDate, DateTime endDate, bool isAverage)
+        public async Task<SystemResponse> RollsPerStaffInTimeframe(List<Guid>? staffIds, DateTime? startDate, DateTime? endDate, bool isAverage)
         {
             try
             {
                 var query = _context.Rolls
                     .AsNoTracking()
-                    .Include(r => r.Order)
                     .Where(r => r.Status == Enums.RollStatus.Processed)
-                    .Where(r => staffIds.Any() ? staffIds.Contains(r.Order.CreatedBy.Value) : true)
-                    .Where(r => r.DateUpdated.Value >= startDate && r.DateUpdated.Value <= endDate);
+                    .Where(r => (staffIds ?? new List<Guid>()).Any() ? staffIds.Contains(r.UpdatedBy.Value) : true)
+                    .Where(r => (startDate.HasValue ? r.DateUpdated.Value >= startDate : true) 
+                        && (endDate.HasValue ? r.DateUpdated.Value <= endDate : true)
+                    );
 
                 if (isAverage)
                 {
                     // Group by date, count per day, then average
-                    var average = await query
-                        .GroupBy(o => o.DateUpdated.Value)
+                    var grouped = await query
+                        .GroupBy(o => o.DateUpdated.Value.Date)
                         .Select(g => g.Count())
-                        .AverageAsync();
+                        .ToListAsync();
+
+                    double average = 0;
+
+                    if(grouped.Any())
+                        average = grouped.Average();
 
                     return new SystemResponse{
                         IsSuccess = true,

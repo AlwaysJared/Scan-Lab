@@ -59,6 +59,11 @@ namespace API.Controllers
                     CreatedBy = staffId
                 };
 
+                foreach(var r in newOrder.Rolls ?? new List<Roll>())
+                {
+                    r.CreatedBy = staffId;
+                }
+
                 var resp = await _orderRepository.AddOrder(newOrder);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
                 // return Ok(new { Id = id });
@@ -78,6 +83,10 @@ namespace API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                Guid.TryParse(userIdClaim, out var staffId);
+
                 var resp = await _orderRepository.ProcessOrder(req.OrderId);
                 return Ok(resp);
             }
