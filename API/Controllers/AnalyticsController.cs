@@ -36,12 +36,85 @@ namespace API.Controllers
                     req.Ids,
                     req.StartDate,
                     req.EndDate,
-                    req.IsAverage
+                    req.IsAverage,
+                    req.Interval
                 );
 
                 if (!resp.IsSuccess)
                     return StatusCode(500, resp.Message);
-                    
+
+                return Ok(resp.ReturnObject);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.ToString());
+            }
+        }
+
+        [HttpPost("RollsPerScanner")]
+        public async Task<IActionResult> RollsPerScanner(AnalyticsRequest req)
+        {
+            try
+            {
+                var resp = await _analyticsRepository.RollsPerScannerInTimeframe(
+                    req.Ids,
+                    req.StartDate,
+                    req.EndDate,
+                    req.IsAverage,
+                    req.Interval
+                );
+
+                if (!resp.IsSuccess)
+                    return StatusCode(500, resp.Message);
+
+                return Ok(resp.ReturnObject);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.ToString());
+            }
+        }
+
+        [HttpPost("OrdersPerStaff")]
+        public async Task<IActionResult> OrdersPerStaff(AnalyticsRequest req)
+        {
+            try
+            {
+                var resp = await _analyticsRepository.OrdersPerStaffInTimeframe(
+                    req.Ids,
+                    req.StartDate,
+                    req.EndDate,
+                    req.IsAverage,
+                    req.Interval
+                );
+
+                if (!resp.IsSuccess)
+                    return StatusCode(500, resp.Message);
+
+                return Ok(resp.ReturnObject);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.ToString());
+            }
+        }
+
+        [HttpPost("OrdersPerScanner")]
+        public async Task<IActionResult> OrdersPerScanner(AnalyticsRequest req)
+        {
+            try
+            {
+                var resp = await _analyticsRepository.OrdersPerScannerInTimeframe(
+                    req.Ids,
+                    req.StartDate,
+                    req.EndDate,
+                    req.IsAverage,
+                    req.Interval
+                );
+
+                if (!resp.IsSuccess)
+                    return StatusCode(500, resp.Message);
+
                 return Ok(resp.ReturnObject);
             }
             catch (Exception ex)

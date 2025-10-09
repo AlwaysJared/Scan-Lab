@@ -1,11 +1,12 @@
 namespace Libs.Enums
 {
-    public enum Timeframes
+    public enum IntervalType
     {
         Hour,
         Day,
         Week,
         Month,
+        Quarter,
         Year
     }
 }
