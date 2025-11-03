@@ -39,11 +39,24 @@ namespace Libs.Repositories
                 DateTime? utcStart = startDate?.ToUniversalTime();
                 DateTime? utcEnd = endDate?.ToUniversalTime();
 
-                DateTime effectiveStart = startDate ?? DateTime.MinValue;
-                DateTime effectiveEnd = endDate ?? DateTime.MaxValue;
+                var orderDatesSorted = _context.Orders.OrderBy(o => o.CreatedBy)
+                    .Select(o => o.DateCreated);
 
-                DateTime localeffectiveStart = startDate ?? DateTime.MinValue;
-                DateTime localeffectiveEnd = endDate ?? DateTime.MaxValue;
+                DateTime? firstOrderDate = await orderDatesSorted.FirstOrDefaultAsync();
+                // DateTime? lastOrderDate = await orderDatesSorted.LastOrDefaultAsync();
+
+                // if((firstOrderDate ?? DateTime.MinValue) == (lastOrderDate ?? DateTime.MinValue))
+                // {
+                //     lastOrderDate = null;
+                // }
+
+
+                DateTime effectiveStart = startDate ?? firstOrderDate ?? DateTime.Today;
+                DateTime effectiveEnd = endDate ?? DateTime.Today.AddDays(1);
+                
+                DateTime localeffectiveStart = startDate ?? firstOrderDate ?? DateTime.Today;
+                DateTime localeffectiveEnd = endDate ?? DateTime.Today.AddDays(1);
+
 
                 var query = _context.Orders
                     .Include(o => o.Scanner)
@@ -250,11 +263,17 @@ namespace Libs.Repositories
                 DateTime? utcStart = startDate?.ToUniversalTime();
                 DateTime? utcEnd = endDate?.ToUniversalTime();
 
-                DateTime effectiveStart = startDate ?? DateTime.MinValue;
-                DateTime effectiveEnd = endDate ?? DateTime.MaxValue;
+                var orderDatesSorted = _context.Orders.OrderBy(o => o.CreatedBy)
+                    .Select(o => o.DateCreated);
 
-                DateTime localeffectiveStart = startDate ?? DateTime.MinValue;
-                DateTime localeffectiveEnd = endDate ?? DateTime.MaxValue;
+                DateTime? firstOrderDate = await orderDatesSorted.FirstOrDefaultAsync();
+                // DateTime? lastOrderDate = await orderDatesSorted.LastOrDefaultAsync();
+
+                DateTime effectiveStart = startDate ?? firstOrderDate ?? DateTime.Today;
+                DateTime effectiveEnd = endDate ?? DateTime.Today.AddDays(1);
+                
+                DateTime localeffectiveStart = startDate ?? firstOrderDate ?? DateTime.Today;
+                DateTime localeffectiveEnd = endDate ?? DateTime.Today.AddDays(1);
 
                 var query = _context.Orders
                     .AsNoTracking()
@@ -459,11 +478,17 @@ namespace Libs.Repositories
                 DateTime? utcStart = startDate?.ToUniversalTime();
                 DateTime? utcEnd = endDate?.ToUniversalTime();
 
-                DateTime effectiveStart = startDate ?? DateTime.MinValue;
-                DateTime effectiveEnd = endDate ?? DateTime.MaxValue;
+                var rollDatesSorted = _context.Rolls.OrderBy(o => o.CreatedBy)
+                    .Select(o => o.DateCreated);
 
-                DateTime localeffectiveStart = startDate ?? DateTime.MinValue;
-                DateTime localeffectiveEnd = endDate ?? DateTime.MaxValue;
+                DateTime? firstRollDate = await rollDatesSorted.FirstOrDefaultAsync();
+                // DateTime? lastRollDate = await rollDatesSorted.LastOrDefaultAsync();
+
+                DateTime effectiveStart = startDate ?? firstRollDate ?? DateTime.Today;
+                DateTime effectiveEnd = endDate ?? DateTime.Today.AddDays(1);
+                
+                DateTime localeffectiveStart = startDate ?? firstRollDate ?? (DateTime.Today);
+                DateTime localeffectiveEnd = endDate ?? (DateTime.Today.AddDays(1));
 
                 var query = _context.Rolls
                     .Include(r => r.Order)
@@ -670,11 +695,17 @@ namespace Libs.Repositories
                 DateTime? utcStart = startDate?.ToUniversalTime();
                 DateTime? utcEnd = endDate?.ToUniversalTime();
 
-                DateTime effectiveStart = startDate ?? DateTime.MinValue;
-                DateTime effectiveEnd = endDate ?? DateTime.MaxValue;
+                var rollDatesSorted = _context.Rolls.OrderBy(o => o.CreatedBy)
+                    .Select(o => o.DateCreated);
 
-                DateTime localeffectiveStart = startDate ?? DateTime.MinValue;
-                DateTime localeffectiveEnd = endDate ?? DateTime.MaxValue;
+                DateTime? firstRollDate = await rollDatesSorted.FirstOrDefaultAsync();
+                // DateTime? lastRollDate = await rollDatesSorted.LastOrDefaultAsync();
+
+                DateTime effectiveStart = startDate ?? firstRollDate ?? DateTime.Today;
+                DateTime effectiveEnd = endDate ?? DateTime.Today.AddDays(1);
+                
+                DateTime localeffectiveStart = startDate ?? firstRollDate ?? (DateTime.Today);
+                DateTime localeffectiveEnd = endDate ?? (DateTime.Today.AddDays(1));
 
                 var query = _context.Rolls
                     .AsNoTracking()
@@ -867,11 +898,6 @@ namespace Libs.Repositories
             }
         }
 
-
-
-
-
-        
         private void ValidateInterval(DateTime start, DateTime end, IntervalType interval)
         {
             var duration = end - start;

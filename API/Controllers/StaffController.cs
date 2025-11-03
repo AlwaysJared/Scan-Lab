@@ -31,7 +31,7 @@ namespace API.Controllers
             {
                 _logger.Information("Staff queried at {Time}", DateTime.UtcNow);
 
-                var staffResp = await _staffRepository.GetStaff(req.StaffId, req.Page, req.PageSize);
+                var staffResp = await _staffRepository.GetStaff(req.StaffId, req.Page, req.PageSize, req.Query,req.GetAllStaff);
                 if (!staffResp.IsSuccess)
                 {
                     _logger.Error((Exception)staffResp.ReturnObject, $"Error retrieving staff: {(Exception)staffResp.ReturnObject}");

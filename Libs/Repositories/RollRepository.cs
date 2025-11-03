@@ -130,7 +130,8 @@ namespace Libs.Repositories
                 */
                 #region Interval folder retrieval 
                 string targetIntervalFolder = "";
-                var targetMonday = DateTimeHelpers.GetMondayOfWeek(roll.Order.DateCreated ?? DateTime.Today);
+                // var targetMonday = DateTimeHelpers.GetMondayOfWeek(roll.Order.DateCreated ?? DateTime.Today);
+                var targetMonday = DateTimeHelpers.GetMondayOfWeek(DateTime.Now);
 
                 // //get monday of earliest "processed" roll in order
                 // var earliestProcessedRoll = roll.Order.Rolls
@@ -167,9 +168,12 @@ namespace Libs.Repositories
                 {
                     destFolderExists = true;
                     rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
+                        // Only changes in whole repo (client code all still the same)
+                        !String.IsNullOrWhiteSpace(targetIntervalFolder) ? targetIntervalFolder : String.Empty,
                         roll.Order.OrderId,
                         "Rescans",
-                        roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")
+                        // roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")
+                        roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("dddd, MMM dd, yyyy hh-mm-ss tt")
                     );
                     Directory.CreateDirectory(rollFolderPath);
                 }

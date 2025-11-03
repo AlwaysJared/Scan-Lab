@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace Admin.Services;
@@ -7,7 +8,7 @@ namespace Admin.Services;
 public class ApiService
 {
     private static readonly string ApiConfigFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ScanLab", "api_config.json");
-
+    public readonly HttpClient _httpClient;
     private string _apiAddress = string.Empty;
     public event Action<string>? ApiAddressChanged; // ✅ Notify when the API address updates
 
@@ -27,6 +28,7 @@ public class ApiService
 
     public ApiService()
     {
+        _httpClient = new HttpClient();
         LoadApiAddress(); // ✅ Load API address on startup
     }
 

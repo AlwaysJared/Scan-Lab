@@ -11,7 +11,9 @@ namespace Libs.Data.RequestResponse.Staff
     {
         public Guid? StaffId { get; set; }
         public int? Page { get; set; } = 1;
-        public int? PageSize { get; set;} = 10;
+        public int? PageSize { get; set; } = 10;
+        public bool GetAllStaff { get; set; } = false;
+        public string? Query { get; set; }
     }
 
     public class GetStaffResponse : BaseResponse

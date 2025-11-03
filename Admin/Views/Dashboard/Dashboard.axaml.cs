@@ -9,7 +9,7 @@ namespace Admin.Views
         public Dashboard()
         {
             InitializeComponent();
-            DataContext = new OrdersViewModel();
+            // DataContext = new DashboardViewModel();
         }
 
         private void InitializeComponent()
