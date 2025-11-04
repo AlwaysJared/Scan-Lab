@@ -7,12 +7,13 @@ namespace Libs.Data.DTOs.Analytics
 {
     public class AnalyticsBaseDTO
     {
-        public string Label { get; set; }
+        public string Id { get; set;}
+        public string Name { get; set; }
         public double Value { get; set; }
     }
 
     public class OrdersPerStaffDTO
     {
-        List<AnalyticsBaseDTO> Analytics { get; set; }
+        public List<AnalyticsBaseDTO> Analytics { get; set; } = new();
     }
 }

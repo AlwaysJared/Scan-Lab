@@ -5,134 +5,245 @@
     xmlns:vm="using:Admin.ViewModels"
     x:DataType="vm:DashboardViewModel">
 
-    <Grid Margin="24">
-        <!--  Card that responsively fills half the window width  -->
-        <Border
-            MaxWidth="{Binding $parent[Window].Bounds.Width, Converter={StaticResource HalfWidthConverter}}"
-            Padding="24"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Background="{DynamicResource CardBackgroundBrush}"
-            BoxShadow="0 2 8 #00000020"
-            CornerRadius="16">
+    <ScrollViewer>
+        <Grid Margin="24">
+            <!--  Card that responsively fills half the window width  -->
+            <!--  MaxWidth="{Binding $parent[Window].Bounds.Width, Converter={StaticResource HalfWidthConverter}}"  -->
+            <Border
+                Padding="24"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                CornerRadius="16">
 
-            <Grid RowDefinitions="Auto, *">
-                <!--  Title Header  -->
-                <TextBlock
-                    Grid.Row="0"
-                    Margin="0,0,0,8"
-                    FontSize="24"
-                    FontWeight="SemiBold"
-                    Text="Dashboard" />
+                <Grid RowDefinitions="Auto, Auto, Auto, Auto">
 
-                <!--  Content Area  -->
-                <StackPanel Grid.Row="1" Spacing="16">
 
-                    <!--  FILTER BAR  -->
-
-                    <!--  Background="{DynamicResource ThemeControlLowBrush}"  -->
-                    <Border
+                    <!--  Title Header  -->
+                    <TextBlock
+                        Grid.Row="0"
                         Margin="0,0,0,8"
-                        Padding="12"
-                        Background="#FFF000"
-                        CornerRadius="8">
-                        <StackPanel
-                            VerticalAlignment="Center"
-                            Orientation="Horizontal"
-                            Spacing="20">
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Text="Orders by Staff" />
 
-                            <StackPanel>
-                                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontWeight="SemiBold"
-                                    Text="Select Items" />
+                    <!--  Content Area  -->
+                    <StackPanel Grid.Row="1" Spacing="16">
 
-                                <ToggleButton
-                                    x:Name="DropdownButton"
-                                    Width="180"
-                                    Content="Select Items"
-                                    IsChecked="{Binding IsDropdownOpen, Mode=TwoWay}" />
+                        <!--  FILTER BAR  -->
+                        <!--  Background="{DynamicResource ThemeControlLowBrush}"  -->
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="12"
+                            CornerRadius="8">
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="20">
 
-                                <Popup IsOpen="{Binding IsDropdownOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=DropdownButton}">
-                                    <Border
-                                        Padding="4"
-                                        Background="White"
-                                        BorderBrush="Gray"
-                                        BorderThickness="1"
-                                        CornerRadius="4">
-                                        <ScrollViewer MaxHeight="120">
-                                            <ItemsControl ItemsSource="{Binding AvailableOptions}">
-                                                <ItemsControl.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
-                                                    </DataTemplate>
-                                                </ItemsControl.ItemTemplate>
-                                            </ItemsControl>
-                                        </ScrollViewer>
-                                    </Border>
-                                </Popup>
-                            </StackPanel>
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Select Items" />
 
+                                    <ToggleButton
+                                        x:Name="DropdownButton"
+                                        Width="180"
+                                        Content="Select Items"
+                                        IsChecked="{Binding IsDropdownOpen, Mode=TwoWay}" />
 
-                            <!--  Date range  -->
-                            <StackPanel>
-                                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontWeight="SemiBold"
-                                    Text="Date Range" />
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <CalendarDatePicker  Width="130" SelectedDate="{Binding StartDate}" />
-                                    <TextBlock VerticalAlignment="Center" Text="to" />
-                                    <CalendarDatePicker  Width="130" SelectedDate="{Binding EndDate}" />
+                                    <Popup IsOpen="{Binding IsDropdownOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=DropdownButton}">
+                                        <Border
+                                            Padding="4"
+                                            Background="White"
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <ScrollViewer MaxHeight="120">
+                                                <ItemsControl ItemsSource="{Binding AvailableOptions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
                                 </StackPanel>
+
+
+                                <!--  Date range  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Date Range" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding StartDate}" />
+                                        <TextBlock VerticalAlignment="Center" Text="to" />
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding EndDate}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!--  Toggle  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Average?" />
+                                    <ToggleSwitch IsChecked="{Binding IncludeArchived}" />
+                                </StackPanel>
+
+                                <!--  Apply Filter Button  -->
+                                <Button
+                                    Height="32"
+                                    VerticalAlignment="Bottom"
+                                    Command="{Binding OrdersPerStaffCommand}"
+                                    Content="Apply Filters" />
                             </StackPanel>
+                        </Border>
+                        <!--  TABLE  -->
+                        <DataGrid
+                            AutoGenerateColumns="False"
+                            CornerRadius="8"
+                            GridLinesVisibility="All"
+                            HeadersVisibility="Column"
+                            IsReadOnly="True"
+                            ItemsSource="{Binding TableItems}"
+                            RowHeight="32">
 
-                            <!--  Toggle  -->
-                            <StackPanel>
-                                <TextBlock
-                                    Margin="0,0,0,4"
-                                    FontWeight="SemiBold"
-                                    Text="Include Archived" />
-                                <ToggleSwitch IsChecked="{Binding IncludeArchived}" />
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Id}"
+                                    Header="ID" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Name}"
+                                    Header="Name" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Value}"
+                                    Header="" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                    </StackPanel>
+
+                    <!--  Title Header  -->
+                    <TextBlock
+                        Grid.Row="2"
+                        Margin="0,30,0,8"
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Text="Rolls by Staff" />
+
+                    <!--  Content Area  -->
+                    <StackPanel Grid.Row="3" Spacing="16">
+
+                        <!--  FILTER BAR  -->
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="12"
+                            CornerRadius="8">
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="20">
+
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Select Items" />
+
+                                    <ToggleButton
+                                        x:Name="RollsPerStaffDropdownButton"
+                                        Width="180"
+                                        Content="Select Items"
+                                        IsChecked="{Binding IsRollsPerStaffDropdownOpen, Mode=TwoWay}" />
+
+                                    <Popup IsOpen="{Binding IsRollsPerStaffDropdownOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=RollsPerStaffDropdownButton}">
+                                        <Border
+                                            Padding="4"
+                                            Background="White"
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <ScrollViewer MaxHeight="120">
+                                                <ItemsControl ItemsSource="{Binding RollsPerStaffAvailableOptions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+
+
+                                <!--  Date range  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Date Range" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding RollsPerStaffStartDate}" />
+                                        <TextBlock VerticalAlignment="Center" Text="to" />
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding RollsPerStaffEndDate}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!--  Toggle  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Average?" />
+                                    <ToggleSwitch IsChecked="{Binding RollsPerStaffIncludeArchived}" />
+                                </StackPanel>
+
+                                <!--  Apply Filter Button  -->
+                                <Button
+                                    Height="32"
+                                    VerticalAlignment="Bottom"
+                                    Command="{Binding RollsPerStaffCommand}"
+                                    Content="Apply" />
                             </StackPanel>
+                        </Border>
+                        <!--  TABLE  -->
+                        <DataGrid
+                            AutoGenerateColumns="False"
+                            CornerRadius="8"
+                            GridLinesVisibility="All"
+                            HeadersVisibility="Column"
+                            IsReadOnly="True"
+                            ItemsSource="{Binding RollsPerStaffTableItems}"
+                            RowHeight="32">
 
-                            <!--  Apply Filter Button  -->
-                            <Button
-                                Height="32"
-                                VerticalAlignment="Bottom"
-                                Command="{Binding OrdersPerStaffCommand}"
-                                Content="Apply Filters" />
-                        </StackPanel>
-                    </Border>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Id}"
+                                    Header="ID" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Name}"
+                                    Header="Name" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Value}"
+                                    Header="" />
+                            </DataGrid.Columns>
+                        </DataGrid>
 
-                    <!--  TABLE  -->
-                    <DataGrid
-                        AutoGenerateColumns="False"
-                        CornerRadius="8"
-                        GridLinesVisibility="All"
-                        HeadersVisibility="Column"
-                        IsReadOnly="True"
-                        ItemsSource="{Binding TableItems}"
-                        RowHeight="32">
-
-                        <DataGrid.Columns>
-                            <DataGridTextColumn
-                                Width="Auto"
-                                Binding="{Binding Id}"
-                                Header="ID" />
-                            <DataGridTextColumn
-                                Width="*"
-                                Binding="{Binding Name}"
-                                Header="Name" />
-                            <DataGridTextColumn
-                                Width="*"
-                                Binding="{Binding Value}"
-                                Header="" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                </StackPanel>
-            </Grid>
-        </Border>
-    </Grid>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
 </UserControl>
