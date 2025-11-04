@@ -15,7 +15,7 @@
                 VerticalAlignment="Top"
                 CornerRadius="16">
 
-                <Grid RowDefinitions="Auto, Auto, Auto, Auto">
+                <Grid RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto, Auto">
 
 
                     <!--  Title Header  -->
@@ -223,6 +223,230 @@
                             HeadersVisibility="Column"
                             IsReadOnly="True"
                             ItemsSource="{Binding RollsPerStaffTableItems}"
+                            RowHeight="32">
+
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Id}"
+                                    Header="ID" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Name}"
+                                    Header="Name" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Value}"
+                                    Header="" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                    </StackPanel>
+
+                    <!--  Title Header  -->
+                    <TextBlock
+                        Grid.Row="4"
+                        Margin="0,30,0,8"
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Text="Orders by Scanner" />
+
+                    <!--  Content Area  -->
+                    <StackPanel Grid.Row="5" Spacing="16">
+
+                        <!--  FILTER BAR  -->
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="12"
+                            CornerRadius="8">
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="20">
+
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Select Scanner(s)" />
+
+                                    <ToggleButton
+                                        x:Name="OrdersPerScannerDropdownButton"
+                                        Width="180"
+                                        Content="Select Scanner(s)"
+                                        IsChecked="{Binding IsOrdersPerScannerDropdownOpen, Mode=TwoWay}" />
+
+                                    <Popup IsOpen="{Binding IsOrdersPerScannerDropdownOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=OrdersPerScannerDropdownButton}">
+                                        <Border
+                                            Padding="4"
+                                            Background="White"
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <ScrollViewer MaxHeight="120">
+                                                <ItemsControl ItemsSource="{Binding OrdersPerScannerAvailableOptions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+
+
+                                <!--  Date range  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Date Range" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding OrdersPerScannerStartDate}" />
+                                        <TextBlock VerticalAlignment="Center" Text="to" />
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding OrdersPerScannerEndDate}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!--  Toggle  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Average?" />
+                                    <ToggleSwitch IsChecked="{Binding OrdersPerScannerIncludeArchived}" />
+                                </StackPanel>
+
+                                <!--  Apply Filter Button  -->
+                                <Button
+                                    Height="32"
+                                    VerticalAlignment="Bottom"
+                                    Command="{Binding OrdersPerScannerCommand}"
+                                    Content="Apply" />
+                            </StackPanel>
+                        </Border>
+                        <!--  TABLE  -->
+                        <DataGrid
+                            AutoGenerateColumns="False"
+                            CornerRadius="8"
+                            GridLinesVisibility="All"
+                            HeadersVisibility="Column"
+                            IsReadOnly="True"
+                            ItemsSource="{Binding OrdersPerScannerTableItems}"
+                            RowHeight="32">
+
+                            <DataGrid.Columns>
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Id}"
+                                    Header="ID" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Name}"
+                                    Header="Name" />
+                                <DataGridTextColumn
+                                    Width="*"
+                                    Binding="{Binding Value}"
+                                    Header="" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                    </StackPanel>
+
+                    <!--  Title Header  -->
+                    <TextBlock
+                        Grid.Row="6"
+                        Margin="0,30,0,8"
+                        FontSize="24"
+                        FontWeight="SemiBold"
+                        Text="Rolls by Scanner" />
+
+                    <!--  Content Area  -->
+                    <StackPanel Grid.Row="7" Spacing="16">
+
+                        <!--  FILTER BAR  -->
+                        <Border
+                            Margin="0,0,0,8"
+                            Padding="12"
+                            CornerRadius="8">
+                            <StackPanel
+                                VerticalAlignment="Center"
+                                Orientation="Horizontal"
+                                Spacing="20">
+
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Select Scanner(s)" />
+
+                                    <ToggleButton
+                                        x:Name="RollsPerScannerDropdownButton"
+                                        Width="180"
+                                        Content="Select Scanner(s)"
+                                        IsChecked="{Binding IsRollsPerScannerDropdownOpen, Mode=TwoWay}" />
+
+                                    <Popup IsOpen="{Binding IsRollsPerScannerDropdownOpen, Mode=TwoWay}" PlacementTarget="{Binding ElementName=RollsPerScannerDropdownButton}">
+                                        <Border
+                                            Padding="4"
+                                            Background="White"
+                                            BorderBrush="Gray"
+                                            BorderThickness="1"
+                                            CornerRadius="4">
+                                            <ScrollViewer MaxHeight="120">
+                                                <ItemsControl ItemsSource="{Binding RollsPerScannerAvailableOptions}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox Content="{Binding Label}" IsChecked="{Binding IsSelected, Mode=TwoWay}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </Border>
+                                    </Popup>
+                                </StackPanel>
+
+
+                                <!--  Date range  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Date Range" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding RollsPerScannerStartDate}" />
+                                        <TextBlock VerticalAlignment="Center" Text="to" />
+                                        <CalendarDatePicker Width="130" SelectedDate="{Binding RollsPerScannerEndDate}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <!--  Toggle  -->
+                                <StackPanel>
+                                    <TextBlock
+                                        Margin="0,0,0,4"
+                                        FontWeight="SemiBold"
+                                        Text="Average?" />
+                                    <ToggleSwitch IsChecked="{Binding RollsPerScannerIncludeArchived}" />
+                                </StackPanel>
+
+                                <!--  Apply Filter Button  -->
+                                <Button
+                                    Height="32"
+                                    VerticalAlignment="Bottom"
+                                    Command="{Binding RollsPerScannerCommand}"
+                                    Content="Apply" />
+                            </StackPanel>
+                        </Border>
+                        <!--  TABLE  -->
+                        <DataGrid
+                            AutoGenerateColumns="False"
+                            CornerRadius="8"
+                            GridLinesVisibility="All"
+                            HeadersVisibility="Column"
+                            IsReadOnly="True"
+                            ItemsSource="{Binding RollsPerScannerTableItems}"
                             RowHeight="32">
 
                             <DataGrid.Columns>

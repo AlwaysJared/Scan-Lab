@@ -37,7 +37,7 @@ namespace Admin.ViewModels
         public ObservableCollection<OptionItem> AvailableOptions { get; } = new();
         public ObservableCollection<OptionItem> RollsPerStaffAvailableOptions { get; } = new();
         public ObservableCollection<OptionItem> RollsPerScannerAvailableOptions { get; } = new();
-        public ObservableCollection<OptionItem> OrdersPerSCannerAvailableOptions { get; } = new();
+        public ObservableCollection<OptionItem> OrdersPerScannerAvailableOptions { get; } = new();
 
         public Dictionary<string, bool> SelectedOptionsDict { get; } = new();
 
@@ -146,9 +146,12 @@ namespace Admin.ViewModels
             _apiService = apiService;
             _mainWindowVm = mainWindowVm;
             PopulateStaff();
+            PopulateScanners();
 
             OrdersPerStaff();
             RollsPerStaff();
+            OrdersPerScanner();
+            RollsPerScanner();
         }
 
         [RelayCommand]
@@ -286,6 +289,125 @@ namespace Admin.ViewModels
         }
 
         [RelayCommand]
+        private async void OrdersPerScanner()
+        {
+            try
+            {
+                OrdersPerScannerTableItems.Clear();
+                var apiUrl = $"{_apiService.ApiAddress}/api/Analytics/OrdersPerScanner";
+
+                var getStaffRequest = new
+                {
+                    Ids = OrdersPerScannerAvailableOptions.Where(x => x.IsSelected).Select(x => x.Value).ToList(),
+                    OrdersPerScannerStartDate,
+                    OrdersPerScannerEndDate,
+                    IsAverage = OrdersPerScannerIncludeArchived,
+                    Interval = 1
+                };
+
+
+                // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                string jsonRequest = JsonSerializer.Serialize(getStaffRequest);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                // _apiService.AddAuthHeader();
+                // HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+                HttpResponseMessage response = await _apiService._httpClient.PostAsync(apiUrl, content);
+                // Check if the request was successful
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        ReferenceHandler = ReferenceHandler.Preserve
+                    };
+                    var scannerResp = JsonSerializer.Deserialize<OrdersPerStaffDTO>(json, options);
+                    foreach (var a in scannerResp.Analytics)
+                    {
+                        OrdersPerScannerTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value.ToString() });
+                    }
+                }
+                else
+                {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        // _mainWindowVm.Logout();
+                        return;
+                    }
+                    var errMsg = await response.Content.ReadAsStringAsync();
+                    await UiTools.ShowMessageAsync("Error", errMsg, UiTools.MessageType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                await UiTools.ShowMessageAsync("Error", ex.Message, UiTools.MessageType.Error);
+            }
+        }
+
+        [RelayCommand]
+        private async void RollsPerScanner()
+        {
+            try
+            {
+                RollsPerScannerTableItems.Clear();
+                var apiUrl = $"{_apiService.ApiAddress}/api/Analytics/RollsPerScanner";
+
+                var getStaffRequest = new
+                {
+                    Ids = RollsPerScannerAvailableOptions.Where(x => x.IsSelected).Select(x => x.Value).ToList(),
+                    StartDate,
+                    EndDate,
+                    IsAverage = RollsPerScannerIncludeArchived,
+                    Interval = 1
+                };
+
+
+                // new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }
+                string jsonRequest = JsonSerializer.Serialize(getStaffRequest);
+                var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+                // _apiService.AddAuthHeader();
+                // HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
+                HttpResponseMessage response = await _apiService._httpClient.PostAsync(apiUrl, content);
+                // Check if the request was successful
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        ReferenceHandler = ReferenceHandler.Preserve
+                    };
+                    var scannerResp = JsonSerializer.Deserialize<OrdersPerStaffDTO>(json, options);
+                    foreach (var a in scannerResp.Analytics)
+                    {
+                        RollsPerScannerTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value.ToString() });
+                    }
+                }
+                else
+                {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        // _mainWindowVm.Logout();
+                        return;
+                    }
+                    var errMsg = await response.Content.ReadAsStringAsync();
+                    await UiTools.ShowMessageAsync("Error", errMsg, UiTools.MessageType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                await UiTools.ShowMessageAsync("Error", ex.Message, UiTools.MessageType.Error);
+            }
+        }
+
+
+        [RelayCommand]
         private async void PopulateStaff()
         {
             try
@@ -322,6 +444,53 @@ namespace Admin.ViewModels
                     {
                         AvailableOptions.Add(new OptionItem { Label = staff.FirstName + " " + staff.LastName, Value = staff.Id.ToString() });
                         RollsPerStaffAvailableOptions.Add(new OptionItem { Label = staff.FirstName + " " + staff.LastName, Value = staff.Id.ToString() });
+                    }
+                }
+                else
+                {
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", UiTools.MessageType.Error);
+                        // _mainWindowVm.Logout();
+                        return;
+                    }
+                    var errMsg = await response.Content.ReadAsStringAsync();
+                    await UiTools.ShowMessageAsync("Error", errMsg, UiTools.MessageType.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                await UiTools.ShowMessageAsync($"Error", ex.ToString(), UiTools.MessageType.Error);
+            }
+
+        }
+
+        [RelayCommand]
+        private async void PopulateScanners()
+        {
+            try
+            {
+                var apiUrl = $"{_apiService.ApiAddress}/api/Scanner/Scanners";
+
+                // _apiService.AddAuthHeader();
+                HttpResponseMessage response = await _apiService._httpClient.GetAsync(apiUrl);
+                // Check if the request was successful
+                if (response.IsSuccessStatusCode)
+                {
+                    var json = await response.Content.ReadAsStringAsync();
+
+                    // var response = await _httpClient.GetStringAsync(apiUrl);
+                    // Deserialize the response into a list of orders
+                    var options = new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        ReferenceHandler = ReferenceHandler.Preserve
+                    };
+                    var scannerResp = JsonSerializer.Deserialize<List<Scanner>>(json, options);
+                    foreach (var s in scannerResp ?? new List<Scanner>())
+                    {
+                        OrdersPerScannerAvailableOptions.Add(new OptionItem { Label = s.ScannerName, Value = s.Id.ToString() });
+                        RollsPerScannerAvailableOptions.Add(new OptionItem { Label = s.ScannerName, Value = s.Id.ToString() });
                     }
                 }
                 else
