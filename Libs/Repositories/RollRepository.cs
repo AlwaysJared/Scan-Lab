@@ -187,12 +187,12 @@ namespace Libs.Repositories
                 {
                     string extension = Path.GetExtension(file).ToLower();
 
+                    string fileName = Path.GetFileName(file);
+                    string fileDir = Path.GetDirectoryName(file) ?? "";
+
                     // Check if the file is an image based on extension
                     if (Array.Exists(imageExtensions, ext => ext.Equals(extension)))
                     {
-                        string fileName = Path.GetFileName(file);
-                        string fileDir = Path.GetDirectoryName(file) ?? "";
-
                         #region Image File Conversions & EXIF data setting
                         // If file is a .bmp file, convert it to a tiff image
                         if (extension.ToLower() == ".bmp")
@@ -249,11 +249,13 @@ namespace Libs.Repositories
                     }
                     else
                     {
-                        return new SystemResponse
-                        {
-                            IsSuccess = false,
-                            Message = $"File '{file}' not recognized as a valid image file type"
-                        };
+                        // delete current file if it is not an image file 
+                        await IOHelpers.DeleteFileAsync(Path.Combine(fileDir, fileName));
+                        // return new SystemResponse
+                        // {
+                        //     IsSuccess = false,
+                        //     Message = $"File '{file}' not recognized as a valid image file type"
+                        // };
                     }
 
                 }
@@ -367,7 +369,7 @@ namespace Libs.Repositories
 
                 if (status == RollStatus.ScanningPaused || status == RollStatus.Created)
                 {
-                    if(dbRoll.Order.Status != OrderStatus.Processing)
+                    if (dbRoll.Order.Status != OrderStatus.Processing)
                         dbRoll.Order.Status = OrderStatus.Created;
                 }
 

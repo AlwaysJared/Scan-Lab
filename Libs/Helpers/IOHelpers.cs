@@ -14,6 +14,11 @@ namespace Libs.Helpers
             return Task.Run(() => File.Move(source, destination));
         }
 
+        public static Task DeleteFileAsync(string source)
+        {
+            return Task.Run(() => File.Delete(source));
+        }
+
         public static Task DeleteDirAsync(string dir)
         {
             return Task.Run(() => Directory.Delete(dir));
