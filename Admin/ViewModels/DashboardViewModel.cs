@@ -26,6 +26,28 @@ namespace Admin.ViewModels
         public ObservableCollection<TableItem> OrdersPerScannerTableItems { get; } = new ObservableCollection<TableItem>();
 
         [ObservableProperty]
+        private double ordersPerStaffTotal;
+
+        [ObservableProperty]
+        private double rollsPerStaffTotal;
+
+        [ObservableProperty]
+        private double ordersPerScannerTotal;
+
+        [ObservableProperty]
+        private double rollsPerScannerTotal;
+
+
+        private void RecalculateTotals()
+        {
+            OrdersPerStaffTotal = IncludeArchived ? TableItems.DefaultIfEmpty(new TableItem()).Average(i => i.Value) : TableItems.Sum(i => i.Value);
+            RollsPerStaffTotal = RollsPerStaffIncludeArchived ? RollsPerStaffTableItems.DefaultIfEmpty(new TableItem()).Average(i => i.Value) : RollsPerStaffTableItems.Sum(i => i.Value);
+            OrdersPerScannerTotal = OrdersPerScannerIncludeArchived ? OrdersPerScannerTableItems.DefaultIfEmpty(new TableItem()).Average(i => i.Value) : OrdersPerScannerTableItems.Sum(i => i.Value);
+            RollsPerScannerTotal = RollsPerScannerIncludeArchived ? RollsPerScannerTableItems.DefaultIfEmpty(new TableItem()).Average(i => i.Value) : RollsPerScannerTableItems.Sum(i => i.Value);
+        }
+        
+        
+        [ObservableProperty]
         private bool isDropdownOpen;
         [ObservableProperty]
         private bool isRollsPerStaffDropdownOpen;
@@ -145,6 +167,7 @@ namespace Admin.ViewModels
         {
             _apiService = apiService;
             _mainWindowVm = mainWindowVm;
+
             PopulateStaff();
             PopulateScanners();
 
@@ -152,6 +175,12 @@ namespace Admin.ViewModels
             RollsPerStaff();
             OrdersPerScanner();
             RollsPerScanner();
+
+            // Hook collection change events for live total updates
+            // TableItems.CollectionChanged += (_, __) => RecalculateTotals();
+            // RollsPerStaffTableItems.CollectionChanged += (_, __) => RecalculateTotals();
+            // RollsPerScannerTableItems.CollectionChanged += (_, __) => RecalculateTotals();
+            // OrdersPerScannerTableItems.CollectionChanged += (_, __) => RecalculateTotals();
         }
 
         [RelayCommand]
@@ -208,7 +237,7 @@ namespace Admin.ViewModels
                     var staffResp = JsonSerializer.Deserialize<OrdersPerStaffDTO>(json, options);
                     foreach (var a in staffResp.Analytics)
                     {
-                        TableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value.ToString() });
+                        TableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value });
                     }
                 }
                 else
@@ -227,6 +256,10 @@ namespace Admin.ViewModels
             {
                 await UiTools.ShowMessageAsync("Error", ex.Message, UiTools.MessageType.Error);
             }
+            finally
+            {
+                RecalculateTotals();
+            }
         }
 
         [RelayCommand]
@@ -240,8 +273,8 @@ namespace Admin.ViewModels
                 var getStaffRequest = new
                 {
                     Ids = RollsPerStaffAvailableOptions.Where(x => x.IsSelected).Select(x => x.Value).ToList(),
-                    StartDate,
-                    EndDate,
+                    StartDate = RollsPerStaffStartDate,
+                    EndDate = RollsPerStaffEndDate,
                     IsAverage = RollsPerStaffIncludeArchived,
                     Interval = 1
                 };
@@ -267,7 +300,7 @@ namespace Admin.ViewModels
                     var staffResp = JsonSerializer.Deserialize<OrdersPerStaffDTO>(json, options);
                     foreach (var a in staffResp.Analytics)
                     {
-                        RollsPerStaffTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value.ToString() });
+                        RollsPerStaffTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value });
                     }
                 }
                 else
@@ -286,6 +319,10 @@ namespace Admin.ViewModels
             {
                 await UiTools.ShowMessageAsync("Error", ex.Message, UiTools.MessageType.Error);
             }
+            finally
+            {
+                RecalculateTotals();
+            }
         }
 
         [RelayCommand]
@@ -299,8 +336,8 @@ namespace Admin.ViewModels
                 var getStaffRequest = new
                 {
                     Ids = OrdersPerScannerAvailableOptions.Where(x => x.IsSelected).Select(x => x.Value).ToList(),
-                    OrdersPerScannerStartDate,
-                    OrdersPerScannerEndDate,
+                    StartDate = OrdersPerScannerStartDate,
+                    EndDate = OrdersPerScannerEndDate,
                     IsAverage = OrdersPerScannerIncludeArchived,
                     Interval = 1
                 };
@@ -326,7 +363,7 @@ namespace Admin.ViewModels
                     var scannerResp = JsonSerializer.Deserialize<OrdersPerStaffDTO>(json, options);
                     foreach (var a in scannerResp.Analytics)
                     {
-                        OrdersPerScannerTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value.ToString() });
+                        OrdersPerScannerTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value });
                     }
                 }
                 else
@@ -345,6 +382,10 @@ namespace Admin.ViewModels
             {
                 await UiTools.ShowMessageAsync("Error", ex.Message, UiTools.MessageType.Error);
             }
+            finally
+            {
+                RecalculateTotals();
+            }
         }
 
         [RelayCommand]
@@ -358,8 +399,8 @@ namespace Admin.ViewModels
                 var getStaffRequest = new
                 {
                     Ids = RollsPerScannerAvailableOptions.Where(x => x.IsSelected).Select(x => x.Value).ToList(),
-                    StartDate,
-                    EndDate,
+                    StartDate = RollsPerScannerStartDate,
+                    EndDate = RollsPerScannerEndDate,
                     IsAverage = RollsPerScannerIncludeArchived,
                     Interval = 1
                 };
@@ -385,7 +426,7 @@ namespace Admin.ViewModels
                     var scannerResp = JsonSerializer.Deserialize<OrdersPerStaffDTO>(json, options);
                     foreach (var a in scannerResp.Analytics)
                     {
-                        RollsPerScannerTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value.ToString() });
+                        RollsPerScannerTableItems.Add(new TableItem { Id = a.Id, Name = a.Name, Value = a.Value });
                     }
                 }
                 else
@@ -403,6 +444,10 @@ namespace Admin.ViewModels
             catch (Exception ex)
             {
                 await UiTools.ShowMessageAsync("Error", ex.Message, UiTools.MessageType.Error);
+            }
+            finally
+            {
+                RecalculateTotals();
             }
         }
 
@@ -530,6 +575,6 @@ namespace Admin.ViewModels
     {
         public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
-        public string Value { get; set; } = string.Empty;
+        public double Value { get; set; } = 0;
     }
 }
