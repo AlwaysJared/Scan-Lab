@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
+using API.Services;
 
 
 
@@ -110,6 +111,7 @@ builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<StaffRepository>();
 builder.Services.AddScoped<GmailService>();
+builder.Services.AddScoped<TokenService>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
