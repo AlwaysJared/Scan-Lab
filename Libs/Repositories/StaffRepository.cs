@@ -34,7 +34,12 @@ namespace Libs.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<SystemResponse> GetStaff(Guid? staffId = null, int? page = 1, int? pageSize = 10, string? email="")
+        public async Task<SystemResponse> GetStaff(
+            Guid? staffId = null,
+            int? page = 1,
+            int? pageSize = 10,
+            string? email = "",
+            bool getAllStaff = false)
         {
             try
             {
@@ -43,21 +48,26 @@ namespace Libs.Repositories
                 {
                     staff = staff.Where(s => s.Id == staffId).ToList();
                 }
-                
-                if(!String.IsNullOrEmpty(email.Trim()))
+
+                if (!String.IsNullOrEmpty(email))
                 {
                     staff = staff.Where(s => s.Email.ToLower() == email.ToLower()).ToList();
                 }
-                
 
-                var totalPages = (int)Math.Ceiling((staff?.Count ?? 0) / (double)pageSize);
+                var totalPages = 1;
 
-                // if (staff.Count > ((page.Value - 1) * pageSize.Value))
-                // {
-                //     staff = staff.Skip((page.Value - 1) * pageSize.Value).ToList();
-                // }
+                if (!getAllStaff)
+                {
+                    totalPages = (int)Math.Ceiling((staff?.Count ?? 0) / (double)pageSize);
 
-                staff = staff.Skip((page.Value-1) * pageSize.Value).Take(pageSize.Value).ToList();
+                    // if (staff.Count > ((page.Value - 1) * pageSize.Value))
+                    // {
+                    //     staff = staff.Skip((page.Value - 1) * pageSize.Value).ToList();
+                    // }
+
+                    staff = staff.Skip((page.Value - 1) * pageSize.Value).Take(pageSize.Value).ToList();
+                }
+
 
                 return new SystemResponse
                 {

@@ -110,6 +110,7 @@ builder.Services.AddScoped<RollRepository>();
 builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<AuthRepository>();
 builder.Services.AddScoped<StaffRepository>();
+builder.Services.AddScoped<AnalyticsRepository>();
 builder.Services.AddScoped<GmailService>();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddControllers();

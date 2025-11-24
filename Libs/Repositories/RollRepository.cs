@@ -71,7 +71,7 @@ namespace Libs.Repositories
             }
         }
 
-        public async Task<SystemResponse> ProcessRoll(Guid rollId)
+        public async Task<SystemResponse> ProcessRoll(Guid rollId, Guid? staffId)
         {
             try
             {
@@ -101,7 +101,7 @@ namespace Libs.Repositories
                     return new SystemResponse() { IsSuccess = false, Message = $"No rolls found in scanner's watched directory ('{roll.Order.Scanner.WatchedDir}')" };
 
                 // Attempt to update roll's status to 'in progress'
-                var statusResp = await UpdateRollStatus(roll, RollStatus.Processing);
+                var statusResp = await UpdateRollStatus(roll, RollStatus.Processing, staffId);
 
                 if (!statusResp.IsSuccess)
                     return new SystemResponse() { IsSuccess = false, Message = statusResp.Message };
@@ -130,7 +130,8 @@ namespace Libs.Repositories
                 */
                 #region Interval folder retrieval 
                 string targetIntervalFolder = "";
-                var targetMonday = DateTimeHelpers.GetMondayOfWeek(roll.Order.DateCreated ?? DateTime.Today);
+                // var targetMonday = DateTimeHelpers.GetMondayOfWeek(roll.Order.DateCreated ?? DateTime.Today);
+                var targetMonday = DateTimeHelpers.GetMondayOfWeek(DateTime.Now);
 
                 // //get monday of earliest "processed" roll in order
                 // var earliestProcessedRoll = roll.Order.Rolls
@@ -167,9 +168,12 @@ namespace Libs.Repositories
                 {
                     destFolderExists = true;
                     rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
+                        // Only changes in whole repo (client code all still the same)
+                        !String.IsNullOrWhiteSpace(targetIntervalFolder) ? targetIntervalFolder : String.Empty,
                         roll.Order.OrderId,
                         "Rescans",
-                        roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")
+                        // roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")
+                        roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("dddd, MMM dd, yyyy hh-mm-ss tt")
                     );
                     Directory.CreateDirectory(rollFolderPath);
                 }
@@ -183,12 +187,12 @@ namespace Libs.Repositories
                 {
                     string extension = Path.GetExtension(file).ToLower();
 
+                    string fileName = Path.GetFileName(file);
+                    string fileDir = Path.GetDirectoryName(file) ?? "";
+
                     // Check if the file is an image based on extension
                     if (Array.Exists(imageExtensions, ext => ext.Equals(extension)))
                     {
-                        string fileName = Path.GetFileName(file);
-                        string fileDir = Path.GetDirectoryName(file) ?? "";
-
                         #region Image File Conversions & EXIF data setting
                         // If file is a .bmp file, convert it to a tiff image
                         if (extension.ToLower() == ".bmp")
@@ -200,7 +204,7 @@ namespace Libs.Repositories
                                 fileName = Path.ChangeExtension(fileName, ".tiff");
                             else
                             {
-                                await UpdateRollStatus(roll, RollStatus.Processing);
+                                await UpdateRollStatus(roll, RollStatus.Processing, staffId);
 
                                 return new SystemResponse { IsSuccess = false, Message = tiffConversionResp.Message };
                             }
@@ -245,11 +249,13 @@ namespace Libs.Repositories
                     }
                     else
                     {
-                        return new SystemResponse
-                        {
-                            IsSuccess = false,
-                            Message = $"File '{file}' not recognized as a valid image file type"
-                        };
+                        // delete current file if it is not an image file 
+                        await IOHelpers.DeleteFileAsync(Path.Combine(fileDir, fileName));
+                        // return new SystemResponse
+                        // {
+                        //     IsSuccess = false,
+                        //     Message = $"File '{file}' not recognized as a valid image file type"
+                        // };
                     }
 
                 }
@@ -259,7 +265,7 @@ namespace Libs.Repositories
                 // Directory.Delete(latestRollDir);
                 await IOHelpers.DeleteDirAsync(latestRollDir);
 
-                statusResp = await UpdateRollStatus(roll, RollStatus.Processed);
+                statusResp = await UpdateRollStatus(roll, RollStatus.Processed, staffId);
 
                 if (!statusResp.IsSuccess)
                     return new SystemResponse
@@ -307,7 +313,7 @@ namespace Libs.Repositories
                 return new List<Roll>();
             }
         }
-        public async Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status)
+        public async Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status, Guid? staffId)
         {
             try
             {
@@ -363,12 +369,13 @@ namespace Libs.Repositories
 
                 if (status == RollStatus.ScanningPaused || status == RollStatus.Created)
                 {
-                    if(dbRoll.Order.Status != OrderStatus.Processing)
+                    if (dbRoll.Order.Status != OrderStatus.Processing)
                         dbRoll.Order.Status = OrderStatus.Created;
                 }
 
                 dbRoll.Status = status;
                 dbRoll.DateUpdated = DateTime.UtcNow;
+                dbRoll.UpdatedBy = staffId;
 
                 await context.SaveChangesAsync();
 

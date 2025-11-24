@@ -8,6 +8,8 @@ namespace API.Models.RequestsResponses
     {
         public required string OrderId { get; set; }
         public required Scanner Scanner { get; set; }
+        public Guid? StaffId { get; set; }
+        public Guid? CustomerId { get; set; }
         public Customer? Customer { get; set; }
         public string? CustomerInitials { get; set; }
         public List<Roll>? Rolls { get; set; }

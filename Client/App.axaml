@@ -15,6 +15,7 @@
         <converters:RollActionVisibilityMultiConverter x:Key="RollActionVis"/>
         <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
         <converters:NullableDateTimeConverter x:Key="NullableDateTimeConverter"/>
+        <converters:EnumDescriptionConverter x:Key="EnumDescriptionConverter"/>
     </Application.Resources>
 
     <Application.Styles>

@@ -36,6 +36,7 @@ namespace Libs.Repositories
                     CustomerInitials = req.CustomerInitials,
                     Rolls = req.Rolls,
                     Scanner = scnr,
+                    CreatedBy = req.CreatedBy
                 };
                 var res = context.Orders.Add(newOrder);
                 await context.SaveChangesAsync();
@@ -180,7 +181,7 @@ namespace Libs.Repositories
             return new SystemResponse() { IsSuccess = true };
         }
 
-        public async Task<SystemResponse> UpdateOrderStatus(Order order, OrderStatus status)
+        public async Task<SystemResponse> UpdateOrderStatus(Order order, OrderStatus status, Guid? staffId)
         {
             try
             {
@@ -206,6 +207,7 @@ namespace Libs.Repositories
 
                 dbOrder.Status = status;
                 dbOrder.DateUpdated = DateTime.UtcNow;
+                dbOrder.UpdatedBy = staffId;
 
                 await context.SaveChangesAsync();
 

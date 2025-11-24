@@ -12,6 +12,7 @@ using System.Text.Json.Serialization;
 using Serilog.Context;
 using Serilog;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -44,6 +45,10 @@ namespace API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                Guid.TryParse(userIdClaim, out var staffId);
+
                 var newOrder = new Order
                 {
                     OrderId = request.OrderId,
@@ -51,7 +56,13 @@ namespace API.Controllers
                     CustomerInitials = request.CustomerInitials,
                     Rolls = request.Rolls,
                     Scanner = request.Scanner,
+                    CreatedBy = staffId
                 };
+
+                foreach(var r in newOrder.Rolls ?? new List<Roll>())
+                {
+                    r.CreatedBy = staffId;
+                }
 
                 var resp = await _orderRepository.AddOrder(newOrder);
                 // var id = await Task.Run(() => _watcherService.CreateWatcher(request.path));
@@ -72,6 +83,10 @@ namespace API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                Guid.TryParse(userIdClaim, out var staffId);
+
                 var resp = await _orderRepository.ProcessOrder(req.OrderId);
                 return Ok(resp);
             }

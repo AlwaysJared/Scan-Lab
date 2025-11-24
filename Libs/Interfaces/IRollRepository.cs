@@ -10,9 +10,9 @@ namespace Libs.Interfaces
 {
     public interface IRollRepository : IDisposable
     {
-        Task<SystemResponse> ProcessRoll(Guid rollId);
+        Task<SystemResponse> ProcessRoll(Guid rollId, Guid? staffId);
         Task<List<Roll>> RollsInProgress(Scanner? scnr = null);
-        Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status);
+        Task<SystemResponse> UpdateRollStatus(Roll roll, RollStatus status, Guid? staffId);
         void Save();
     }
 }

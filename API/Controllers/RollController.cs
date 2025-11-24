@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using API.Models.RequestsResponses;
 using Libs.Repositories;
@@ -47,12 +48,16 @@ namespace API.Controllers
         {
             try
             {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                Guid.TryParse(userIdClaim, out var staffId);
+                
                 var roll = await _rollRepository.GetRoll(req.RollId);
 
                 if (roll == null)
                     return BadRequest($"Roll ID: {req.RollId} not found");
 
-                var resp = await _rollRepository.ProcessRoll(req.RollId);
+                var resp = await _rollRepository.ProcessRoll(req.RollId, staffId);
 
                 if (!resp.IsSuccess)
                     return BadRequest(resp.Message);
@@ -66,7 +71,7 @@ namespace API.Controllers
 
                 if (orderComplete)
                 {
-                    var completeOrderResponse = await _orderRepository.UpdateOrderStatus(roll.Order, Libs.Enums.OrderStatus.Completed);
+                    var completeOrderResponse = await _orderRepository.UpdateOrderStatus(roll.Order, Libs.Enums.OrderStatus.Completed, staffId);
                     
                     if (!completeOrderResponse.IsSuccess)
                         return BadRequest($"[ERROR]: Error marking order as completed. {Environment.NewLine} {completeOrderResponse.Message}");
@@ -87,6 +92,10 @@ namespace API.Controllers
         public async Task<IActionResult> UpdateRollStatus(UpdateRollRequest req)
         {
             try{
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                Guid.TryParse(userIdClaim, out var staffId);
+
                 var roll = await _rollRepository.GetRoll(req.RollId);
 
                 if (roll == null)
@@ -95,7 +104,7 @@ namespace API.Controllers
                         Message = "Error retrieving roll"
                     });
                 
-                var resp = await _rollRepository.UpdateRollStatus(roll, req.Status);
+                var resp = await _rollRepository.UpdateRollStatus(roll, req.Status, staffId);
 
                 if(!resp.IsSuccess)
                     return BadRequest(resp.Message);
