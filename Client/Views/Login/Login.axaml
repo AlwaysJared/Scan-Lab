@@ -9,7 +9,7 @@
         <TextBox Watermark="Username" Text="{Binding Username}" />
         <TextBox PasswordChar="*" Watermark="Password" Text="{Binding Password}" />
         <!-- <PasswordBox Password="{Binding Password}" /> -->
-        <Button Content="Login" Command="{Binding LoginCommand}" />
+        <Button Content="Login" Command="{Binding LoginCommand}" IsDefault="True"/>
         <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" />
     </StackPanel>
 </UserControl>
