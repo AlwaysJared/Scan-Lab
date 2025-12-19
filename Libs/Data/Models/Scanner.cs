@@ -14,6 +14,7 @@ namespace Libs.Data.Models
             WatchedDir = scnr?.WatchedDir ?? "";
             DestinationDir = scnr?.DestinationDir ?? "";
             ArchiveDir = scnr?.ArchiveDir ?? "";
+            ProfileId = scnr?.ProfileId;
         }
 
         [Key]
@@ -25,5 +26,9 @@ namespace Libs.Data.Models
         public required string DestinationDir { get; set; }
         public required string ArchiveDir { get; set; }
         public string? ArtistName { get; set; }
+
+        // Scanner Profile relationship
+        public Guid? ProfileId { get; set; } // Nullable for backward compatibility
+        public ScannerProfile? Profile { get; set; }
     }
 }

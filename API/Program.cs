@@ -120,6 +120,13 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Seed scanner profiles on startup
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ScanLabContext>();
+    await Libs.Data.SeedData.ProfileSeeder.SeedProfiles(context);
+}
+
 app.UseSerilogRequestLogging(); // Optional: logs HTTP request info
 
 // Configure the HTTP request pipeline.

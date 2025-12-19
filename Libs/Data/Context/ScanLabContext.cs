@@ -18,6 +18,8 @@ namespace Libs.Data.Context
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<ConfigSetting> ConfigSettings { get; set; }
+        public DbSet<ScannerProfile> ScannerProfiles { get; set; }
+        public DbSet<ProfileConfiguration> ProfileConfigurations { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -27,6 +29,20 @@ namespace Libs.Data.Context
                 .HasMany(o => o.Rolls)
                 .WithOne(r => r.Order)
                 .HasForeignKey(r => r.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Scanner -> Profile relationship
+            modelBuilder.Entity<Scanner>()
+                .HasOne(s => s.Profile)
+                .WithMany()
+                .HasForeignKey(s => s.ProfileId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Profile -> Configurations relationship
+            modelBuilder.Entity<ScannerProfile>()
+                .HasMany<ProfileConfiguration>()
+                .WithOne(pc => pc.Profile)
+                .HasForeignKey(pc => pc.ProfileId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Rename Identity tables to match "Staff"
