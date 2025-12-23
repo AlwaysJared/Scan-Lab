@@ -17,8 +17,8 @@ namespace Libs.Repositories
     public class GmailService : IEmailService
     {
         private readonly ScanLabContext _context;
-        private string _fromEmail;
-        private string _appPassword; //Google App Password
+        private string? _fromEmail;
+        private string? _appPassword; //Google App Password
 
         //  string fromEmail, string appPassword
         public GmailService(ScanLabContext context)

@@ -15,6 +15,7 @@ namespace Libs.Data.Models
             DestinationDir = scnr?.DestinationDir ?? "";
             ArchiveDir = scnr?.ArchiveDir ?? "";
             ProfileId = scnr?.ProfileId;
+            AutoProcessDelaySeconds = scnr?.AutoProcessDelaySeconds;
         }
 
         [Key]
@@ -30,5 +31,8 @@ namespace Libs.Data.Models
         // Scanner Profile relationship
         public Guid? ProfileId { get; set; } // Nullable for backward compatibility
         public ScannerProfile? Profile { get; set; }
+
+        // Auto-processing delay configuration (per scanner instance)
+        public int? AutoProcessDelaySeconds { get; set; } // Nullable, defaults to 25 if null
     }
 }

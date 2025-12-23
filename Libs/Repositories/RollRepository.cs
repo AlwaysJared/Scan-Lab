@@ -167,15 +167,12 @@ namespace Libs.Repositories
                     roll.RollNumber.ToString()
                 );
 
-                bool destFolderExists = false;
-
                 if (!Directory.Exists(rollFolderPath))
                 {
                     Directory.CreateDirectory(rollFolderPath);
                 }
                 else
                 {
-                    destFolderExists = true;
                     rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
                         // Only changes in whole repo (client code all still the same)
                         !String.IsNullOrWhiteSpace(targetIntervalFolder) ? targetIntervalFolder : String.Empty,
@@ -317,7 +314,7 @@ namespace Libs.Repositories
                     .Where(r => r.Status == RollStatus.ScanningInProgress)
                     .ToListAsync() ?? new List<Roll>();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return new List<Roll>();
             }

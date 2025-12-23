@@ -12,7 +12,7 @@ namespace Libs.Services.ScannerStrategies
         /// </summary>
         public static readonly Dictionary<string, Type> StrategyRegistry = new()
         {
-            { "HS1800Strategy", typeof(HS1800Strategy) },
+            { "NoritsuControllerStrategy", typeof(NoritsuControllerStrategy) },
             { "SP500Strategy", typeof(SP500Strategy) },
             { "SP3000Strategy", typeof(SP3000Strategy) }
         };

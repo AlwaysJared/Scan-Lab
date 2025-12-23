@@ -83,9 +83,9 @@ namespace Libs.Tests.Helpers
         }
 
         public static Order CreateTestOrder(
-            string orderId = null,
-            Scanner scanner = null,
-            Customer customer = null,
+            string? orderId = null,
+            Scanner? scanner = null,
+            Customer? customer = null,
             string customerInitials = "JD")
         {
             return new Order
@@ -100,7 +100,7 @@ namespace Libs.Tests.Helpers
         }
 
         public static Roll CreateTestRoll(
-            Order order = null,
+            Order? order = null,
             int rollNumber = 1,
             RollStatus status = RollStatus.Created)
         {

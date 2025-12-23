@@ -7,8 +7,8 @@ namespace Libs.Data.DTOs.Analytics
 {
     public class AnalyticsBaseDTO
     {
-        public string Id { get; set;}
-        public string Name { get; set; }
+        public required string Id { get; set;}
+        public required string Name { get; set; }
         public double Value { get; set; }
     }
 

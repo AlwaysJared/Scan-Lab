@@ -103,7 +103,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
         );
 });
 
-builder.Services.AddSingleton<FileSystemWatcherService>();
+builder.Services.AddScoped<FileSystemWatcherService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ScannerRepository>();
 builder.Services.AddScoped<RollRepository>();

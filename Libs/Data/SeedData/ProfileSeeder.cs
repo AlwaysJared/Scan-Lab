@@ -15,9 +15,9 @@ namespace Libs.Data.SeedData
             {
                 new ScannerProfile
                 {
-                    ProfileName = "HS-1800 Auto",
-                    StrategyClassName = "HS1800Strategy",
-                    Description = "Automatic processing for HS-1800 scanners with daily folder structure"
+                    ProfileName = "Noritsu Controller Auto",
+                    StrategyClassName = "NoritsuControllerStrategy",
+                    Description = "Automatic processing for Noritsu Controller-based scanners (HS-1800, LS-600, etc.) with daily folder structure"
                 },
                 new ScannerProfile
                 {
@@ -36,27 +36,27 @@ namespace Libs.Data.SeedData
             context.ScannerProfiles.AddRange(profiles);
             await context.SaveChangesAsync();
 
-            // Add default configurations for HS-1800
-            var hs1800Profile = profiles.First(p => p.StrategyClassName == "HS1800Strategy");
-            var hs1800Configs = new List<ProfileConfiguration>
+            // Add default configurations for Noritsu Controller scanners
+            var noritsuProfile = profiles.First(p => p.StrategyClassName == "NoritsuControllerStrategy");
+            var noritsuConfigs = new List<ProfileConfiguration>
             {
                 new ProfileConfiguration
                 {
-                    ProfileId = hs1800Profile.Id,
+                    ProfileId = noritsuProfile.Id,
                     ConfigKey = "CompletionDelaySeconds",
                     ConfigValue = "25",
-                    Description = "Time to wait after directory creation before processing"
+                    Description = "Time to wait after last file creation before processing"
                 },
                 new ProfileConfiguration
                 {
-                    ProfileId = hs1800Profile.Id,
+                    ProfileId = noritsuProfile.Id,
                     ConfigKey = "DirectoryPattern",
                     ConfigValue = "{WatchedDir}/{YYYYMMDD}/*",
                     Description = "Expected directory structure pattern"
                 }
             };
 
-            context.ProfileConfigurations.AddRange(hs1800Configs);
+            context.ProfileConfigurations.AddRange(noritsuConfigs);
             await context.SaveChangesAsync();
         }
     }

@@ -13,10 +13,10 @@ namespace Libs.Data.Models
         public ScannerProfile? Profile { get; set; }
 
         [Required]
-        public string ConfigKey { get; set; } // "CompletionDelaySeconds", "DirectoryPattern", etc.
+        public required string ConfigKey { get; set; } // "CompletionDelaySeconds", "DirectoryPattern", etc.
 
         [Required]
-        public string ConfigValue { get; set; } // "25", "{WatchedDir}/{YYYYMMDD}/*", etc.
+        public required string ConfigValue { get; set; } // "25", "{WatchedDir}/{YYYYMMDD}/*", etc.
 
         public string? Description { get; set; }
     }

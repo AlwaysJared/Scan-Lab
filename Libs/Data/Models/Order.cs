@@ -6,7 +6,7 @@ namespace Libs.Data.Models
     public class Order
     {
         [Key]
-        public string OrderId { get; set; }
+        public required string OrderId { get; set; }
         public Customer? Customer { get; set; }
         public string? CustomerInitials { get; set; }
         public OrderStatus Status { get; set; } = OrderStatus.Created;

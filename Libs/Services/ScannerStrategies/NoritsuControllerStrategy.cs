@@ -7,7 +7,11 @@ using System.Threading.Tasks;
 
 namespace Libs.Services.ScannerStrategies
 {
-    public class HS1800Strategy : IScannerStrategy
+    /// <summary>
+    /// Strategy for Noritsu Controller-based scanners (HS-1800, LS-600, etc.)
+    /// Implements smart file watching with timer reset on each new file
+    /// </summary>
+    public class NoritsuControllerStrategy : IScannerStrategy
     {
         public string ResolveWatchPath(Scanner scanner)
         {
@@ -28,7 +32,8 @@ namespace Libs.Services.ScannerStrategies
 
         public CompletionDetectionMode CompletionMode => CompletionDetectionMode.TimeBasedDelay;
 
-        public int? CompletionDelaySeconds => 25; // 25 second delay like FileMover app
+        // Read delay from scanner instance, default to 25 seconds
+        public int? CompletionDelaySeconds => null; // Handled per-scanner in ShouldAutoProcess
 
         public async Task<string?> GetLatestRollDirectory(Scanner scanner)
         {
@@ -49,13 +54,24 @@ namespace Libs.Services.ScannerStrategies
             return await Task.FromResult(rollDirs.FirstOrDefault()?.Path);
         }
 
+        /// <summary>
+        /// Smart file watching: Watch for files inside directory, restart timer on each new file
+        /// </summary>
         public async Task<bool> ShouldAutoProcess(Scanner scanner, string directoryPath)
         {
-            // Wait for completion delay
-            if (CompletionDelaySeconds.HasValue)
-            {
-                await Task.Delay(TimeSpan.FromSeconds(CompletionDelaySeconds.Value));
-            }
+            // NOTE: This method is called by FileSystemWatcherService which handles
+            // the actual file watching and timer logic. This implementation is a placeholder.
+            // The real logic is in FileSystemWatcherService.OnDirectoryCreated()
+
+            // Verify directory exists
+            if (!Directory.Exists(directoryPath))
+                return false;
+
+            // Get delay from scanner instance, default to 25 seconds
+            var delaySeconds = scanner.AutoProcessDelaySeconds ?? 25;
+
+            // Simple delay for now - FileSystemWatcherService will handle smart watching
+            await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
 
             // Verify directory still exists and has files
             if (!Directory.Exists(directoryPath))

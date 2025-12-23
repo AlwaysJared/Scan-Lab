@@ -8,10 +8,10 @@ namespace Libs.Data.Models
         public Guid Id { get; set; } = Guid.NewGuid();
 
         [Required]
-        public string ProfileName { get; set; } // "HS-1800", "SP-500 Manual", etc.
+        public required string ProfileName { get; set; } // "HS-1800", "SP-500 Manual", etc.
 
         [Required]
-        public string StrategyClassName { get; set; } // "HS1800Strategy", "SP500Strategy"
+        public required string StrategyClassName { get; set; } // "HS1800Strategy", "SP500Strategy"
 
         public string? Description { get; set; }
 

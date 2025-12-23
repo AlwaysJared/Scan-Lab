@@ -1418,7 +1418,7 @@ namespace Libs.Repositories
 
         private class GroupedRollResult
         {
-            public string Interval { get; set; }
+            public required string Interval { get; set; }
             public int Count { get; set; }
         }
     }
