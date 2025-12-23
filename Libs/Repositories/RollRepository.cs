@@ -8,6 +8,7 @@ using Libs.Data.Models;
 using Libs.Enums;
 using Libs.Helpers;
 using Libs.Interfaces;
+using Libs.Services.ScannerStrategies;
 using Microsoft.EntityFrameworkCore;
 
 namespace Libs.Repositories
@@ -109,17 +110,25 @@ namespace Libs.Repositories
                 // Define the common image file extensions
                 string[] imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp"];
 
-                var rollDirsSorted = Directory.GetDirectories(roll.Order.Scanner.WatchedDir).Select(dir => new
-                {
-                    Path = dir,
-                    CreationDate = Directory.GetCreationTime(dir),
-                    WriteTime = Directory.GetLastWriteTimeUtc(dir)
-                })
-                // .OrderBy(dir => dir.CreationDate) // Sort by creation date
-                .OrderByDescending(dir => dir.WriteTime) // Sort by creation date
-                .ToList();
+                // Load scanner strategy
+                var strategy = ScannerStrategyFactory.CreateStrategy(roll.Order.Scanner);
 
-                var latestRollDir = rollDirsSorted.Select(dir => dir.Path).ToList()[0];
+                if (strategy == null)
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = $"Scanner profile not configured or invalid strategy class"
+                    };
+
+                // Use strategy to find latest roll directory
+                var latestRollDir = await strategy.GetLatestRollDirectory(roll.Order.Scanner);
+
+                if (string.IsNullOrEmpty(latestRollDir))
+                    return new SystemResponse
+                    {
+                        IsSuccess = false,
+                        Message = $"No roll directories found in scanner's watched directory"
+                    };
 
                 /*
                     Looks for the latest interval directory within the scanner's destination directory.
