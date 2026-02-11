@@ -16,7 +16,7 @@ jobs:
         shell: pwsh
         run: |
           cd .\Scripts\
-          .\Publish-API.ps1 -environment Production
+          .\Publish-API.ps1 -environment "Production"
           
       - name: Deploy Published API & Update IIS target dir (symbolic link)
         shell: pwsh
