@@ -16,6 +16,7 @@ jobs:
         shell: pwsh
         run: |
           cd .\Scripts\
+          dotnet tool install --global dotnet-ef
           .\Publish-API.ps1 -environment "Production"
           
       - name: Deploy Published API & Update IIS target dir (symbolic link)
