@@ -22,6 +22,7 @@ dotnet publish $projectPath `
 
 $env:ASPNETCORE_ENVIRONMENT = "$environment"
 
+Write-Host "Updating databases using Entity Framework Core migrations..."
 Push-Location ".."
 dotnet ef database update -c ScanLabContext --project Libs --startup-project API
 dotnet ef database update -c ScanLab_LogContext --project Libs --startup-project API
