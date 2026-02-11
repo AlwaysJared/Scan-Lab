@@ -1,3 +1,10 @@
+param(
+    [Parameter]
+    [string]$environment
+)
+
+Write-Host "Publishing API for environment: '$environment'"
+
 # Define the path to the project and the publish profile
 $projectPath = ".\..\API\API.csproj"
 $publishProfile = "Production"
@@ -13,6 +20,8 @@ dotnet publish $projectPath `
     -o $outputDir
 
 # Remove-Item ".\..\DB\ScanLab.*"
+
+$env:ASPNETCORE_ENVIRONMENT = "$environment"
 
 Push-Location ".."
 dotnet ef database update -c ScanLabContext --project Libs --startup-project API
