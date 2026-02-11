@@ -1,5 +1,4 @@
 param(
-    [Parameter]
     [string]$environment
 )
 
