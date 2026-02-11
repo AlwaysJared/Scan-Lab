@@ -1,0 +1,51 @@
+name: Deploy Updated API
+on:
+  push:
+    branches:
+      - main
+      - deploy-api
+
+jobs:
+  deploy-api:
+    runs-on: self-hosted
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        
+      - name: Publish API
+        shell: pwsh
+        run: |
+          cd .\Scripts\
+          .\Publish-API.ps1 -environment "Production"
+          
+      - name: Deploy Published API & Update IIS target dir (symbolic link)
+        shell: pwsh
+        run: |
+          $shortSha = $env:GITHUB_SHA.Substring(0, 7)
+          $folderPath = "C:/ScanLab/API/Releases/$shortSha/"
+
+          if (-not (Test-Path -PathType Container $folderPath)) {
+              New-Item -Path $folderPath -ItemType Directory
+          } else {
+              Write-Host "Folder already exists!"
+          }
+
+          Import-Module WebAdministration
+          Stop-WebSite -Name "ScanLab API"
+          Stop-WebAppPool -Name "ScanLab API"
+          
+          Copy-Item -Path "./API/Publish/API/*" -Destination "$folderPath" -Recurse -Force
+          Remove-Item -Path "C:/ScanLab/API/main/" -ErrorAction SilentlyContinue
+          New-Item -ItemType SymbolicLink -Path "C:/ScanLab/API/main/" -Target "$folderPath"
+
+          Start-WebSite -Name "ScanLab API"
+          Start-WebAppPool -Name "ScanLab API"
+          
+  cleanup:
+    runs-on: self-hosted
+    needs: deploy-api
+    steps:
+      - name: Clean folder
+        shell: pwsh
+        run: |
+          Remove-Item -Recurse -Force ${{ github.workspace }}\*
