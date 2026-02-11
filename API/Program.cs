@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using API.Services;
+using Libs.Services.SP500Export;
 
 
 
@@ -104,6 +105,7 @@ builder.Host.UseSerilog((context, services, configuration) =>
 });
 
 builder.Services.AddScoped<FileSystemWatcherService>();
+builder.Services.AddSingleton<SP500ExporterService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ScannerRepository>();
 builder.Services.AddScoped<RollRepository>();

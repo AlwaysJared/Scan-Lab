@@ -4,7 +4,8 @@
       "Bash(dotnet new:*)",
       "Bash(dotnet add:*)",
       "Bash(dotnet build:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(dotnet test:*)"
     ],
     "deny": [],
     "ask": []

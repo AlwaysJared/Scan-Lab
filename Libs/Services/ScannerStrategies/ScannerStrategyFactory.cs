@@ -14,7 +14,8 @@ namespace Libs.Services.ScannerStrategies
         {
             { "NoritsuControllerStrategy", typeof(NoritsuControllerStrategy) },
             { "SP500Strategy", typeof(SP500Strategy) },
-            { "SP3000Strategy", typeof(SP3000Strategy) }
+            { "SP3000Strategy", typeof(SP3000Strategy) },
+            { "SP500AutoStrategy", typeof(SP500AutoStrategy) }
         };
 
         /// <summary>

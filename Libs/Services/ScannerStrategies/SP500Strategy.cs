@@ -9,19 +9,19 @@ namespace Libs.Services.ScannerStrategies
 {
     public class SP500Strategy : IScannerStrategy
     {
-        public string ResolveWatchPath(Scanner scanner)
+        public virtual string ResolveWatchPath(Scanner scanner)
         {
             // SP-500 doesn't use daily folders - watch directory directly
             return scanner.WatchedDir;
         }
 
-        public bool IsRecursive => false; // Only watch top level
+        public virtual bool IsRecursive => false; // Only watch top level
 
-        public CompletionDetectionMode CompletionMode => CompletionDetectionMode.Manual;
+        public virtual CompletionDetectionMode CompletionMode => CompletionDetectionMode.Manual;
 
-        public int? CompletionDelaySeconds => null; // Manual triggering only
+        public virtual int? CompletionDelaySeconds => null; // Manual triggering only
 
-        public async Task<string?> GetLatestRollDirectory(Scanner scanner)
+        public virtual async Task<string?> GetLatestRollDirectory(Scanner scanner)
         {
             if (!Directory.Exists(scanner.WatchedDir))
                 return null;
@@ -38,7 +38,7 @@ namespace Libs.Services.ScannerStrategies
             return await Task.FromResult(rollDirs.FirstOrDefault()?.Path);
         }
 
-        public async Task<bool> ShouldAutoProcess(Scanner scanner, string directoryPath)
+        public virtual async Task<bool> ShouldAutoProcess(Scanner scanner, string directoryPath)
         {
             // Manual strategy never auto-processes
             return await Task.FromResult(false);
