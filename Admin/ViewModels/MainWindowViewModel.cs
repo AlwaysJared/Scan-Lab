@@ -30,6 +30,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             "Orders" => new Orders { DataContext = new OrdersViewModel() },
             "Scanners" => new Scanners { DataContext = new ScannersViewModel(_apiService) },
+            "ScannerProfiles" => new ScannerProfiles { DataContext = new ScannerProfilesViewModel(_apiService) },
             "Dashboard" => new Dashboard { DataContext = new DashboardViewModel(_apiService, this) },
             "Settings" => new Settings { DataContext = new SettingsViewModel(_apiService) },
             "ActivityLog" => new ActivityLog { DataContext = new ActivityLogViewModel(_apiService) },

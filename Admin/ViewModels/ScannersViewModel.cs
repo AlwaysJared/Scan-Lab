@@ -353,16 +353,21 @@ namespace Admin.ViewModels
                 }
                 else
                 {
+                    int? delaySeconds = null;
+                    if (int.TryParse(AutoProcessDelaySeconds, out int addParsed))
+                        delaySeconds = addParsed;
+
                     var AddScannerRequest = new
                     {
-                        Id = IsEditMode ? EditScannerId : null,
                         ScannerName,
                         Make = ScannerMake,
                         Model = ScannerModel,
                         WatchedDir = WatchedFolderPath,
                         DestinationDir = DestFolderPath,
                         ArchiveDir = ArchiveFolderPath,
-                        ArtistName
+                        ArtistName,
+                        ProfileId = SelectedProfile?.Id,
+                        AutoProcessDelaySeconds = delaySeconds
                     };
                     string jsonRequest = JsonSerializer.Serialize(AddScannerRequest,
                                         new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase }

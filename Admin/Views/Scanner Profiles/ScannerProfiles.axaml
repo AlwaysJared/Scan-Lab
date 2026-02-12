@@ -1,0 +1,107 @@
+<UserControl
+    x:Class="Admin.Views.ScannerProfiles"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="clr-namespace:Admin.ViewModels"
+    x:DataType="vm:ScannerProfilesViewModel">
+    <TabControl Margin="5" SelectedIndex="{Binding SelectedTabIndex}">
+        <TabItem Header="Profile List">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <DataGrid
+                    Grid.Row="0"
+                    MinHeight="200"
+                    MaxHeight="500"
+                    Margin="10"
+                    AutoGenerateColumns="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding Profiles}">
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding ProfileName}" Header="Profile Name" Width="200" />
+                        <DataGridTextColumn Binding="{Binding StrategyClassName}" Header="Strategy" Width="200" />
+                        <DataGridTextColumn Binding="{Binding Description}" Header="Description" Width="*" />
+                        <DataGridCheckBoxColumn Binding="{Binding IsActive}" Header="Active" Width="80" />
+
+                        <DataGridTemplateColumn Width="Auto" Header="Actions">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="5">
+                                        <Button
+                                            Command="{Binding $parent[UserControl].((vm:ScannerProfilesViewModel)DataContext).EditProfileCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Edit Profile">
+                                            <Image
+                                                Width="16"
+                                                Height="16"
+                                                Source="{SvgImage avares://Admin/Assets/pencil.svg}" />
+                                        </Button>
+                                        <Button
+                                            Command="{Binding $parent[UserControl].((vm:ScannerProfilesViewModel)DataContext).DeleteProfileCommand}"
+                                            CommandParameter="{Binding}"
+                                            ToolTip.Tip="Delete Profile"
+                                            Content="X" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Loading Layer -->
+                <Border
+                    Grid.Row="0"
+                    Background="White"
+                    IsVisible="{Binding IsLoading}"
+                    Opacity="0.8">
+                    <Grid>
+                        <ProgressBar
+                            Width="150"
+                            Height="10"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            IsIndeterminate="True" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </TabItem>
+        <TabItem Header="{Binding FormTabText}">
+            <Border
+                Padding="10"
+                HorizontalAlignment="Stretch"
+                BorderBrush="Gray"
+                BorderThickness="1"
+                CornerRadius="5">
+                <StackPanel Spacing="5">
+                    <TextBlock FontWeight="Bold" Text="Profile Name:" />
+                    <TextBox HorizontalAlignment="Stretch" Text="{Binding ProfileName}" />
+
+                    <TextBlock FontWeight="Bold" Text="Strategy:" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        ItemsSource="{Binding AvailableStrategies}"
+                        SelectedItem="{Binding SelectedStrategy}" />
+
+                    <TextBlock FontWeight="Bold" Text="Description:" />
+                    <TextBox
+                        HorizontalAlignment="Stretch"
+                        AcceptsReturn="True"
+                        MinHeight="60"
+                        Text="{Binding Description}"
+                        TextWrapping="Wrap" />
+
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <Button Command="{Binding SubmitProfileCommand}" Content="Save" />
+                        <Button
+                            Margin="8,0,0,0"
+                            Command="{Binding ClearProfileFormCommand}"
+                            Content="Cancel" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </TabItem>
+    </TabControl>
+</UserControl>
