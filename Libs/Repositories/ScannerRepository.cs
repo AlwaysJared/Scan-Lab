@@ -18,16 +18,16 @@ namespace Libs.Repositories
         public async Task<SystemResponse> AddScanner(Scanner scnr)
         {
             try{
-                // var scnr = new Scanner{
-                //     Id = Guid.NewGuid(),
-                //     ScannerName = req.ScannerName,
-                //     Make = req.Make,
-                //     Model = req.Model,
-                //     WatchedDir = req.WatchedDir,
-                //     DestinationDir = req.DestinationDir,
-                //     ArchiveDir = req.ArchiveDir,
-                //     ArtistName = req.ArtistName
-                // };
+                // Validate profile if provided
+                if (scnr.ProfileId.HasValue)
+                {
+                    var profile = await context.ScannerProfiles
+                        .FirstOrDefaultAsync(p => p.Id == scnr.ProfileId.Value);
+
+                    if (profile == null)
+                        return new SystemResponse { IsSuccess = false, Message = "Selected profile not found" };
+                }
+
                 context.Scanners.Add(scnr);
                 await context.SaveChangesAsync();
             }

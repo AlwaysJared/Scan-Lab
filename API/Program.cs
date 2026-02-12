@@ -108,6 +108,7 @@ builder.Services.AddScoped<FileSystemWatcherService>();
 builder.Services.AddSingleton<SP500ExporterService>();
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<ScannerRepository>();
+builder.Services.AddScoped<ProfileRepository>();
 builder.Services.AddScoped<RollRepository>();
 builder.Services.AddScoped<LogRepository>();
 builder.Services.AddScoped<AuthRepository>();
