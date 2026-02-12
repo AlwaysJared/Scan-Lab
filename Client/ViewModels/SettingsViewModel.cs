@@ -152,6 +152,9 @@ public partial class SettingsViewModel : ViewModelBase
                 refScanner.WatchedDir = _scannerService.SelectedScanner?.WatchedDir ?? "";
                 refScanner.DestinationDir = _scannerService.SelectedScanner?.DestinationDir ?? "";
                 refScanner.ArchiveDir = _scannerService.SelectedScanner?.ArchiveDir ?? "";
+                refScanner.ProfileId = _scannerService.SelectedScanner?.ProfileId;
+                refScanner.Profile = _scannerService.SelectedScanner?.Profile;
+                refScanner.AutoProcessDelaySeconds = _scannerService.SelectedScanner?.AutoProcessDelaySeconds;
             }
         }
         catch (Exception ex)
@@ -299,6 +302,9 @@ public partial class SettingsViewModel : ViewModelBase
             SelectedScanner.WatchedDir = refScanner?.WatchedDir ?? "";
             SelectedScanner.DestinationDir = refScanner?.DestinationDir ?? "";
             SelectedScanner.ArchiveDir = refScanner?.ArchiveDir ?? "";
+            SelectedScanner.ProfileId = refScanner?.ProfileId;
+            SelectedScanner.Profile = refScanner?.Profile;
+            SelectedScanner.AutoProcessDelaySeconds = refScanner?.AutoProcessDelaySeconds;
             WatchedFolderPath = refScanner.WatchedDir;
             DestFolderPath = refScanner.DestinationDir;
             ArchiveFolderPath = refScanner.ArchiveDir;

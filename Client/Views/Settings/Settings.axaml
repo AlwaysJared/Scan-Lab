@@ -68,6 +68,13 @@
                                 HorizontalAlignment="Stretch"
                                 Text="{Binding SelectedScanner.ArtistName}" />
 
+                            <!-- Scanner Profile (read-only) -->
+                            <TextBlock FontWeight="Bold" Text="Scanner Profile:" />
+                            <TextBox
+                                HorizontalAlignment="Stretch"
+                                IsReadOnly="True"
+                                Text="{Binding SelectedScanner.Profile.ProfileName, FallbackValue='No profile assigned'}" />
+
                             <TextBlock FontWeight="Bold" Text="Watched Directory:" />
                             <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto">
                                 <TextBox
