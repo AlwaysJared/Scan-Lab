@@ -77,7 +77,35 @@ namespace Libs.Repositories
 
         public async Task<List<Scanner>> GetScanners()
         {
-            return await context.Scanners.ToListAsync();
+            return await context.Scanners.Include(s => s.Profile).ToListAsync();
+        }
+
+        public async Task<List<ScannerProfile>> GetProfiles()
+        {
+            return await context.ScannerProfiles.Where(p => p.IsActive).ToListAsync();
+        }
+
+        public async Task<List<ProfileConfiguration>> GetProfileConfigurations(Guid profileId)
+        {
+            return await context.ProfileConfigurations.Where(pc => pc.ProfileId == profileId).ToListAsync();
+        }
+
+        public async Task<SystemResponse> UpdateProfileConfiguration(Guid configId, string value)
+        {
+            try
+            {
+                var config = await context.ProfileConfigurations.FindAsync(configId);
+                if (config == null)
+                    return new SystemResponse { IsSuccess = false, Message = "Configuration not found" };
+
+                config.ConfigValue = value;
+                await context.SaveChangesAsync();
+                return new SystemResponse { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new SystemResponse { IsSuccess = false, Message = ex.Message };
+            }
         }
 
         public void Save()
@@ -135,6 +163,8 @@ namespace Libs.Repositories
                 dbScnr.DestinationDir = compatibleDestDir;
                 dbScnr.ArchiveDir = compatibleArchiveDir;
                 dbScnr.ArtistName = scanner.ArtistName;
+                dbScnr.ProfileId = scanner.ProfileId;
+                dbScnr.AutoProcessDelaySeconds = scanner.AutoProcessDelaySeconds;
 
                 await context.SaveChangesAsync();
 

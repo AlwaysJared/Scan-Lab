@@ -34,4 +34,10 @@ namespace API.Models.RequestsResponses
     {
         public required Scanner Scnr{ get; set; }
     }
+
+    public class UpdateProfileConfigRequest
+    {
+        public required Guid ConfigId { get; set; }
+        public required string ConfigValue { get; set; }
+    }
 }

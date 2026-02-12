@@ -20,9 +20,7 @@
                     <DataGridTextColumn Binding="{Binding Make}" Header="Make" />
                     <DataGridTextColumn Binding="{Binding Model}" Header="Model" />
                     <DataGridTextColumn Binding="{Binding ArtistName}" Header="Artist Name" />
-                    <!-- <DataGridTextColumn Binding="{Binding WatchedDir}" Header="Watched Folder" />
-                    <DataGridTextColumn Binding="{Binding DestinationDir}" Header="Destination Folder" />
-                    <DataGridTextColumn Binding="{Binding ArchiveDir}" Header="Archive Folder" />-->
+                    <DataGridTextColumn Binding="{Binding Profile.ProfileName}" Header="Profile" />
 
 
                     <!--  ✅ Button Group Column  -->
@@ -66,6 +64,41 @@
 
                     <TextBlock FontWeight="Bold" Text="Artist Name:" />
                     <TextBox HorizontalAlignment="Stretch" Text="{Binding ArtistName}" />
+
+                    <!--  Scanner Profile  -->
+                    <TextBlock FontWeight="Bold" Text="Scanner Profile:" />
+                    <ComboBox
+                        HorizontalAlignment="Stretch"
+                        DisplayMemberBinding="{Binding ProfileName}"
+                        ItemsSource="{Binding Profiles}"
+                        SelectedItem="{Binding SelectedProfile}" />
+
+                    <!--  Auto-Process Delay (only for Noritsu)  -->
+                    <StackPanel IsVisible="{Binding ShowAutoProcessDelay}" Spacing="5">
+                        <TextBlock FontWeight="Bold" Text="Auto-Process Delay (seconds):" />
+                        <TextBox HorizontalAlignment="Stretch" Text="{Binding AutoProcessDelaySeconds}" />
+                    </StackPanel>
+
+                    <!--  Profile Configurations (when profile selected)  -->
+                    <StackPanel IsVisible="{Binding HasProfileSelected}" Spacing="5">
+                        <TextBlock
+                            Margin="0,10,0,0"
+                            FontWeight="Bold"
+                            Text="Profile Configuration:" />
+                        <ItemsControl ItemsSource="{Binding ProfileConfigurations}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Margin="0,3" Spacing="2">
+                                        <TextBlock
+                                            FontStyle="Italic"
+                                            Foreground="Gray"
+                                            Text="{Binding Description}" />
+                                        <TextBox HorizontalAlignment="Stretch" Text="{Binding ConfigValue, Mode=TwoWay}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
 
                     <TextBlock FontWeight="Bold" Text="Watched Directory:" />
                     <Grid HorizontalAlignment="Stretch" ColumnDefinitions="*,Auto">

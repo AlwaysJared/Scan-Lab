@@ -23,6 +23,8 @@ using static Client.Tools.UiTools;
 using System.IO;
 using System.Diagnostics;
 using System.Net;
+using System.Collections.Concurrent;
+using Libs.Services.SP500Export;
 
 namespace Client.ViewModels;
 
@@ -109,6 +111,20 @@ public partial class DashboardViewModel : ViewModelBase
 
     private readonly System.Timers.Timer _searchDelayTimer = new(500) { AutoReset = false };
 
+    // --- SP-500 Auto Export Status ---
+    private readonly ConcurrentDictionary<Guid, SP500ExportStatusDto> _exportStatuses = new();
+    private System.Timers.Timer? _exportPollTimer;
+
+    [ObservableProperty]
+    private ObservableCollection<SP500ExportStatusDto> activeExports = new();
+
+    private bool _hasActiveExports;
+    public bool HasActiveExports
+    {
+        get => _hasActiveExports;
+        set => SetProperty(ref _hasActiveExports, value);
+    }
+
     // public DashboardViewModel() : this(App.ApiService) { }
     public DashboardViewModel() { }
 
@@ -143,7 +159,8 @@ public partial class DashboardViewModel : ViewModelBase
             });
         };
 
-        // LoadOrdersAsync();
+        // Check for any active SP500 export sessions
+        _ = CheckForActiveExports();
     }
 
     [RelayCommand]
@@ -609,5 +626,177 @@ public partial class DashboardViewModel : ViewModelBase
                     UiTools.MessageType.Success
             );
         }
+    }
+
+    // --- SP-500 Auto Export Commands ---
+
+    [RelayCommand]
+    public async Task StartExport(Roll? roll)
+    {
+        try
+        {
+            if (roll is null) return;
+
+            if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
+            {
+                await UiTools.ShowMessageAsync("Error", "[Error]: API Address is not configured.", MessageType.Error);
+                return;
+            }
+
+            string apiUrl = $"{_apiService.ApiAddress}/api/SP500Export/start/{roll.RollId}";
+            _apiService.AddAuthHeader();
+            var response = await _apiService._httpClient.PostAsync(apiUrl, null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await UiTools.ShowMessageAsync("Success",
+                    $"Auto-export started for Roll #{roll.RollNumber}",
+                    MessageType.Success);
+
+                StartExportPolling();
+                await LoadOrdersAsync();
+            }
+            else
+            {
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", MessageType.Error);
+                    _mainWindowVm.Logout();
+                    return;
+                }
+                var errMsg = await response.Content.ReadAsStringAsync();
+                await UiTools.ShowMessageAsync("Error", $"[Error]: {errMsg}", MessageType.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", MessageType.Error);
+        }
+    }
+
+    [RelayCommand]
+    public async Task StopExport(Roll? roll)
+    {
+        try
+        {
+            if (roll is null) return;
+
+            if (string.IsNullOrWhiteSpace(_apiService.ApiAddress))
+            {
+                await UiTools.ShowMessageAsync("Error", "[Error]: API Address is not configured.", MessageType.Error);
+                return;
+            }
+
+            string apiUrl = $"{_apiService.ApiAddress}/api/SP500Export/stop/{roll.RollId}";
+            _apiService.AddAuthHeader();
+            var response = await _apiService._httpClient.PostAsync(apiUrl, null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await UiTools.ShowMessageAsync("Success",
+                    $"Auto-export stopped for Roll #{roll.RollNumber}",
+                    MessageType.Success);
+
+                _exportStatuses.TryRemove(roll.RollId, out _);
+                await PollExportStatuses();
+                await LoadOrdersAsync();
+            }
+            else
+            {
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    await UiTools.ShowMessageAsync("Error", "Session Expired. Please log in again to continue", MessageType.Error);
+                    _mainWindowVm.Logout();
+                    return;
+                }
+                var errMsg = await response.Content.ReadAsStringAsync();
+                await UiTools.ShowMessageAsync("Error", $"[Error]: {errMsg}", MessageType.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            await UiTools.ShowMessageAsync("Error", $"[Error]: {ex.Message}", MessageType.Error);
+        }
+    }
+
+    [RelayCommand]
+    public async Task StopExportByRollId(Guid rollId)
+    {
+        // Used by the Active Exports panel Stop button
+        var roll = Orders.SelectMany(o => o.Rolls ?? new List<Roll>())
+            .FirstOrDefault(r => r.RollId == rollId);
+
+        if (roll != null)
+            await StopExport(roll);
+    }
+
+    // --- Export Status Polling ---
+
+    private void StartExportPolling()
+    {
+        if (_exportPollTimer != null) return;
+
+        _exportPollTimer = new System.Timers.Timer(5000) { AutoReset = true };
+        _exportPollTimer.Elapsed += async (s, e) =>
+        {
+            await PollExportStatuses();
+        };
+        _exportPollTimer.Start();
+    }
+
+    private void StopExportPolling()
+    {
+        _exportPollTimer?.Stop();
+        _exportPollTimer?.Dispose();
+        _exportPollTimer = null;
+    }
+
+    private async Task PollExportStatuses()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(_apiService?.ApiAddress)) return;
+
+            string apiUrl = $"{_apiService.ApiAddress}/api/SP500Export/sessions";
+            _apiService.AddAuthHeader();
+            var response = await _apiService._httpClient.GetAsync(apiUrl);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var sessions = JsonSerializer.Deserialize<List<SP500ExportStatusDto>>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                _exportStatuses.Clear();
+                if (sessions != null)
+                {
+                    foreach (var session in sessions)
+                        _exportStatuses[session.RollId] = session;
+                }
+
+                Dispatcher.UIThread.Post(() =>
+                {
+                    ActiveExports.Clear();
+                    foreach (var status in _exportStatuses.Values)
+                        ActiveExports.Add(status);
+
+                    HasActiveExports = ActiveExports.Count > 0;
+
+                    if (!HasActiveExports)
+                        StopExportPolling();
+                });
+            }
+        }
+        catch
+        {
+            // Silently handle polling errors to avoid flooding the UI
+        }
+    }
+
+    public async Task CheckForActiveExports()
+    {
+        await PollExportStatuses();
+        if (HasActiveExports)
+            StartExportPolling();
     }
 }

@@ -79,6 +79,7 @@ namespace Libs.Repositories
             var orders = await context.Orders
             .Include(o => o.Rolls)
             .Include(o => o.Scanner)
+                .ThenInclude(s => s.Profile)
             .Include(o => o.Customer)
             .Where(o => !String.IsNullOrWhiteSpace(search) ? (
                     o.OrderId.ToLower().Contains(search.ToLower())

@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Data.Converters;
 using Libs.Enums;
@@ -20,35 +18,36 @@ namespace Client.Converters
 
                 var rollStatus = (RollStatus)values[0];
                 var action = (string)values[1];
-                
+
+                // Check if scanner uses SP500Auto profile (optional 3rd binding)
+                var isAuto = values.Count > 2
+                    && values[2] is string strategy
+                    && strategy == "SP500AutoStrategy";
+
                 switch (action.ToLower())
                 {
                     case "start":
-                        switch (rollStatus)
-                        {
-                            case RollStatus.Created:
-                            case RollStatus.ScanningPaused:
-                                return true;
-                            default:
-                                return false;
-                        }
                     case "pause":
-                        switch (rollStatus)
-                        {
-                            case RollStatus.ScanningInProgress:
-                                return true;
-                            default:
-                                return false;
-                        }
                     case "complete":
-                        switch (rollStatus)
+                        // Hide manual scanning buttons for SP500Auto scanners
+                        if (isAuto) return false;
+                        return action.ToLower() switch
                         {
-                            case RollStatus.ScanningInProgress:
-                            case RollStatus.ScanningPaused:
-                                return true;
-                            default:
-                                return false;
-                        }
+                            "start" => rollStatus == RollStatus.Created || rollStatus == RollStatus.ScanningPaused,
+                            "pause" => rollStatus == RollStatus.ScanningInProgress,
+                            "complete" => rollStatus == RollStatus.ScanningInProgress || rollStatus == RollStatus.ScanningPaused,
+                            _ => false
+                        };
+                    case "startexport":
+                        // Only show for SP500Auto, when roll is ready to export
+                        if (!isAuto) return false;
+                        return rollStatus == RollStatus.Created || rollStatus == RollStatus.ScanningPaused;
+                    case "stopexport":
+                        // Only show for SP500Auto, when export could be running
+                        if (!isAuto) return false;
+                        return rollStatus == RollStatus.Created
+                            || rollStatus == RollStatus.ScanningInProgress
+                            || rollStatus == RollStatus.ScanningPaused;
                     case "delete":
                         switch (rollStatus)
                         {

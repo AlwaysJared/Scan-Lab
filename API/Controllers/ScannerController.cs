@@ -95,5 +95,52 @@ namespace API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("profiles")]
+        public async Task<IActionResult> GetProfiles()
+        {
+            try
+            {
+                var profiles = await _scannerRepository.GetProfiles();
+                return Ok(profiles);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("profile-configurations/{profileId}")]
+        public async Task<IActionResult> GetProfileConfigurations(Guid profileId)
+        {
+            try
+            {
+                var configs = await _scannerRepository.GetProfileConfigurations(profileId);
+                return Ok(configs);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("update-profile-configuration")]
+        public async Task<IActionResult> UpdateProfileConfiguration(UpdateProfileConfigRequest req)
+        {
+            try
+            {
+                var resp = await _scannerRepository.UpdateProfileConfiguration(req.ConfigId, req.ConfigValue);
+
+                if (!resp.IsSuccess)
+                    return BadRequest(resp.Message);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }

@@ -10,15 +10,11 @@
     x:DataType="vm:DashboardViewModel">
 
     <Grid>
-        <!-- <TextBlock
-            Margin="10"
-            HorizontalAlignment="Center"
-            FontSize="16"
-            Text="Orders Table" />-->
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <!--  Search bar row  -->
+            <RowDefinition Height="Auto" />
+            <!--  Active Exports panel  -->
             <RowDefinition Height="Auto" />
             <!--  Orders table  -->
             <RowDefinition Height="*" />
@@ -54,9 +50,53 @@
             </StackPanel>
         </Border>
 
+        <!--  Active SP-500 Exports Panel  -->
+        <Border
+            Grid.Row="1"
+            Margin="10,5"
+            Padding="8"
+            Background="#FFF3CD"
+            BorderBrush="#FFD700"
+            BorderThickness="1"
+            CornerRadius="4"
+            IsVisible="{Binding HasActiveExports}">
+            <StackPanel>
+                <TextBlock
+                    Margin="0,0,0,5"
+                    FontWeight="Bold"
+                    Text="Active SP-500 Exports" />
+                <ItemsControl ItemsSource="{Binding ActiveExports}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel
+                                Margin="0,2"
+                                Orientation="Horizontal"
+                                Spacing="15">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontWeight="SemiBold"
+                                    Text="{Binding Status}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="{Binding DetectedRollNumber, StringFormat='Roll: {0}'}" />
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    Text="{Binding ImagesExported, StringFormat='{0} images'}" />
+                                <Button
+                                    Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).StopExportByRollIdCommand}"
+                                    CommandParameter="{Binding RollId}"
+                                    Content="Stop"
+                                    Padding="8,2" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </Border>
+
         <!--  Orders table  -->
         <DataGrid
-            Grid.Row="1"
+            Grid.Row="2"
             Margin="10"
             AutoGenerateColumns="False"
             CanUserResizeColumns="True"
@@ -67,7 +107,6 @@
 
             <DataGrid.Columns>
                 <DataGridTextColumn Binding="{Binding OrderId}" Header="Order ID" />
-                <!-- <DataGridTextColumn Binding="{Binding DateCreated, StringFormat='MMM d, yyyy, hh:mm tt'}" Header="Created" /> -->
                 <DataGridTemplateColumn Header="Created" SortMemberPath="DateCreated">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -79,7 +118,6 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <!-- <DataGridTextColumn Binding="{Binding DateUpdated, StringFormat='MMM d, yyyy, hh:mm tt'}" Header="Updated" /> -->
                 <DataGridTemplateColumn Header="Updated" SortMemberPath="DateUpdated">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -103,7 +141,7 @@
                                 <Button
                                     Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).DeleteOrderCommand}"
                                     CommandParameter="{Binding}"
-                                    ToolTip.Tip="Delete Roll">
+                                    ToolTip.Tip="Delete Order">
                                     <Image
                                         Width="16"
                                         Height="16"
@@ -125,7 +163,6 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
 
-            <!--  ✅ Explicitly set x:DataType to Order  -->
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate x:DataType="libs-models:Order">
                     <Border
@@ -143,10 +180,6 @@
                                         Binding="{Binding RollNumber}"
                                         Header="Roll #"
                                         IsReadOnly="True" />
-                                    <!-- <DataGridTextColumn
-                                        Binding="{Binding DateCreated}"
-                                        Header="Created"
-                                        IsReadOnly="True" />-->
                                     <DataGridTemplateColumn Header="Created" SortMemberPath="DateCreated">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -158,10 +191,6 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <!-- <DataGridTextColumn
-                                        Binding="{Binding DateUpdated, StringFormat='MMM d, yyyy, hh:mm tt'}"
-                                        Header="Updated"
-                                        IsReadOnly="True" />-->
                                     <DataGridTemplateColumn Header="Updated" SortMemberPath="DateUpdated">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
@@ -178,12 +207,12 @@
                                         Header="Status"
                                         IsReadOnly="True" />
 
-                                    <!--  ✅ Button Group Column  -->
+                                    <!--  Button Group Column  -->
                                     <DataGridTemplateColumn Width="Auto" Header="Actions">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <StackPanel Orientation="Horizontal" Spacing="5">
-                                                    <!--  Start/Resume Scanning  -->
+                                                    <!--  Start/Resume Scanning (hidden for SP500Auto)  -->
                                                     <Button
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).StartResumeScanningRollCommand}"
                                                         CommandParameter="{Binding}"
@@ -192,6 +221,7 @@
                                                             <MultiBinding Converter="{StaticResource RollActionVis}">
                                                                 <Binding Path="Status" />
                                                                 <Binding Source="start" />
+                                                                <Binding Path="$parent[DataGrid].DataContext.Scanner.Profile.StrategyClassName" />
                                                             </MultiBinding>
                                                         </Button.IsVisible>
                                                         <Image
@@ -200,7 +230,7 @@
                                                             Source="{SvgImage avares://Client/Assets/play.svg}" />
                                                     </Button>
 
-                                                    <!--  Pause Scanning  -->
+                                                    <!--  Pause Scanning (hidden for SP500Auto)  -->
                                                     <Button
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).PauseScanningRollCommand}"
                                                         CommandParameter="{Binding}"
@@ -209,6 +239,7 @@
                                                             <MultiBinding Converter="{StaticResource RollActionVis}">
                                                                 <Binding Path="Status" />
                                                                 <Binding Source="pause" />
+                                                                <Binding Path="$parent[DataGrid].DataContext.Scanner.Profile.StrategyClassName" />
                                                             </MultiBinding>
                                                         </Button.IsVisible>
                                                         <Image
@@ -217,7 +248,7 @@
                                                             Source="{SvgImage avares://Client/Assets/pause-outline.svg}" />
                                                     </Button>
 
-                                                    <!--  Complete Roll  -->
+                                                    <!--  Complete Roll (hidden for SP500Auto)  -->
                                                     <Button
                                                         Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).CompleteRollCommand}"
                                                         CommandParameter="{Binding}"
@@ -226,12 +257,49 @@
                                                             <MultiBinding Converter="{StaticResource RollActionVis}">
                                                                 <Binding Path="Status" />
                                                                 <Binding Source="complete" />
+                                                                <Binding Path="$parent[DataGrid].DataContext.Scanner.Profile.StrategyClassName" />
                                                             </MultiBinding>
                                                         </Button.IsVisible>
                                                         <Image
                                                             Width="16"
                                                             Height="16"
                                                             Source="{SvgImage avares://Client/Assets/progress-complete.svg}" />
+                                                    </Button>
+
+                                                    <!--  Start Auto-Export (SP500Auto only)  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).StartExportCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Start Auto-Export">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="startexport" />
+                                                                <Binding Path="$parent[DataGrid].DataContext.Scanner.Profile.StrategyClassName" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="{SvgImage avares://Client/Assets/play.svg}" />
+                                                    </Button>
+
+                                                    <!--  Stop Auto-Export (SP500Auto only)  -->
+                                                    <Button
+                                                        Command="{Binding $parent[UserControl].((vm:DashboardViewModel)DataContext).StopExportCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        ToolTip.Tip="Stop Auto-Export">
+                                                        <Button.IsVisible>
+                                                            <MultiBinding Converter="{StaticResource RollActionVis}">
+                                                                <Binding Path="Status" />
+                                                                <Binding Source="stopexport" />
+                                                                <Binding Path="$parent[DataGrid].DataContext.Scanner.Profile.StrategyClassName" />
+                                                            </MultiBinding>
+                                                        </Button.IsVisible>
+                                                        <Image
+                                                            Width="16"
+                                                            Height="16"
+                                                            Source="{SvgImage avares://Client/Assets/pause-outline.svg}" />
                                                     </Button>
 
                                                     <!--  Reset Roll  -->
@@ -292,7 +360,7 @@
 
         <!--  Loading Layer  -->
         <Border
-            Grid.Row="2"
+            Grid.Row="3"
             Background="White"
             IsVisible="{Binding IsLoading}"
             Opacity="0.8">

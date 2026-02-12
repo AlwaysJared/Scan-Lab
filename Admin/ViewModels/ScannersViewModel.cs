@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -104,6 +105,35 @@ namespace Admin.ViewModels
         [ObservableProperty]
         private string archiveFolderPath;
 
+        // --- Profile Selection ---
+        [ObservableProperty]
+        private ObservableCollection<ScannerProfile> profiles = new();
+
+        private ScannerProfile? _selectedProfile;
+        public ScannerProfile? SelectedProfile
+        {
+            get => _selectedProfile;
+            set
+            {
+                SetProperty(ref _selectedProfile, value);
+                if (value != null)
+                    _ = LoadProfileConfigurationsAsync(value.Id);
+                else
+                    ProfileConfigurations = new();
+                OnPropertyChanged(nameof(HasProfileSelected));
+                OnPropertyChanged(nameof(ShowAutoProcessDelay));
+            }
+        }
+
+        public bool HasProfileSelected => SelectedProfile != null;
+        public bool ShowAutoProcessDelay => SelectedProfile?.StrategyClassName == "NoritsuControllerStrategy";
+
+        [ObservableProperty]
+        private ObservableCollection<ProfileConfiguration> profileConfigurations = new();
+
+        [ObservableProperty]
+        private string? autoProcessDelaySeconds;
+
         public ScannersViewModel() : this(App.ApiService) { }
 
         public ScannersViewModel(ApiService apiService)
@@ -113,6 +143,7 @@ namespace Admin.ViewModels
             SelectFolderCommand = new RelayCommand<string>(async (propertyName) => await SelectFolderAsync(propertyName));
 
             LoadScannersAsync();
+            _ = LoadProfilesAsync();
         }
 
         public IRelayCommand<string> SelectFolderCommand { get; }
@@ -141,6 +172,44 @@ namespace Admin.ViewModels
             {
                 IsLoading = false;
                 OnPropertyChanged(nameof(IsNotLoading));
+            }
+        }
+
+        private async Task LoadProfilesAsync()
+        {
+            try
+            {
+                string apiUrl = $"{_apiService.ApiAddress}/api/Scanner/profiles";
+                var response = await _httpClient.GetStringAsync(apiUrl);
+                var profileList = JsonSerializer.Deserialize<List<ScannerProfile>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (profileList != null)
+                {
+                    Profiles = new ObservableCollection<ScannerProfile>(profileList);
+                }
+            }
+            catch (Exception ex)
+            {
+                await UiTools.ShowMessageAsync("Error", $"Error fetching profiles: {ex.Message}", MessageType.Error);
+            }
+        }
+
+        private async Task LoadProfileConfigurationsAsync(Guid profileId)
+        {
+            try
+            {
+                string apiUrl = $"{_apiService.ApiAddress}/api/Scanner/profile-configurations/{profileId}";
+                var response = await _httpClient.GetStringAsync(apiUrl);
+                var configList = JsonSerializer.Deserialize<List<ProfileConfiguration>>(response, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (configList != null)
+                {
+                    ProfileConfigurations = new ObservableCollection<ProfileConfiguration>(configList);
+                }
+            }
+            catch (Exception ex)
+            {
+                await UiTools.ShowMessageAsync("Error", $"Error fetching profile configurations: {ex.Message}", MessageType.Error);
             }
         }
 
@@ -239,6 +308,10 @@ namespace Admin.ViewModels
                         await ShowMessageAsync("Error", "Scanner ID for edit missing", MessageType.Error);
                         return;
                     }
+                    int? delaySeconds = null;
+                    if (int.TryParse(AutoProcessDelaySeconds, out int parsed))
+                        delaySeconds = parsed;
+
                     var EditScannerRequest = new
                     {
                         Scnr = new
@@ -251,6 +324,8 @@ namespace Admin.ViewModels
                             DestinationDir = DestFolderPath,
                             ArchiveDir = ArchiveFolderPath,
                             ArtistName = ArtistName,
+                            ProfileId = SelectedProfile?.Id,
+                            AutoProcessDelaySeconds = delaySeconds,
                         }
                     };
 
@@ -263,6 +338,9 @@ namespace Admin.ViewModels
 
                     if (response.IsSuccessStatusCode)
                     {
+                        // Save profile configurations if any were loaded
+                        await SaveProfileConfigurationsAsync();
+
                         await ShowMessageAsync("Success", "Scanner successfully updated!", MessageType.Success);
                         await ClearScannerForm();
                         SelectedTabIndex = 0;
@@ -324,8 +402,30 @@ namespace Admin.ViewModels
             WatchedFolderPath = string.Empty;
             DestFolderPath = string.Empty;
             ArchiveFolderPath = string.Empty;
+            SelectedProfile = null;
+            AutoProcessDelaySeconds = null;
+            ProfileConfigurations = new();
             IsEditMode = false;
             FormTabText = "Add Scanner";
+        }
+
+        private async Task SaveProfileConfigurationsAsync()
+        {
+            foreach (var config in ProfileConfigurations)
+            {
+                try
+                {
+                    string apiUrl = $"{_apiService.ApiAddress}/api/Scanner/update-profile-configuration";
+                    var request = new { ConfigId = config.Id, ConfigValue = config.ConfigValue };
+                    string jsonRequest = JsonSerializer.Serialize(request, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+                    var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+                    await _httpClient.PostAsync(apiUrl, content);
+                }
+                catch (Exception ex)
+                {
+                    await UiTools.ShowMessageAsync("Error", $"Error saving config '{config.ConfigKey}': {ex.Message}", MessageType.Error);
+                }
+            }
         }
 
         [RelayCommand]
@@ -339,6 +439,8 @@ namespace Admin.ViewModels
             WatchedFolderPath = scnr.WatchedDir;
             DestFolderPath = scnr.DestinationDir;
             ArchiveFolderPath = scnr.ArchiveDir;
+            AutoProcessDelaySeconds = scnr.AutoProcessDelaySeconds?.ToString();
+            SelectedProfile = Profiles.FirstOrDefault(p => p.Id == scnr.ProfileId);
             IsEditMode = true;
             FormTabText = "Edit Scanner";
             SelectedTabIndex = 1;
