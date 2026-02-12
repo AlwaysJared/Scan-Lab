@@ -29,6 +29,7 @@ namespace Libs.Repositories
                 return await context.Rolls
                     .Include(r => r.Order)
                     .Include(r => r.Order.Scanner)
+                        .ThenInclude(s => s.Profile)
                     .FirstOrDefaultAsync(r => r.RollId == rollId);
             }
             catch

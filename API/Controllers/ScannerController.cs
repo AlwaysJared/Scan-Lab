@@ -36,7 +36,9 @@ namespace API.Controllers
                     WatchedDir = req.WatchedDir,
                     DestinationDir = req.DestinationDir,
                     ArchiveDir = req.ArchiveDir,
-                    ArtistName = req.ArtistName
+                    ArtistName = req.ArtistName,
+                    ProfileId = req.ProfileId,
+                    AutoProcessDelaySeconds = req.AutoProcessDelaySeconds
                 };
 
                 var resp = await _scannerRepository.AddScanner(newScnr);

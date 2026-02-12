@@ -12,6 +12,8 @@ namespace API.Models.RequestsResponses
         public required string DestinationDir { get; set; }
         public required string ArchiveDir { get; set; }
         public string? ArtistName { get; set; }
+        public Guid? ProfileId { get; set; }
+        public int? AutoProcessDelaySeconds { get; set; }
     }
 
     public class AddScannerResponse : BaseResponse
