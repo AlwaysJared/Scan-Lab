@@ -131,30 +131,10 @@ namespace Libs.Repositories
                         Message = $"No roll directories found in scanner's watched directory"
                     };
 
-                /*
-                    Looks for the latest interval directory within the scanner's destination directory.
-
-                    [NOTE]: This logic is currently desgined are the static requirement of each scanner's "destination" folder
-                        needing a "weekly" folder that is created every Monday. Therefore, that folder needs to be created and
-                        labeled w/ the date of the Monday of that week (formated as MM-DD-YY)
-                */
-                #region Interval folder retrieval 
+                // Determine the weekly interval folder (Monday-based, formatted as MM-dd-yy)
+                #region Interval folder retrieval
                 string targetIntervalFolder = "";
-                // var targetMonday = DateTimeHelpers.GetMondayOfWeek(roll.Order.DateCreated ?? DateTime.Today);
                 var targetMonday = DateTimeHelpers.GetMondayOfWeek(DateTime.Now);
-
-                // //get monday of earliest "processed" roll in order
-                // var earliestProcessedRoll = roll.Order.Rolls
-                //     .Where(r => r.Status == RollStatus.Processed)
-                //     .OrderBy(r => r.DateUpdated)
-                //     .FirstOrDefault();
-
-                // /*  
-                //     determine if targeted interval folder needs to be updated (if there is a roll that was processed under
-                //     another interval folder) 
-                // */
-                // if (earliestProcessedRoll != null)
-                //     targetMonday = DateTimeHelpers.GetMondayOfWeek(earliestProcessedRoll.DateUpdated.Value);
 
                 if (!targetMonday.HasValue)
                     return new SystemResponse() { IsSuccess = false, Message = "Error getting date for interval folder" };
@@ -175,11 +155,9 @@ namespace Libs.Repositories
                 else
                 {
                     rollFolderPath = Path.Combine(roll.Order.Scanner.DestinationDir,
-                        // Only changes in whole repo (client code all still the same)
                         !String.IsNullOrWhiteSpace(targetIntervalFolder) ? targetIntervalFolder : String.Empty,
                         roll.Order.OrderId,
                         "Rescans",
-                        // roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-fff")
                         roll.RollNumber.ToString() + " @ " + DateTime.Now.ToString("dddd, MMM dd, yyyy hh-mm-ss tt")
                     );
                     Directory.CreateDirectory(rollFolderPath);
@@ -207,7 +185,6 @@ namespace Libs.Repositories
                             var tiffConversionResp = await ImageFileHelpers.BmpToTiff(file);
 
                             if (tiffConversionResp.IsSuccess)
-                                // fileName = tiffConversionResp.ReturnObject?.ToString() ?? fileName;
                                 fileName = Path.ChangeExtension(fileName, ".tiff");
                             else
                             {
@@ -236,7 +213,6 @@ namespace Libs.Repositories
                         #endregion
 
 
-                        // string newFileName = $"{roll.Order.CustomerInitials}-{roll.Order.OrderId}-{roll.RollNumber}-{imgCount}" + extension;
                         string newFileName = $"{roll.Order.CustomerInitials}-{roll.Order.OrderId}-{roll.RollNumber}-{imgCount}" + Path.GetExtension(fileName);
 
                         string newFilePath = Path.Combine(rollFolderPath, newFileName);
@@ -247,29 +223,17 @@ namespace Libs.Repositories
                             continue;
                         }
 
-                        // Move/Rename the file 
-                        // (awaiting to avoid Directory.Delete conflict)
-                        // File.Move(file, newFilePath);
                         await IOHelpers.MoveFileAsync(Path.Combine(fileDir, fileName), newFilePath);
 
                         imgCount++;
                     }
                     else
                     {
-                        // delete current file if it is not an image file 
                         await IOHelpers.DeleteFileAsync(Path.Combine(fileDir, fileName));
-                        // return new SystemResponse
-                        // {
-                        //     IsSuccess = false,
-                        //     Message = $"File '{file}' not recognized as a valid image file type"
-                        // };
                     }
 
                 }
 
-                // Delete the roll folder
-                // awaited to ensure proper execution
-                // Directory.Delete(latestRollDir);
                 await IOHelpers.DeleteDirAsync(latestRollDir);
 
                 statusResp = await UpdateRollStatus(roll, RollStatus.Processed, staffId);

@@ -79,6 +79,18 @@ namespace Libs.Tests
             Assert.That(order.Scanner, Is.EqualTo(scanner));
             Assert.That(order.Customer, Is.EqualTo(customer));
             Assert.That(roll.Order, Is.EqualTo(order));
+
+            // Verify profile/config builders
+            var profile = TestDataBuilder.CreateTestProfile();
+            var config = TestDataBuilder.CreateTestProfileConfig(profile);
+            Assert.That(profile, Is.Not.Null);
+            Assert.That(profile.ProfileName, Is.EqualTo("Test Profile"));
+            Assert.That(config.Profile, Is.EqualTo(profile));
+
+            // Verify scanner with profile
+            var scannerWithProfile = TestDataBuilder.CreateTestScanner(profile: profile);
+            Assert.That(scannerWithProfile.Profile, Is.EqualTo(profile));
+            Assert.That(scannerWithProfile.ProfileId, Is.EqualTo(profile.Id));
         }
     }
 }

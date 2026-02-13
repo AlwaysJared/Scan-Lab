@@ -7,6 +7,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Libs.Repositories
 {
+    /// <summary>
+    /// Repository for managing scanner profiles and their configurations.
+    /// </summary>
     public class ProfileRepository : IProfileRepository, IDisposable
     {
         private readonly ScanLabContext context;
@@ -16,6 +19,9 @@ namespace Libs.Repositories
             this.context = context;
         }
 
+        /// <summary>
+        /// Gets all active scanner profiles ordered by name.
+        /// </summary>
         public async Task<List<ScannerProfile>> GetProfiles()
         {
             return await context.ScannerProfiles
@@ -24,12 +30,18 @@ namespace Libs.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Gets a single scanner profile by ID.
+        /// </summary>
         public async Task<ScannerProfile?> GetProfile(Guid id)
         {
             return await context.ScannerProfiles
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
 
+        /// <summary>
+        /// Adds a new scanner profile. Validates strategy class name and checks for duplicate names.
+        /// </summary>
         public async Task<SystemResponse> AddProfile(ScannerProfile profile)
         {
             try
@@ -76,6 +88,9 @@ namespace Libs.Repositories
             }
         }
 
+        /// <summary>
+        /// Updates an existing scanner profile's name, strategy, and description.
+        /// </summary>
         public async Task<SystemResponse> UpdateProfile(ScannerProfile profile)
         {
             try
@@ -120,6 +135,9 @@ namespace Libs.Repositories
             }
         }
 
+        /// <summary>
+        /// Soft-deletes a scanner profile. Blocked if any scanners are currently using it.
+        /// </summary>
         public async Task<SystemResponse> DeleteProfile(Guid id)
         {
             try
@@ -167,6 +185,9 @@ namespace Libs.Repositories
             }
         }
 
+        /// <summary>
+        /// Gets all configuration key-value pairs for a profile, ordered by key.
+        /// </summary>
         public async Task<List<ProfileConfiguration>> GetProfileConfigurations(Guid profileId)
         {
             return await context.ProfileConfigurations
@@ -175,6 +196,9 @@ namespace Libs.Repositories
                 .ToListAsync();
         }
 
+        /// <summary>
+        /// Updates a profile configuration's value and description.
+        /// </summary>
         public async Task<SystemResponse> UpdateProfileConfiguration(ProfileConfiguration config)
         {
             try

@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    /// <summary>
+    /// API controller for scanner profile CRUD operations and strategy management.
+    /// </summary>
     [ApiController]
     [Authorize]
     [Route("api/[controller]")]
@@ -21,6 +24,9 @@ namespace API.Controllers
             _profileRepository = profileRepository;
         }
 
+        /// <summary>
+        /// Gets all active scanner profiles.
+        /// </summary>
         [HttpGet("profiles")]
         public async Task<IActionResult> GetProfiles()
         {
@@ -35,6 +41,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets a single scanner profile by ID.
+        /// </summary>
         [HttpGet("profile/{id}")]
         public async Task<IActionResult> GetProfile(Guid id)
         {
@@ -53,6 +62,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Creates a new scanner profile with strategy validation.
+        /// </summary>
         [HttpPost("add")]
         public async Task<IActionResult> AddProfile(AddProfileRequest req)
         {
@@ -78,6 +90,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates an existing scanner profile.
+        /// </summary>
         [HttpPut("update")]
         public async Task<IActionResult> UpdateProfile(UpdateProfileRequest req)
         {
@@ -104,6 +119,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Soft-deletes a scanner profile. Returns 400 if scanners are using it.
+        /// </summary>
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteProfile(Guid id)
         {
@@ -122,6 +140,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets all registered strategy class names from the factory.
+        /// </summary>
         [HttpGet("strategies")]
         public IActionResult GetAvailableStrategies()
         {
@@ -136,6 +157,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets all configuration entries for a specific profile.
+        /// </summary>
         [HttpGet("profile/{id}/configurations")]
         public async Task<IActionResult> GetProfileConfigurations(Guid id)
         {
@@ -150,6 +174,9 @@ namespace API.Controllers
             }
         }
 
+        /// <summary>
+        /// Updates a single profile configuration value.
+        /// </summary>
         [HttpPost("update-configuration")]
         public async Task<IActionResult> UpdateProfileConfiguration(UpdateProfileConfigRequest req)
         {

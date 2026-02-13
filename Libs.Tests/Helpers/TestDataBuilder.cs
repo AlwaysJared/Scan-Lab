@@ -6,16 +6,12 @@ namespace Libs.Tests.Helpers
 {
     /// <summary>
     /// Helper class to build test data objects with sensible defaults
-    /// NOTE: ScannerProfile and ProfileConfiguration methods are commented out
-    /// until Phase 1 implementation creates those models
     /// </summary>
     public static class TestDataBuilder
     {
-        // TODO: Uncomment after Phase 1 - Scanner Profile models
-        /*
         public static ScannerProfile CreateTestProfile(
             string profileName = "Test Profile",
-            string strategyClassName = "HS1800Strategy",
+            string strategyClassName = "NoritsuControllerStrategy",
             string description = "Test Description")
         {
             return new ScannerProfile
@@ -44,13 +40,12 @@ namespace Libs.Tests.Helpers
                 Description = "Test configuration"
             };
         }
-        */
 
         public static Scanner CreateTestScanner(
             string watchedDir = "/test/watched",
             string destinationDir = "/test/destination",
             string archiveDir = "/test/archive",
-            // ScannerProfile profile = null, // TODO: Uncomment after Phase 1
+            ScannerProfile? profile = null,
             string scannerName = "Test Scanner",
             string make = "Test Make",
             string model = "Test Model")
@@ -64,9 +59,9 @@ namespace Libs.Tests.Helpers
                 WatchedDir = watchedDir,
                 DestinationDir = destinationDir,
                 ArchiveDir = archiveDir,
-                ArtistName = "Test Artist"
-                // ProfileId = profile?.Id, // TODO: Uncomment after Phase 1
-                // Profile = profile // TODO: Uncomment after Phase 1
+                ArtistName = "Test Artist",
+                ProfileId = profile?.Id,
+                Profile = profile
             };
         }
 

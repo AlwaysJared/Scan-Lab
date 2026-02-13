@@ -169,9 +169,9 @@ The system migrated from SQLite to PostgreSQL (see commit 535c22b). Commented-ou
 
 ---
 
-## Scanner Profile System (Phases 1-3)
+## Scanner Profile System
 
-The Scanner Profile System introduces a flexible, extensible architecture for supporting multiple scanner models with different file organization behaviors and completion detection methods. This system was implemented across three phases and is production-ready as of Phase 3.
+The Scanner Profile System provides a flexible, extensible architecture for supporting multiple scanner models with different file organization behaviors and completion detection methods.
 
 ### Overview
 
@@ -367,7 +367,8 @@ public static readonly Dictionary<string, Type> StrategyRegistry = new()
 {
     { "NoritsuControllerStrategy", typeof(NoritsuControllerStrategy) },
     { "SP500Strategy", typeof(SP500Strategy) },
-    { "SP3000Strategy", typeof(SP3000Strategy) }
+    { "SP3000Strategy", typeof(SP3000Strategy) },
+    { "SP500AutoStrategy", typeof(SP500AutoStrategy) }
 };
 
 public static IScannerStrategy? CreateStrategy(Scanner scanner);
@@ -569,87 +570,96 @@ Made nullable fields explicitly nullable:
 
 ---
 
-### Testing
+### Testing (Phase 8)
 
-**Test Suite** (`Libs.Tests/SmokeTests.cs`):
+**42 tests** across 4 test fixtures, all passing:
 
-All 5 smoke tests passing:
-- ✅ `DatabaseConnection_Succeeds`
-- ✅ `DatabaseContext_CanSaveAndRetrieve`
-- ✅ `FileSystem_CanCreateDirectory`
-- ✅ `FileSystem_CanCreateFiles`
-- ✅ `TestDataBuilder_CreatesValidObjects`
+- **SmokeTests** (5 tests) — DB connection, EF Core CRUD, file system, TestDataBuilder
+- **StrategyFactoryTests** (14 tests) — `IsValidStrategy`, `GetAvailableStrategies`, `CreateStrategy` by name/scanner
+- **StrategyPropertyTests** (10 tests) — CompletionMode, IsRecursive, ShouldAutoProcess for all 4 strategies
+- **StrategyFileSystemTests** (7 tests) — ResolveWatchPath, GetLatestRollDirectory with temp directories
+- **ProfileRepositoryTests** (5 tests) — Profile/config CRUD, scanner relationship, cascade delete
 
-**Test Enhancements:**
-- Fixed nullable parameter warnings in `TestDataBuilder.cs`
-- All test helpers updated for null safety
+**Test Categories:** `[Category("Smoke")]`, `[Category("Unit")]`, `[Category("FileSystem")]`, `[Category("Integration")]`
 
----
+**Test Infrastructure** (`Libs.Tests/Helpers/`):
 
-### Git History
-
-**Branch:** `ScannerProfiles`
-
-**Commits:**
-1. `7aa192b` - Phase 1 DB Foundation
-2. `c7c8a0b` - Phase 2 & ImageSharp update
-3. `f0fd41e` - Phase 3: Enhanced Watcher Service & Null Safety
-
-**Current Status:** All phases complete and pushed to GitHub
+- `TestBase` / `DatabaseTestBase` / `FileSystemTestBase` — base classes for different test needs
+- `TestDatabaseFixture` — creates isolated PostgreSQL test database per test
+- `FileSystemTestHelper` — temp directory creation, test files, HS1800 structure helpers
+- `TestDataBuilder` — factory methods for Scanner, Customer, Order, Roll, ScannerProfile, ProfileConfiguration
 
 ---
 
-### Future Work: Phase 3.1 - SP-500 Integration
+### Phase 3.1: SP-500 Auto-Export Integration
 
-**Planned:** Integration of SP500Exporter as a scanner profile in Scan-Lab
+**Implemented:** Ported SP500Exporter functionality into Scan-Lab as a scanner profile strategy.
 
-**SP500Exporter Overview:**
-- Separate .NET 8 console application (in `SP500Exporter/` repository)
-- Monitors Windows XP VM network share for Frontier Software exports
-- Automatic roll detection, image copying, and cleanup
-- Session-based architecture with timeout handling
+**SP500AutoStrategy** (`Libs/Services/ScannerStrategies/SP500AutoStrategy.cs`):
 
-**Integration Plan:**
+- Extends `SP500Strategy`, overrides `CompletionMode` to `ExitFile`
+- Auto-processing handled by `SP500ExporterService`, not FileSystemWatcherService
 
-1. **Create SP500AutoStrategy** (extends `SP500Strategy`):
-   ```csharp
-   public class SP500AutoStrategy : IScannerStrategy
-   {
-       private ExporterService? _exporterService;
+**SP500ExporterService** (`Libs/Services/SP500ExporterService.cs`):
 
-       public void StartAutoExport(Scanner scanner, Roll roll);
-       public void StopAutoExport(Guid rollId);
-       public bool IsExporting(Guid rollId);
-   }
-   ```
+- Polling-based monitoring (3-second intervals) of Frontier Software exports
+- Roll detection via `{roll}-1-4`, `{roll}-Ac_ImgConv`, `{roll}-1-1` directories
+- Exit file: `CdOrder.INF` in `-1-4` subdirectory signals completion
+- Copies `H*.jpg` from `-Ac_ImgConv` subdirs to target directory
+- 90-minute timeout, session-based (one export at a time)
 
-2. **Add UI Controls** in Client:
-   - Start/Stop buttons for each roll
-   - Real-time status display (scanning, copying, complete, timeout)
-   - Error notifications in UI
+**Profile Seeding** — adds "SP-500 Auto" profile with `SP500AutoStrategy`
 
-3. **Wire ExporterService**:
-   - Instantiate `ExporterService` from `SP500AutoStrategy`
-   - Start/Stop methods called from Client UI
-   - Events exposed for status updates
+**Client Dashboard Integration:**
 
-4. **Scanner Profile Configuration**:
-   ```csharp
-   new ScannerProfile
-   {
-       ProfileName = "SP-500 Auto",
-       StrategyClassName = "SP500AutoStrategy",
-       Description = "Automatic processing for SP-500 scanners with manual start/stop"
-   }
-   ```
+- Start/Stop Export buttons bound to `Scanner.Profile.StrategyClassName == "SP500AutoStrategy"`
+- `RollActionVisibilityMultiConverter`: hides manual buttons for SP500Auto scanners, shows export buttons
+- Active Exports panel with real-time status polling
 
-**Integration Checklist:**
-- [ ] Port ExporterService to Libs/Services
-- [ ] Create SP500AutoStrategy implementing IScannerStrategy
-- [ ] Add Start/Stop UI buttons in Client roll management
-- [ ] Implement status event handlers
-- [ ] Add timeout error UI notifications
-- [ ] Test with real SP-500 scanner workflow
+---
+
+### Phase 5: API Layer Updates
+
+**ScannerProfileController** (`API/Controllers/ScannerProfileController.cs`):
+
+- `GET /api/ScannerProfile/profiles` — list all active profiles
+- `GET /api/ScannerProfile/profile/{id}` — get single profile
+- `POST /api/ScannerProfile/add` — create profile (validates strategy class name)
+- `PUT /api/ScannerProfile/update` — update profile
+- `DELETE /api/ScannerProfile/delete/{id}` — soft-delete (blocked if scanners use it)
+- `GET /api/ScannerProfile/strategies` — list available strategy class names
+- `GET /api/ScannerProfile/profile/{id}/configurations` — get profile configs
+
+**ProfileRepository** (`Libs/Repositories/ProfileRepository.cs`):
+
+- Full CRUD with strategy validation via `ScannerStrategyFactory.IsValidStrategy()`
+- Soft delete (sets `IsActive = false`) with in-use protection
+
+**RollController** — automation lifecycle endpoints:
+
+- `POST /api/Roll/startExport` — starts SP500 auto-export for a roll
+- `POST /api/Roll/stopExport` — stops active export
+- `GET /api/Roll/activeExports` — lists active export sessions
+
+---
+
+### Phase 6: Admin App Updates
+
+**Scanner Profiles Management** (`Admin/Views/Scanner Profiles/ScannerProfiles.axaml`):
+
+- Tab-based CRUD: DataGrid list + Add/Edit form
+- Profile Name, Strategy (dropdown from API), Description fields
+- Edit/Delete buttons in DataGrid
+
+**Navigation** — added "Scanner Profiles" button to sidebar in `Admin/Views/MainWindow.axaml`
+
+---
+
+### Phase 7: Client App Updates
+
+**Settings** — read-only "Scanner Profile" field in Scanner Configuration expander showing assigned profile name (with "No profile assigned" fallback)
+
+**Dashboard** — SP500 auto-export UI (completed in Phase 3.1)
 
 ---
 
@@ -842,21 +852,15 @@ await context.SaveChangesAsync();
 
 ## Current Development Status
 
-**Phase 1-3: Complete** ✅
-- Database foundation implemented
-- Strategy pattern fully functional
-- Enhanced watcher service with smart file watching
-- All null safety warnings resolved
-- Comprehensive testing completed
+All phases of the Scanner Profile Migration are complete.
 
-**Phase 3.1: Planned** 🚧
-- SP-500 auto-export integration
-- UI controls for start/stop
-- Real-time status updates
-- Error notification system
-
-**Phase 4+: Future** 📋
-- Additional scanner profiles as needed
-- Performance optimization
-- Advanced monitoring and logging
-- Multi-scanner orchestration
+- **Phase 1:** Database foundation (ScannerProfile, ProfileConfiguration models, seeding)
+- **Phase 2:** Strategy pattern (IScannerStrategy, factory, 4 strategy implementations)
+- **Phase 3:** Enhanced watcher service (session-based, smart file watching, null safety)
+- **Phase 3.1:** SP-500 auto-export (SP500ExporterService, SP500AutoStrategy, Client dashboard UI)
+- **Phase 4:** Repository updates (ProfileRepository, RollRepository strategy integration)
+- **Phase 5:** API layer (ScannerProfileController CRUD, RollController export lifecycle)
+- **Phase 6:** Admin app (Scanner Profiles management page, sidebar navigation)
+- **Phase 7:** Client app (Settings profile display, Dashboard export buttons)
+- **Phase 8:** Testing (42 tests: unit, file system, DB integration)
+- **Phase 9:** Documentation and cleanup
