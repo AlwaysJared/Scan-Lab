@@ -17,6 +17,9 @@ using Libs.Services.SP500Export;
 
 
 
+try
+{
+
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:3624");
 
@@ -148,3 +151,14 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+}
+catch (Exception ex)
+{
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"\n=== APPLICATION FAILED TO START ===\n");
+    Console.ResetColor();
+    Console.WriteLine(ex.ToString());
+    Console.WriteLine("\nPress any key to exit...");
+    Console.ReadKey();
+}
