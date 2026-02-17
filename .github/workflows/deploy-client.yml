@@ -1,0 +1,17 @@
+name: Deploy Updated Client
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-client:
+    runs-on: sp500v2
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        
+      - name: Publish Client
+        shell: bash
+        run: |
+          echo "Hello World"
