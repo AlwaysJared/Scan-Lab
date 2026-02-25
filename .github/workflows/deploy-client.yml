@@ -33,7 +33,6 @@ jobs:
           name: ScanLab-Client
           path: artifacts/
         
-      - name: Publish Client
-        shell: bash
+      - name: Deploy Client
         run: |
           unzip artifacts/ScanLab-Client.zip -d ~/Desktop/ScanLab/Client
