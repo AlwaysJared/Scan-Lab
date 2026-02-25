@@ -6,6 +6,23 @@ on:
   #     - main
 
 jobs:
+  build-client:
+    runs-on: build
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+        
+      - name: build client
+        shell: pwsh
+        run: |
+          cd .\Scripts\
+          .\Publish-Client.ps1
+
+      - name: package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ScanLab-Client
+          path: Client/Publish/
   deploy-client:
     runs-on: sp500v2
     steps:
