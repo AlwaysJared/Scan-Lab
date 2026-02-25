@@ -1,9 +1,10 @@
 name: Deploy Updated API
 on:
-  push:
-    branches:
-      - main
-      - deploy-api
+  workflow_dispatch: 
+  # push:
+  #   branches:
+  #     - main
+  #     - deploy-api
 
 jobs:
   deploy-api:
