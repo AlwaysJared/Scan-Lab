@@ -1,9 +1,10 @@
 name: Deploy Updated Admin
 on:
-  push:
-    branches:
-      - main
-      - deploy-admin
+  workflow_dispatch: 
+  # push:
+  #   branches:
+  #     - main
+  #     - deploy-admin
 
 jobs:
   deploy-admin:
