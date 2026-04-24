@@ -21,7 +21,7 @@ namespace API.Controllers
             _scannerRepository = scannerRepository;
         }
 
-        [Authorize]
+        // [Authorize]
         [HttpPost("add")]
         public async Task<IActionResult> AddScanner(AddScannerRequest req)
         {
