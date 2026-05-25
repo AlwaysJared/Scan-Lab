@@ -4,6 +4,8 @@
 .vscode/
 .vsconfig
 
+*.lscache
+
 # User-specific files (Windows)
 *.user
 *.userosscache
@@ -96,3 +98,6 @@ Testing/
 # sqlite DB files
 *.db
 *.db-*
+
+#client app config files
+selected_scanner.json

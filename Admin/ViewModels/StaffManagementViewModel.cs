@@ -234,7 +234,7 @@ namespace Admin.ViewModels
             }
             catch (Exception ex)
             {
-                await UiTools.ShowMessageAsync("Error", $"Error fetching scanners: {ex.Message}", MessageType.Error);
+                await UiTools.ShowMessageAsync("Error", $"Error fetching staffs: {ex.Message}", MessageType.Error);
             }
             finally
             {
@@ -270,7 +270,7 @@ namespace Admin.ViewModels
                 {
                     if (!EditStaffId.HasValue)
                     {
-                        await ShowMessageAsync("Error", "Scanner ID for edit missing", MessageType.Error);
+                        await ShowMessageAsync("Error", "Staff ID for edit missing", MessageType.Error);
                         return;
                     }
                     var EditStaffRequest = new
@@ -302,7 +302,7 @@ namespace Admin.ViewModels
                     }
                     else
                     {
-                        await ShowMessageAsync("Failure", $"[Failed to update scanner]: {response.Content}", MessageType.Error);
+                        await ShowMessageAsync("Failure", $"[Failed to update staff]: {response.Content}", MessageType.Error);
                     }
                 }
                 else
@@ -325,21 +325,21 @@ namespace Admin.ViewModels
 
                     if (response.IsSuccessStatusCode)
                     {
-                        await ShowMessageAsync("Success", "Scanner added successfully!", MessageType.Success);
+                        await ShowMessageAsync("Success", "Staff added successfully!", MessageType.Success);
                         await ClearStaffForm();
                         SelectedTabIndex = 0;
                         await LoadStaffAsync();
                     }
                     else
                     {
-                        await ShowMessageAsync("Failure", $"[Failed to add scanner]: {response.Content}", MessageType.Error);
+                        await ShowMessageAsync("Failure", $"[Failed to add staff]: {response.Content}", MessageType.Error);
                     }
                 }
 
             }
             catch (Exception ex)
             {
-                await ShowMessageAsync("Failure", $"Error submitting scanner: {ex.Message}", MessageType.Error);
+                await ShowMessageAsync("Failure", $"Error submitting staff: {ex.Message}", MessageType.Error);
             }
         }
 

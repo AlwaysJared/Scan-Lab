@@ -120,6 +120,17 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ScanLabContext>();
+    dbContext.Database.Migrate();
+    dbContext.Database.EnsureCreated();
+
+    var LogdbContext = scope.ServiceProvider.GetRequiredService<ScanLab_LogContext>();
+    LogdbContext.Database.Migrate();
+    LogdbContext.Database.EnsureCreated();
+}
+
 app.UseSerilogRequestLogging(); // Optional: logs HTTP request info
 
 // Configure the HTTP request pipeline.

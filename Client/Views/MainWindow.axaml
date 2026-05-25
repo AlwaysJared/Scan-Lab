@@ -28,8 +28,7 @@
             Background="LightGray"
             DockPanel.Dock="Left">-->
 
-        <Grid Background="LightGray"
-            IsVisible="{Binding IsLoggedIn}">
+        <Grid Background="LightGray">
             <!--  Define the grid structure  -->
             <Grid.RowDefinitions>
                 <!--  Top buttons take equal space, but settings button is floated at bottom  -->
@@ -45,7 +44,8 @@
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Dashboard"
                 DockPanel.Dock="Top"
-                ToolTip.Tip="Orders">
+                ToolTip.Tip="Orders"
+                IsVisible="{Binding IsLoggedIn}">
                 <Image
                     Width="25"
                     Height="25"
@@ -55,7 +55,8 @@
                 Command="{Binding NavigateCommand}"
                 CommandParameter="OrderForm"
                 DockPanel.Dock="Top"
-                ToolTip.Tip="Order Form">
+                ToolTip.Tip="Order Form"
+                IsVisible="{Binding IsLoggedIn}">
                 <Image
                     Width="25"
                     Height="25"
@@ -69,11 +70,22 @@
                 Background="LightGray"/>
             <Button Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding LogoutCommand}"
-                ToolTip.Tip="Logout">
+                ToolTip.Tip="Logout"
+                IsVisible="{Binding IsLoggedIn}">
                 <Image
                     Width="25"
                     Height="25"
                     Source="{SvgImage avares://Client/Assets/user-logout.svg}" />
+            </Button>
+            <Button Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+                Command="{Binding NavigateCommand}"
+                CommandParameter="Login"
+                ToolTip.Tip="Login"
+                IsVisible="{Binding !IsLoggedIn}">
+                <Image
+                    Width="25"
+                    Height="25"
+                    Source="{SvgImage avares://Client/Assets/enter.svg}" />
             </Button>
             <Button Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"

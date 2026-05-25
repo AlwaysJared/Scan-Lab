@@ -167,7 +167,7 @@ public partial class DashboardViewModel : ViewModelBase
             {
                 search = SearchQuery,
                 orderStatus = statusFilter,
-                scannerId = _scannerSearchChecked ? (Guid?)_scannerService.SelectedScanner.Id : null,
+                scannerId = _scannerSearchChecked ? (_scannerService.SelectedScanner?.Id) : null,
                 fetchCompletedOrders = _completedOrdersChecked
             };
 

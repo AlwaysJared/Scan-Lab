@@ -63,7 +63,14 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     public async Task Navigate(string viewName)
     {
-        if (!_tokenService.HasValidToken())
+        if (viewName == "Login")
+        {
+            ShowLogin();
+            return;
+        }
+
+        // Allow navigating to Settings without token
+        if (viewName != "Settings" && !_tokenService.HasValidToken())
         {
             await UiTools.ShowMessageAsync("Error", "Session expired. Please log in again to continue", UiTools.MessageType.Error);
             UpdateLoginState();
@@ -74,7 +81,7 @@ public partial class MainWindowViewModel : ViewModelBase
         if (CurrentView != null)
             if (CurrentView.GetType().Name.ToLower().Contains(viewName.ToLower()))
                 return;
-        
+
         CurrentView = viewName switch
         {
             "Dashboard" => new Dashboard { DataContext = new DashboardViewModel(_apiService, _scannerService, _authService, this) },

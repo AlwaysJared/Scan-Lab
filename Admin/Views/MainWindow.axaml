@@ -52,7 +52,7 @@
                     Height="25"
                     Source="{SvgImage avares://Admin/Assets/dashboard-monitor.svg}" />
             </Button>
-            <Button Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
+            <!-- <Button Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Orders"
                 DockPanel.Dock="Top"
@@ -61,7 +61,7 @@
                     Width="25"
                     Height="25"
                     Source="{SvgImage avares://Admin/Assets/to-do.svg}" />
-            </Button>
+            </Button> -->
             <Button Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Width="50" Height="50"
                 Command="{Binding NavigateCommand}"
                 CommandParameter="Scanners"
