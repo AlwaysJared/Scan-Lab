@@ -10,6 +10,7 @@
         <TextBox PasswordChar="*" Watermark="Password" Text="{Binding Password}" />
         <!-- <PasswordBox Password="{Binding Password}" /> -->
         <Button Content="Login" Command="{Binding LoginCommand}" IsDefault="True"/>
+        <TextBlock Text="{Binding ApiAddressMessage}" TextWrapping="Wrap" Foreground="Red" />
         <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" />
     </StackPanel>
 </UserControl>

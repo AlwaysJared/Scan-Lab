@@ -31,6 +31,10 @@ namespace Client.ViewModels
             _mainWindowVm = mainWindowVm;
         }
 
+        public string? ApiAddressMessage => string.IsNullOrEmpty(_apiService.ApiAddress)
+            ? "API address is not configured. Please set the API address in settings."
+            : null;
+
         [RelayCommand]
         private async Task LoginAsync()
         {
